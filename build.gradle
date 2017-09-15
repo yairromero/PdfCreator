@@ -1,0 +1,28 @@
+
+apply plugin: 'java'
+apply plugin: 'application'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+   compile 'com.lowagie:itext:2.1.7'
+   compile 'net.sourceforge.dynamicreports:dynamicreports-core:5.0.0'
+   compile 'net.sourceforge.dynamicreports:dynamicreports-adhoc:5.0.0'
+   compile 'net.sourceforge.dynamicreports:dynamicreports-googlecharts:5.0.0'
+   testCompile 'junit:junit:4.12'         // JUnit dependency for testing
+}
+
+sourceSets {
+        main {
+                java {
+                        srcDirs= ["src/main/java"]
+                }
+                resources {
+                        srcDirs= ["src/main/resources"]
+                }
+        }
+}
+
+mainClassName = 'com.meltsan.pdfcreator.Main'  // Main class with main method
