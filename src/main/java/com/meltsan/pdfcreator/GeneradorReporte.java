@@ -21,13 +21,17 @@ import javax.imageio.ImageIO;
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.Constantes;
 import com.meltsan.pdfcreator.beans.PerCapita;
+import com.meltsan.pdfcreator.beans.PerCapitaValues;
 import com.meltsan.pdfcreator.util.Estilos;
 
 import net.sf.dynamicreports.jasper.builder.JasperConcatenatedReportBuilder;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.Exporters;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
+import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
+import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
 import net.sf.dynamicreports.report.builder.component.ImageBuilder;
+import net.sf.dynamicreports.report.builder.component.RectangleBuilder;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
 import net.sf.dynamicreports.report.constant.ImageScale;
 import net.sf.dynamicreports.report.constant.PageOrientation;
@@ -40,7 +44,7 @@ import net.sf.jasperreports.engine.JRDataSource;
 public class GeneradorReporte {
 	
 	private Antecedentes antecedentes;
-	private ArrayList<PerCapita> sinPerCapita;
+	private PerCapita sinPerCapita;
 	private ArrayList<JasperReportBuilder> listaReportes;
 	private BufferedImage img = null;
 	private ImageBuilder imgHeader = null;
@@ -48,7 +52,7 @@ public class GeneradorReporte {
 	private BufferedImage imgCal = null;
 	private File file = null;
 	
-	public GeneradorReporte(Antecedentes antecedentes, ArrayList<PerCapita> sinPerCapita) {
+	public GeneradorReporte(Antecedentes antecedentes, PerCapita sinPerCapita) {
 		
 		this.antecedentes = antecedentes;			
 		this.sinPerCapita = sinPerCapita;
@@ -77,7 +81,7 @@ public class GeneradorReporte {
  		   listaReportes.add(reporteAntecedentes());
  	   }
  	   
- 	   if(!this.sinPerCapita.isEmpty()) {
+ 	   if(sinPerCapita != null) {
  		   listaReportes.add(reporteSinPerCapita());
  	   }
  	   
@@ -156,7 +160,7 @@ public class GeneradorReporte {
 		ArrayList<BigDecimal> primas = new ArrayList<BigDecimal>();
 		
 		
-		for(PerCapita pc: this.sinPerCapita) {			
+		for(PerCapitaValues pc: this.sinPerCapita.getGrafica()) {			
 			costos.add(pc.getCostoPerCapita());
 			primas.add(pc.getPrimaPerCapita());
 		}
@@ -170,17 +174,27 @@ public class GeneradorReporte {
 		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
 		TextColumnBuilder<BigDecimal> costoColumn = col.column("Costo Per Cápita", "costo", type.bigDecimalType());
 		TextColumnBuilder<BigDecimal> primaColumn = col.column("Prima Per Cápita", "prima", type.bigDecimalType());
-				 
+		TextFieldBuilder<String> textField = cmp.text(sinPerCapita.getTexto())
+											.setFixedHeight(100)											
+											.setStyle(Estilos.reportSubTitleStyle);
+		
+		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
+		
+		HorizontalListBuilder textoInferior = cmp.horizontalList()
+									.add(textField)
+									.setBackgroundComponent(rectangulo);
+
+													 
 		reportePerCapita
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text("Indicadores de siniestralidad").setStyle(Estilos.reportTitleStyle))   		    	   	
-   		.summary(
-   				cht.lineChart()
+   		.summary(cmp.verticalList(
+   				cht.lineChart()   				
    				.customizers(new CustomizedLineChart())
    				.setTitle("Costo per cápita Vs Prima per cápita")
-   				.setTitleColor(Color.BLUE)
-   				.setTitleFont(Estilos.chartFontStyle)
+   				.setTitleColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f))
+   				.setTitleFont(Estilos.chartFontStyle)   				
    				.setCategory(periodoColumn)   				
    				.series(
    					cht.serie(costoColumn), cht.serie(primaColumn))
@@ -188,14 +202,23 @@ public class GeneradorReporte {
    					cht.axisFormat().setLabel("Periodo"))
    					.setValueAxisFormat(   							
    							cht.axisFormat().setTickLabelMask("$ #,###.##").setRangeMinValueExpression(minRange).setRangeMaxValueExpression(maxRange)
-   							)
-   				)      	   		   		
-   		.setDataSource(crearPerCapitaDS(this.sinPerCapita)) 	   		
+   							)  
+   				.setDataSource(crearPerCapitaDS(this.sinPerCapita.getGrafica())),
+   				cmp.text(""),
+   				textoInferior
+   				)   			
+   			)   		
    		.build();
 		
 		return reportePerCapita;
 	}
 	
+	/**
+	 * Funcion para obtener el numero maximo
+	 * de una lista
+	 * @param data Lista con objetos de tipo BigDecimal
+	 * @return BigDecimal mayor de la lista
+	 */
 	private BigDecimal getMax(ArrayList<BigDecimal> data) {
 				
 		BigDecimal max = data.get(0);	
@@ -207,6 +230,12 @@ public class GeneradorReporte {
 		return max;
 	}
 	
+	/**
+	 * Funcion para obtener el numero minimo
+	 * de una lista
+	 * @param data Lista con objetos de tipo BigDecimal
+	 * @return BigDecimal menor de la lista
+	 */
 	private BigDecimal getMin(ArrayList<BigDecimal> data) {
 				
 		BigDecimal min = data.get(0);	
@@ -224,10 +253,10 @@ public class GeneradorReporte {
 	 * @param indicadores lista con objetos PerCapita 
 	 * @return JRDataSource para alimentar grafica 
 	 */
-	private JRDataSource crearPerCapitaDS(ArrayList<PerCapita> indicadores) {
+	private JRDataSource crearPerCapitaDS(ArrayList<PerCapitaValues> indicadores) {
 		DRDataSource dataSource = new DRDataSource("periodo", "costo","prima");
 		
-		for(PerCapita pc : indicadores) {
+		for(PerCapitaValues pc : indicadores) {
 			dataSource.add(pc.getPeriodo(),pc.getCostoPerCapita(),pc.getPrimaPerCapita());
 		}
 		

@@ -1,41 +1,31 @@
 package com.meltsan.pdfcreator.beans;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 
 public class PerCapita {
 	
-	private String periodo;
-	private BigDecimal costoPerCapita;
-	private BigDecimal primaPerCapita;
+	private String texto;
+	private ArrayList<PerCapitaValues> grafica;
 	
-	public PerCapita(String periodo, BigDecimal costo, BigDecimal prima) {
-		this.periodo = periodo;
-		this.costoPerCapita = costo;
-		this.primaPerCapita = prima;
+	public PerCapita(String texto, ArrayList<PerCapitaValues> grafica) {
+		this.texto = texto;
+		this.grafica = grafica;
 	}
 
-	public String getPeriodo() {
-		return periodo;
+	public String getTexto() {
+		return texto;
 	}
 
-	public void setPeriodo(String periodo) {
-		this.periodo = periodo;
+	public void setTexto(String texto) {
+		this.texto = texto;
 	}
 
-	public BigDecimal getCostoPerCapita() {
-		return costoPerCapita;
+	public ArrayList<PerCapitaValues> getGrafica() {
+		return grafica;
 	}
 
-	public void setCostoPerCapita(BigDecimal costoPerCapita) {
-		this.costoPerCapita = costoPerCapita;
-	}
-
-	public BigDecimal getPrimaPerCapita() {
-		return primaPerCapita;
-	}
-
-	public void setPrimaPerCapita(BigDecimal primaPerCapita) {
-		this.primaPerCapita = primaPerCapita;
+	public void setGrafica(ArrayList<PerCapitaValues> grafica) {
+		this.grafica = grafica;
 	}
 
 }

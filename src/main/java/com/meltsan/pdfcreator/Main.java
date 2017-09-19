@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.PerCapita;
+import com.meltsan.pdfcreator.beans.PerCapitaValues;
 
 public class Main {
 	
@@ -20,16 +21,23 @@ public class Main {
 		
 		Antecedentes ant = new Antecedentes(l1,l2,t1);
 		
-		PerCapita p1 = new PerCapita("2013-2014",new BigDecimal(11147),new BigDecimal(14106));
-		PerCapita p2 = new PerCapita("2014-2015",new BigDecimal(9455),new BigDecimal(14256));
-		PerCapita p3 = new PerCapita("2015-2016",new BigDecimal(13976),new BigDecimal(15203));
-		PerCapita p4 = new PerCapita("2016-2017",new BigDecimal(16028),new BigDecimal(16154));
+		PerCapitaValues p1 = new PerCapitaValues("2013-2014",new BigDecimal(11147),new BigDecimal(14106));
+		PerCapitaValues p2 = new PerCapitaValues("2014-2015",new BigDecimal(9455),new BigDecimal(14256));
+		PerCapitaValues p3 = new PerCapitaValues("2015-2016",new BigDecimal(11976),new BigDecimal(15203));
+		PerCapitaValues p4 = new PerCapitaValues("2016-2017",new BigDecimal(18028),new BigDecimal(15154));
 		
-		ArrayList<PerCapita> pc = new ArrayList<PerCapita>();
-		pc.add(p1);
-		pc.add(p2);
-		pc.add(p3);
-		pc.add(p4);
+		ArrayList<PerCapitaValues> pcv = new ArrayList<PerCapitaValues>();
+		pcv.add(p1);
+		pcv.add(p2);
+		pcv.add(p3);
+		pcv.add(p4);
+		
+		String pctxt = " Podemos ver que de acuerdo a los montos de siniestralidad y "
+				+ "prima neta anual de las vigencias consideradas ha sido suficiente, "
+				+ "sin embargo dado la tendencia creciente que ha mostrado la siniestralidad "
+				+ "podría dejar de serlo para el cierre de la vigencia en curso.";
+		
+		PerCapita pc = new PerCapita(pctxt,pcv);
 		
 		GeneradorReporte generador = new GeneradorReporte(ant,pc);
 		

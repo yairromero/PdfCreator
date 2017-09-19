@@ -1,6 +1,9 @@
 package com.meltsan.pdfcreator.util;
 
 import java.awt.Color;
+
+import org.apache.avalon.framework.logger.ConsoleLogger;
+
 import static net.sf.dynamicreports.report.builder.DynamicReports.*;
 import net.sf.dynamicreports.report.builder.ReportTemplateBuilder;
 import net.sf.dynamicreports.report.builder.datatype.BigDecimalType;
@@ -22,6 +25,7 @@ public class Estilos {
 	public static final StyleBuilder columnTitleStyle;
 	public static final StyleBuilder groupStyle;
 	public static final StyleBuilder subtotalStyle;
+	public static final StyleBuilder textAreaStyle;
 	public static final ReportTemplateBuilder reportTemplate;
 	public static final CurrencyType currencyType;
 	public static final FontBuilder chartFontStyle;
@@ -37,9 +41,14 @@ public class Estilos {
 		                               .setForegroundColor(Color.WHITE);				
 		      reportTitleStyle = stl.style(boldWhiteStyle)		
 		                             .setFontSize(25);
+		      		      
 		      reportSubTitleStyle = stl.style(boldStyle)		
                       				.setFontSize(18)
-                      				.setForegroundColor(Color.CYAN);	 		      
+                      				.setForegroundColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f));	 
+		      textAreaStyle = stl.style()
+		    		  			.setRadius(10)
+		    		  			.setBackgroundColor(Color.WHITE)
+		    		  			.setLinePen(stl.pen().setLineColor(Color.ORANGE));
 		      reportHeadStyle = stl.style(boldStyle)
 		    		  					.setForegroundColor(Color.GRAY)
 		    		  					.setFontSize(15);
@@ -82,6 +91,15 @@ public class Estilos {
 		      currencyType = new CurrencyType();
 		
 		   }
+	
+	/*private static float[] getColor(int r, int g, int b) {
+		float[] hbsvals = new float[3];
+		Color.RGBtoHSB(r, g, b, hbsvals);
+		System.out.println("h: "+hbsvals[0]);
+		System.out.println("h: "+hbsvals[1]);
+		System.out.println("h: "+hbsvals[2]);
+		return hbsvals;
+	}*/
 
 	public static class CurrencyType extends BigDecimalType {
 		
