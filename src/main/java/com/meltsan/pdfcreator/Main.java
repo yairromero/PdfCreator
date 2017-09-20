@@ -1,12 +1,18 @@
 package com.meltsan.pdfcreator;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
+import com.meltsan.pdfcreator.beans.InflacionSS;
+import com.meltsan.pdfcreator.beans.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.PerCapita;
 import com.meltsan.pdfcreator.beans.PerCapitaValues;
+import com.meltsan.pdfcreator.beans.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.PoblacionHistorica;
+import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
 
 public class Main {
 	
@@ -39,7 +45,43 @@ public class Main {
 		
 		PerCapita pc = new PerCapita(pctxt,pcv);
 		
-		GeneradorReporte generador = new GeneradorReporte(ant,pc);
+		String itxt = "Un elemento importante que se debe considerar, es la tasa de inflación del "
+				+ "sector salud publicada por el Banco de México, la cual esta afectada por un "
+				+ "factor del sector asegurador mexicano que es acordado en la Asociación Mexicana "
+				+ "de Instituciones de Seguros, debido a que los honorarios médicos, gastos "
+				+ "hospitalarios y medicamentos no están regulados y por tanto los porcentajes que "
+				+ "manejan dichos proveedores médicos están por arriba de la inflación que se "
+				+ "pública.";
+		
+		ArrayList<InflacionSSValues> it = new ArrayList<InflacionSSValues>();
+			it.add(new InflacionSSValues("2011", 11.61f));
+			it.add(new InflacionSSValues("2012", 11.57f));
+			it.add(new InflacionSSValues("2013", 11.80f));
+			it.add(new InflacionSSValues("2014", 11.90f));
+			it.add(new InflacionSSValues("2015", 11.51f));
+			it.add(new InflacionSSValues("2016", 12.65f));
+		
+		InflacionSS iss = new InflacionSS(itxt,it);
+		
+		String setxt = "En base a la siniestralidad histórica mensual de las vigencias "
+				+ "anteriores y considerando la siniestralidad que se lleva hasta el momento se "
+				+ "espera el siguiente comportamiento (mostrado gráficamente), con un monto al "
+				+ "final de la vigencia de $18,400,650.";	
+		
+		SiniestralidadEsperada se = new SiniestralidadEsperada(setxt);
+		
+		String pht = "Durante las vigencias en consideración, la población incrementó un 5.03%, por su parte la prima per cápita ha "
+				+ "incrementado un  ́14.5%";
+		
+		ArrayList<PobHistoricaValues> phv = new ArrayList<PobHistoricaValues>();
+		phv.add(new PobHistoricaValues("2013-2014",1093,15417673L,14106L));
+		phv.add(new PobHistoricaValues("2014-2015",1145,16322655L,14256L));
+		phv.add(new PobHistoricaValues("2015-2016",1149,17467912L,15203L));
+		phv.add(new PobHistoricaValues("2016-2017",1148,18544881L,16154L));
+				
+		PoblacionHistorica ph = new PoblacionHistorica(pht,phv);
+		
+		GeneradorReporte generador = new GeneradorReporte(ant,pc,iss,se,ph);
 		
 	}
 

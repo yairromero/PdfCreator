@@ -16,10 +16,12 @@ public class Estilos {
 	
 	public static final StyleBuilder rootStyle;
 	public static final StyleBuilder boldStyle;
+	public static final StyleBuilder boldCenteredStyle;
 	public static final StyleBuilder italicStyle;
 	public static final StyleBuilder boldWhiteStyle;	
 	public static final StyleBuilder reportTitleStyle;
 	public static final StyleBuilder reportSubTitleStyle;
+	public static final StyleBuilder reportSubTitleCenteredStyle;
 	public static final StyleBuilder reportHeadStyle;
 	public static final StyleBuilder columnStyle;
 	public static final StyleBuilder columnTitleStyle;
@@ -34,8 +36,9 @@ public class Estilos {
 	
 	static {
 			  chartFontStyle		= stl.fontArialBold().setFontSize(12);
-		      rootStyle           = stl.style().setPadding(2);
+		      rootStyle           = stl.style().setPadding(2).setFontSize(12);
 		      boldStyle           = stl.style(rootStyle).bold();		
+		      boldCenteredStyle   = stl.style(rootStyle).bold().setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE);
 		      italicStyle         = stl.style(rootStyle).italic();		
 		      boldWhiteStyle   = stl.style(boldStyle)		
 		                               .setForegroundColor(Color.WHITE);				
@@ -43,7 +46,11 @@ public class Estilos {
 		                             .setFontSize(25);
 		      		      
 		      reportSubTitleStyle = stl.style(boldStyle)		
-                      				.setFontSize(18)
+        				.setFontSize(18)
+        				.setForegroundColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f));
+		      
+		      reportSubTitleCenteredStyle = stl.style(boldCenteredStyle)		
+                      				.setFontSize(13)
                       				.setForegroundColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f));	 
 		      textAreaStyle = stl.style()
 		    		  			.setRadius(10)
@@ -58,7 +65,7 @@ public class Estilos {
 		      columnTitleStyle    = stl.style(columnStyle)		
 		                               .setBorder(stl.pen1Point())		
 		                               .setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)		
-		                               .setBackgroundColor(Color.BLUE)
+		                               .setBackgroundColor(Color.getHSBColor(0.6763285f, 0.6764706f, 0.4f))
 		                               .setForegroundColor(Color.WHITE)
 		                               .bold();		
 		      groupStyle          = stl.style(boldStyle)		

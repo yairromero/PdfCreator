@@ -1,6 +1,8 @@
-package com.meltsan.pdfcreator;
+package com.meltsan.pdfcreator.util;
 
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Locale;
 
 import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
@@ -57,12 +59,14 @@ public class CustomizedLineChart implements DRIChartCustomizer {
 		   public String generateLabel(CategoryDataset dataset, int series,int category) {
  
 		      String result = null;
- 
-		      Number value = dataset.getValue(series, category);
- 
-		      result = value.toString(); // could apply formatting here
- 
+		      
+		      NumberFormat formatter = NumberFormat.getNumberInstance(Locale.getDefault());
+		      formatter = new DecimalFormat("#0.00"); 
+		      Number value = dataset.getValue(series, category);		      
+		      
+		      result = formatter.format(value);
+		      
 		      return result;   
-		   }
+		   }		   		   
 	}
 }
