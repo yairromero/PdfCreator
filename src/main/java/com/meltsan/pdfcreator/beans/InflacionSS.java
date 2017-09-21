@@ -2,6 +2,8 @@ package com.meltsan.pdfcreator.beans;
 
 import java.util.ArrayList;
 
+import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+
 public class InflacionSS {
 	
 	private String texto;

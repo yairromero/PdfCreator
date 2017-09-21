@@ -18,13 +18,15 @@ import javax.imageio.ImageIO;
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.Constantes;
 import com.meltsan.pdfcreator.beans.InflacionSS;
-import com.meltsan.pdfcreator.beans.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.PerCapita;
-import com.meltsan.pdfcreator.beans.PerCapitaValues;
-import com.meltsan.pdfcreator.beans.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
-import com.meltsan.pdfcreator.util.CustomizedLineChart;
+import com.meltsan.pdfcreator.beans.SiniestroRango;
+import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
+import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
+import com.meltsan.pdfcreator.customizers.CustomizedDecimalLineChart;
+import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
 import com.meltsan.pdfcreator.util.Estilos;
 
 import net.sf.dynamicreports.jasper.builder.JasperConcatenatedReportBuilder;
@@ -65,7 +67,7 @@ public class GeneradorReporte {
 	
 	public GeneradorReporte(Antecedentes antecedentes, PerCapita sinPerCapita,
 							InflacionSS inflacionSS, SiniestralidadEsperada sinEsperada,
-							PoblacionHistorica pobHistorica) {
+							PoblacionHistorica pobHistorica, SiniestroRango sinRango) {
 		
 		ds = new DataSources();
 		this.antecedentes = antecedentes;
@@ -112,6 +114,10 @@ public class GeneradorReporte {
  	   if(this.inflacionSS != null){
  		   listaReportes.add(reporteInflacionSectorSalud());
  	   } 	  
+ 	   
+ 	   if(sinRango != null){
+ 		  listaReportes.add(reporteRangosSinGrafica(sinRango));
+ 	   }
  	   
  	   ejecutarReporte(listaReportes);
 	}
@@ -204,9 +210,9 @@ public class GeneradorReporte {
    		.title(cmp.text(Constantes.PERCAPITA_TITULO).setStyle(Estilos.reportTitleStyle))   		    	   	
    		.summary(cmp.verticalList(
    				cht.lineChart()   				
-   				.customizers(new CustomizedLineChart())
+   				.customizers(new CustomizedDecimalLineChart())
    				.setTitle(Constantes.PERCAPITA_GRAFICA_TITULO)
-   				.setTitleColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f))
+   				.setTitleColor(Estilos.colorBlueLight)
    				.setTitleFont(Estilos.chartFontStyle)   				
    				.setCategory(periodoColumn)   				
    				.series(
@@ -259,9 +265,9 @@ public class GeneradorReporte {
    		.summary(cmp.verticalList(
    					textField,   					
    					cht.lineChart()   	
-   					.customizers(new CustomizedLineChart())
+   					.customizers(new CustomizedDecimalLineChart())
    	   				.setTitle(Constantes.INFLACIONSS_GRAFICA_TITULO)
-   	   				.setTitleColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f))
+   	   				.setTitleColor(Estilos.colorBlueLight)
    	   				.setTitleFont(Estilos.chartFontStyle)   				
    	   				.setCategory(periodoColumn)   				
    	   				.series(
@@ -322,7 +328,7 @@ public class GeneradorReporte {
 												.setBackgroundComponent(rectangulo);
 		
 		Map<String, Color> seriesColors = new HashMap<String, Color>();
-		seriesColors.put("Asegurados", Color.getHSBColor(0.6763285f, 0.6764706f, 0.4f));
+		seriesColors.put("Asegurados", Estilos.colorNavy);
 		
 		ArrayList<Integer> intPH = new ArrayList<Integer>();
 		
@@ -345,7 +351,7 @@ public class GeneradorReporte {
    									//.customizers(new CustomizedLineChart())
    									.setTitle(Constantes.POBLACION_HIST_GRAFICA_TITULO)
    									.setTitleFont(Estilos.chartFontStyle)
-   									.setTitleColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f))
+   									.setTitleColor(Estilos.colorBlueLight)
    									.seriesColorsByName(seriesColors)
    									.setCategory(periodoColumn)
    										.series(
@@ -383,6 +389,7 @@ public class GeneradorReporte {
 	}
 	
 	
+	
 	/**
 	 * Genera el reporte de Costo promedio de siniestro
 	 * utilizando el objeto ******** 
@@ -405,26 +412,50 @@ public class GeneradorReporte {
 	}
 	
 	
+	
 	/**
 	 * Genera el reporte de Grafica de Siniestralidad por
-	 * rangos de monto pagado utilizando el objeto ******** 
+	 * rangos de monto pagado utilizando el objeto SiniestroRango 
 	 * @return JasperReportBuilder con la hoja de 
 	 * siniestralidad por rangos de monto pagado
 	 */
-	private JasperReportBuilder reporteRangosSinGrafica() {
+	private JasperReportBuilder reporteRangosSinGrafica(SiniestroRango siniestros) {
 	
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Float> bajaColumn = col.column("Frecuencia Baja", "baja", type.floatType());
+		TextColumnBuilder<Float> altaColumn = col.column("Frecuencia Alta", "alta", type.floatType());
+		TextColumnBuilder<Float> severidadColumn = col.column("Severidad", "severa", type.floatType());
+		TextColumnBuilder<Float> catastrofeColumn = col.column("Catastrófico", "catastrofe", type.floatType());				
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("Frecuencia Baja", Estilos.colorGreenLight);
+		seriesColors.put("Frecuencia Alta", Estilos.colorGrenDark);
+		seriesColors.put("Severidad", Estilos.colorOrange);
+		seriesColors.put("Catastrófico", Estilos.colorRedDark);
 		
 		reporteRangosSin
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.RANGOS_SIN_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
-   					)
+   		.summary(
+   				cht.stackedBarChart()
+   					.setHeight(400)
+   					.addCustomizer(new CustomizedPercentageBarChart())
+   					.setTitle(Constantes.RANGOS_SIN_GRAFICA)
+   					.setTitleFont(Estilos.chartFontStyle)
+   					.setTitleColor(Estilos.colorNavy)
+   					.seriesColorsByName(seriesColors)
+   					.setDataSource(ds.crearSiniestroRangoDS(siniestros.getSiniestros()))
+   					.setCategory(periodoColumn)
+   					.series(
+   							cht.serie(bajaColumn), cht.serie(altaColumn), cht.serie(severidadColumn), cht.serie(catastrofeColumn))   							
    				)
    		.build();		
 		return reporteRangosSin;
 	}
+	
 	
 	
 	/**
@@ -449,6 +480,7 @@ public class GeneradorReporte {
 	}
 	
 	
+	
 	/**
 	 * Genera el reporte de siniestros mayores
 	 * rangos de monto pagado utilizando el objeto ******** 
@@ -469,6 +501,7 @@ public class GeneradorReporte {
    		.build();		
 		return reporteSinMayores;
 	}
+	
 	
 	
 	/**
@@ -493,6 +526,7 @@ public class GeneradorReporte {
 	}
 	
 	
+	
 	/**
 	 * Genera el reporte de Tabla de padecimientos
 	 * cronicos utilizando el objeto ******** 
@@ -513,6 +547,7 @@ public class GeneradorReporte {
    		.build();		
 		return reportePadecimientos;
 	}
+	
 	
 	
 	/**
@@ -537,6 +572,7 @@ public class GeneradorReporte {
 	}
 	
 	
+	
 	/**
 	 * Genera el reporte de Top de padecimientos
 	 * utilizando el objeto ******** 
@@ -557,6 +593,7 @@ public class GeneradorReporte {
    		.build();		
 		return reporteTopPadecimientos;
 	}
+	
 	
 	
 	/**
@@ -651,4 +688,12 @@ public class GeneradorReporte {
 			 }
 
 	}	
+	
+	private void getColor(int r, int g, int b) {
+		float[] hbsvals = new float[3];
+		Color.RGBtoHSB(r, g, b, hbsvals);
+		System.out.println("h: "+hbsvals[0]);
+		System.out.println("b: "+hbsvals[1]);
+		System.out.println("s: "+hbsvals[2]);		
+	}
 }

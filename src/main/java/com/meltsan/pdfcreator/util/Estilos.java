@@ -31,10 +31,21 @@ public class Estilos {
 	public static final ReportTemplateBuilder reportTemplate;
 	public static final CurrencyType currencyType;
 	public static final FontBuilder chartFontStyle;
-
+	public static final Color colorNavy;
+	public static final Color colorBlueLight;
+	public static final Color colorGreenLight;
+	public static final Color colorGrenDark;
+	public static final Color colorOrange;
+	public static final Color colorRedDark;
 	
 	
 	static {
+			  colorBlueLight = Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f);
+			  colorNavy = Color.getHSBColor(0.6763285f, 0.6764706f, 0.4f);
+			  colorGreenLight = Color.getHSBColor(0.25694445f, 0.57416266f, 0.81960785f);
+			  colorGrenDark = Color.getHSBColor( 0.4138577f, 1.0f, 0.69803923f);
+			  colorOrange = Color.getHSBColor(0.11713836f, 0.848f, 0.98039216f);
+			  colorRedDark = Color.getHSBColor(0.0f, 1.0f, 0.7490196f);
 			  chartFontStyle		= stl.fontArialBold().setFontSize(12);
 		      rootStyle           = stl.style().setPadding(2).setFontSize(12);
 		      boldStyle           = stl.style(rootStyle).bold();		
@@ -98,15 +109,7 @@ public class Estilos {
 		      currencyType = new CurrencyType();
 		
 		   }
-	
-	/*private static float[] getColor(int r, int g, int b) {
-		float[] hbsvals = new float[3];
-		Color.RGBtoHSB(r, g, b, hbsvals);
-		System.out.println("h: "+hbsvals[0]);
-		System.out.println("h: "+hbsvals[1]);
-		System.out.println("h: "+hbsvals[2]);
-		return hbsvals;
-	}*/
+		
 
 	public static class CurrencyType extends BigDecimalType {
 		

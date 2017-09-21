@@ -29,7 +29,7 @@ public class Constantes {
 			"Siniestralidad esperada";
 	
 	public static String POBLACION_HIST_TITULO =
-			"Siniestralidad esperada";
+			" Población Histórica";
 	
 	public static String POBLACION_HIST_GRAFICA_TITULO =
 			"Comparativo de Población Histórica";
@@ -42,6 +42,9 @@ public class Constantes {
 	
 	public static String RANGOS_SIN_TITULO = 
 			"Siniestralidad por rangos de monto pagado";
+	
+	public static String RANGOS_SIN_GRAFICA = 
+			"Comparativo de la siniestralidad por rangos de monto pagado";
 	
 	public static String SIN_MAYORES_TITULO = 
 			"Siniestros mayores a $400,000";

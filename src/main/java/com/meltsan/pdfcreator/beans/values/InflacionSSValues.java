@@ -1,4 +1,4 @@
-package com.meltsan.pdfcreator.beans;
+package com.meltsan.pdfcreator.beans.values;
 
 public class InflacionSSValues {
 

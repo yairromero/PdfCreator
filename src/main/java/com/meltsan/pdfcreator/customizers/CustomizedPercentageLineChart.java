@@ -1,4 +1,4 @@
-package com.meltsan.pdfcreator.util;
+package com.meltsan.pdfcreator.customizers;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -16,15 +16,14 @@ import org.jfree.data.category.CategoryDataset;
 
 
  
-public class CustomizedLineChart implements DRIChartCustomizer {
+public class CustomizedPercentageLineChart implements DRIChartCustomizer {
  
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	public void customize(JFreeChart chart, ReportParameters reportParameters) {
 		
-		CategoryPlot categoryPlot = (CategoryPlot) chart.getPlot();
- 
+		CategoryPlot categoryPlot = (CategoryPlot) chart.getPlot(); 
 		LineAndShapeRenderer lineAndShapeRenderer = (LineAndShapeRenderer) categoryPlot.getRenderer();
  
 		lineAndShapeRenderer.setBaseItemLabelGenerator(new CustomLabelGenerator());
@@ -43,7 +42,7 @@ public class CustomizedLineChart implements DRIChartCustomizer {
 		   * @param threshold the threshold value.
 		   */
 		   public CustomLabelGenerator() {
-		      super("", NumberFormat.getInstance());
+		      super("", NumberFormat.getPercentInstance());
  
 		   }
 		   /**
@@ -58,15 +57,10 @@ public class CustomizedLineChart implements DRIChartCustomizer {
 		   */
 		   public String generateLabel(CategoryDataset dataset, int series,int category) {
  
-		      String result = null;
-		      
-		      NumberFormat formatter = NumberFormat.getNumberInstance(Locale.getDefault());
-		      formatter = new DecimalFormat("#0.00"); 
-		      Number value = dataset.getValue(series, category);		      
-		      
-		      result = formatter.format(value);
-		      
-		      return result;   
+			   String result = null;		      
+			      Number value = dataset.getValue(series, category);		      
+			      result = value.toString() + " %";
+			      return result;
 		   }		   		   
 	}
 }

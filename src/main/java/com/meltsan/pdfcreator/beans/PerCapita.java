@@ -2,6 +2,8 @@ package com.meltsan.pdfcreator.beans;
 
 import java.util.ArrayList;
 
+import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
+
 public class PerCapita {
 	
 	private String texto;

@@ -7,9 +7,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.meltsan.pdfcreator.beans.InflacionSS;
-import com.meltsan.pdfcreator.beans.InflacionSSValues;
-import com.meltsan.pdfcreator.beans.PerCapitaValues;
-import com.meltsan.pdfcreator.beans.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
+import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.values.SiniestroRangoValues;
 
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -31,6 +32,22 @@ public class DataSources {
 	       } 
 	       return dataSource;
 	    }
+	
+	/**
+	 * Genera datos para crear grafica de Siniestros
+	 * por rango de monto pagado
+	 * @param indicadores lista con objetos SiniestroRangoValues 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearSiniestroRangoDS(ArrayList<SiniestroRangoValues> indicadores) {
+		DRDataSource dataSource = new DRDataSource("periodo", "baja","alta","severa","catastrofe");
+		
+		for(SiniestroRangoValues pc : indicadores) {
+			dataSource.add(pc.getPeriodo(),pc.getBaja(),pc.getAlta(),pc.getSevera(),pc.getCatastrofe());
+		}
+		
+		return dataSource;
+	}
 	
 	/**
 	 * Genera datos para crear grafica de Poblacion
@@ -55,8 +72,17 @@ public class DataSources {
 	 * @return JRDataSource para alimentar grafica 
 	 */
 	public JRDataSource crearPobHistoricoTablaDS(ArrayList<PobHistoricaValues> indicadores) {
-		DRDataSource dataSource = new DRDataSource("periodo", "asegurados","primaneta","primapercapita");
+		int i = 1;
+		String[] columnas = new String[indicadores.size()+1];
 		
+		columnas[0] = "vigencia";
+		for(PobHistoricaValues pc : indicadores) {
+			columnas[i] = pc.getPeriodo();
+			i++;
+		}
+		DRDataSource dataSource = new DRDataSource(columnas);
+		
+		 
 		for(PobHistoricaValues pc : indicadores) {
 			dataSource.add(pc.getPeriodo(),pc.getAsegurados(),pc.getPrimaNeta(),pc.getPrimaPerCapita());
 		}

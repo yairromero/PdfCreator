@@ -7,12 +7,14 @@ import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.InflacionSS;
-import com.meltsan.pdfcreator.beans.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.PerCapita;
-import com.meltsan.pdfcreator.beans.PerCapitaValues;
-import com.meltsan.pdfcreator.beans.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
+import com.meltsan.pdfcreator.beans.SiniestroRango;
+import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
+import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.values.SiniestroRangoValues;
 
 public class Main {
 	
@@ -81,7 +83,13 @@ public class Main {
 				
 		PoblacionHistorica ph = new PoblacionHistorica(pht,phv);
 		
-		GeneradorReporte generador = new GeneradorReporte(ant,pc,iss,se,ph);
+		ArrayList<SiniestroRangoValues> srv = new ArrayList<SiniestroRangoValues>();		
+		srv.add(new SiniestroRangoValues("2013-2014",26.90,25.72,12.17,35.21));
+		srv.add(new SiniestroRangoValues("2014-2015",31.66,30.34,23.52,14.48));
+		srv.add(new SiniestroRangoValues("2015-2016",17.29,22.79,14.16,45.75));		
+		SiniestroRango sr = new SiniestroRango(srv);
+		
+		GeneradorReporte generador = new GeneradorReporte(ant,pc,iss,se,ph,sr);
 		
 	}
 
