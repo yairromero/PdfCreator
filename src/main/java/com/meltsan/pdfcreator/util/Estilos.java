@@ -93,18 +93,14 @@ public class Estilos {
 		      StyleBuilder crosstabCellStyle       = stl.style(columnStyle)
 		                                                .setBorder(stl.pen1Point());
 				
-		      reportTemplate = template()	
+		      reportTemplate = template()		    		  				
 		                         .setColumnStyle(columnStyle)		
-		                         .setColumnTitleStyle(columnTitleStyle)		
+		                         .setColumnTitleStyle(columnTitleStyle)		                         
 		                         .setGroupStyle(groupStyle)		
 		                         .setGroupTitleStyle(groupStyle)
 		                         .setSubtotalStyle(subtotalStyle)		
-		                         .highlightDetailEvenRows()		
-		                         .crosstabHighlightEvenRows()		
-		                         .setCrosstabGroupStyle(crosstabGroupStyle)		
-		                         .setCrosstabGroupTotalStyle(crosstabGroupTotalStyle)		
-		                         .setCrosstabGrandTotalStyle(crosstabGrandTotalStyle)		
-		                         .setCrosstabCellStyle(crosstabCellStyle);
+		                         .highlightDetailEvenRows();		                         		
+		                         
 		
 		      currencyType = new CurrencyType();
 		

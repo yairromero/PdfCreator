@@ -21,7 +21,9 @@ import com.meltsan.pdfcreator.beans.InflacionSS;
 import com.meltsan.pdfcreator.beans.PerCapita;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
-import com.meltsan.pdfcreator.beans.SiniestroRango;
+import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
+import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
+import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
@@ -41,6 +43,7 @@ import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
 import net.sf.dynamicreports.report.builder.crosstab.CrosstabBuilder;
 import net.sf.dynamicreports.report.builder.crosstab.CrosstabColumnGroupBuilder;
 import net.sf.dynamicreports.report.builder.crosstab.CrosstabRowGroupBuilder;
+import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.constant.Calculation;
 import net.sf.dynamicreports.report.constant.ImageScale;
 import net.sf.dynamicreports.report.constant.PageOrientation;
@@ -67,7 +70,8 @@ public class GeneradorReporte {
 	
 	public GeneradorReporte(Antecedentes antecedentes, PerCapita sinPerCapita,
 							InflacionSS inflacionSS, SiniestralidadEsperada sinEsperada,
-							PoblacionHistorica pobHistorica, SiniestroRango sinRango) {
+							PoblacionHistorica pobHistorica, SiniestroRangoGrafica sinRango,
+							SiniestroPadecimiento siniestroPadecimiento, SiniestroRangoTabla sinRangoTabla) {
 		
 		ds = new DataSources();
 		this.antecedentes = antecedentes;
@@ -118,6 +122,14 @@ public class GeneradorReporte {
  	   if(sinRango != null){
  		  listaReportes.add(reporteRangosSinGrafica(sinRango));
  	   }
+ 	   
+ 	  if(sinRangoTabla != null) {
+ 		  listaReportes.add(reporteRangosSinTabla(sinRangoTabla));
+ 	   }
+ 	   
+ 	   if(siniestroPadecimiento != null) {
+ 		   listaReportes.add(reporteSinPadecimiento(siniestroPadecimiento));
+ 	   } 	   	   
  	   
  	   ejecutarReporte(listaReportes);
 	}
@@ -202,12 +214,15 @@ public class GeneradorReporte {
 		HorizontalListBuilder textoInferior = cmp.horizontalList()
 									.add(textField)
 									.setBackgroundComponent(rectangulo);
+		
+		
 
 													 
 		reportePerCapita
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.PERCAPITA_TITULO).setStyle(Estilos.reportTitleStyle))   		    	   	
+   		.title(cmp.text(Constantes.PERCAPITA_TITULO).setStyle(Estilos.reportTitleStyle))      		
+	      .setDataSource(ds.crearAntecedentesDS(this.antecedentes.getTablaVigencias()))
    		.summary(cmp.verticalList(
    				cht.lineChart()   				
    				.customizers(new CustomizedDecimalLineChart())
@@ -315,7 +330,11 @@ public class GeneradorReporte {
 		JasperReportBuilder reportePobHistorica = new JasperReportBuilder();
 		
 		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
-		TextColumnBuilder<Integer> aseguradosColumn = col.column("Asegurados", "asegurados", type.integerType());				
+		TextColumnBuilder<Integer> aseguradosColumn = col.column("Asegurados", "asegurados", type.integerType());
+		TextColumnBuilder<Double> variacionAColumn = col.column("% Variacion", "variacionA", type.doubleType());
+		TextColumnBuilder<Double> variacionVsAColumn = col.column("% Variacion Vs Año 1", "variacionvsA", type.doubleType());
+		TextColumnBuilder<Long> primaNetaColumn = col.column("Prima Neta", "primaneta", type.longType());
+		TextColumnBuilder<Long> primaPerCapitaColumn = col.column("Prima PerCapita", "primapercapita", type.longType());
 		
 		TextFieldBuilder<String> textField = cmp.text(pob.getTexto())
 				.setFixedHeight(50)											
@@ -340,13 +359,20 @@ public class GeneradorReporte {
 		Integer minRange = getMinInteger(intPH) - 100;	
 		 
 		
+		JasperReportBuilder subreport = report();		
+	      subreport		
+	         .setTemplate(Estilos.reportTemplate)		
+	         .columns(periodoColumn, aseguradosColumn, variacionAColumn, variacionVsAColumn,primaNetaColumn,primaPerCapitaColumn)		
+	         .setDataSource(ds.crearPobHistoricoTablaDS(pob.getGrafica()));
+		
 		reportePobHistorica
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.POBLACION_HIST_TITULO).setStyle(Estilos.reportTitleStyle))   		
    		.summary(cmp.verticalList(
+   						cmp.subreport(subreport),
    						cmp.horizontalList(
-   								cht.barChart()
+   								cht.barChart()   									
    									.setDataSource(ds.crearPobHistoricoDS(pob.getGrafica()))
    									//.customizers(new CustomizedLineChart())
    									.setTitle(Constantes.POBLACION_HIST_GRAFICA_TITULO)
@@ -359,7 +385,7 @@ public class GeneradorReporte {
    													.setValueAxisFormat(
    															cht.axisFormat().setRangeMinValueExpression(minRange).setRangeMaxValueExpression(maxRange)
    															),
-   													textoLateral
+   													cmp.verticalList(cmp.text(""),textoLateral)
    									)   								
    						)
    				 )
@@ -419,7 +445,7 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de 
 	 * siniestralidad por rangos de monto pagado
 	 */
-	private JasperReportBuilder reporteRangosSinGrafica(SiniestroRango siniestros) {
+	private JasperReportBuilder reporteRangosSinGrafica(SiniestroRangoGrafica siniestros) {
 	
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
 		
@@ -441,7 +467,7 @@ public class GeneradorReporte {
    		.title(cmp.text(Constantes.RANGOS_SIN_TITULO).setStyle(Estilos.reportTitleStyle))   		
    		.summary(
    				cht.stackedBarChart()
-   					.setHeight(400)
+   					.setHeight(350)
    					.addCustomizer(new CustomizedPercentageBarChart())
    					.setTitle(Constantes.RANGOS_SIN_GRAFICA)
    					.setTitleFont(Estilos.chartFontStyle)
@@ -464,7 +490,7 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de 
 	 * siniestralidad por rangos de monto pagado
 	 */
-	private JasperReportBuilder reporteRangosSinTabla() {
+	private JasperReportBuilder reporteRangosSinTabla(SiniestroRangoTabla sinRangoTabla) {
 	
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
 		
@@ -556,15 +582,29 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de 
 	 * la tabla de siniestros padecimientos
 	 */
-	private JasperReportBuilder reporteSinPadecimiento() {
+	private JasperReportBuilder reporteSinPadecimiento(SiniestroPadecimiento siniestroPadecimiento) {
 	
 		JasperReportBuilder reporteSinPadecimiento = new JasperReportBuilder();
+		
+		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "padecimiento", type.stringType());
+		TextColumnBuilder<Long> siniestroColumn = col.column("Siniestro", "siniestro", type.longType()).setPattern("########0");
+		
+		JasperReportBuilder subreport = report();		
+	      subreport		
+	         .setTemplate(Estilos.reportTemplate)		
+	         .columns(siniestroColumn, padecimientoColumn)		
+	         .setDataSource(ds.crearSiniestroPadecimientoDS(siniestroPadecimiento.getSiniestros()));
+		
 		
 		reporteSinPadecimiento
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title()   		
+   		.title(cmp.text(Constantes.SIN_PADECIMIENTO_TITULO).setStyle(Estilos.reportTitleStyle))   		
    		.summary(cmp.verticalList(
+   					cmp.text(""),
+   					cmp.text(siniestroPadecimiento.getTexto()).setStyle(Estilos.reportSubTitleStyle),
+   					cmp.text(""),
+   					cmp.subreport(subreport)
    					)
    				)
    		.build();		

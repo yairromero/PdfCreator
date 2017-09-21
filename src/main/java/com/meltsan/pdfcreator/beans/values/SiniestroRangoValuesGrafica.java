@@ -1,6 +1,6 @@
 package com.meltsan.pdfcreator.beans.values;
 
-public class SiniestroRangoValues {
+public class SiniestroRangoValuesGrafica {
 	
 	private String periodo;
 	private Double baja;
@@ -8,7 +8,7 @@ public class SiniestroRangoValues {
 	private Double severa;
 	private Double catastrofe;
 
-	public SiniestroRangoValues(String periodo, Double baja, Double alta, Double severa, 
+	public SiniestroRangoValuesGrafica(String periodo, Double baja, Double alta, Double severa, 
 								Double catastrofe) {
 		
 		this.periodo = periodo;

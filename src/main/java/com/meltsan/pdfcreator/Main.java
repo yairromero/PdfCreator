@@ -10,11 +10,15 @@ import com.meltsan.pdfcreator.beans.InflacionSS;
 import com.meltsan.pdfcreator.beans.PerCapita;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
-import com.meltsan.pdfcreator.beans.SiniestroRango;
+import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
+import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
+import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
-import com.meltsan.pdfcreator.beans.values.SiniestroRangoValues;
+import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
+import com.meltsan.pdfcreator.beans.values.SiniestroRangoValuesGrafica;
+import com.meltsan.pdfcreator.beans.values.SiniestroRangoValuesTabla;
 
 public class Main {
 	
@@ -76,20 +80,42 @@ public class Main {
 				+ "incrementado un  ́14.5%";
 		
 		ArrayList<PobHistoricaValues> phv = new ArrayList<PobHistoricaValues>();
-		phv.add(new PobHistoricaValues("2013-2014",1093,15417673L,14106L));
-		phv.add(new PobHistoricaValues("2014-2015",1145,16322655L,14256L));
-		phv.add(new PobHistoricaValues("2015-2016",1149,17467912L,15203L));
-		phv.add(new PobHistoricaValues("2016-2017",1148,18544881L,16154L));
+		phv.add(new PobHistoricaValues("2013-2014",1093,new Double(0.0),0.0,15417673L,0.0,0.0,14106L,0.0,0.0));
+		phv.add(new PobHistoricaValues("2014-2015",1145,4.8,0.0,16322655L,5.9,0.0,14256L,1.9,5.03));
+		phv.add(new PobHistoricaValues("2015-2016",1149,0.4,0.0,17467912L,7.0,0.0,15203L,6.6,0.0));
+		phv.add(new PobHistoricaValues("2016-2017",1148,-0.9,5.03,18544881L,6.1,20.2,16154L,6.2,14.5));
 				
 		PoblacionHistorica ph = new PoblacionHistorica(pht,phv);
 		
-		ArrayList<SiniestroRangoValues> srv = new ArrayList<SiniestroRangoValues>();		
-		srv.add(new SiniestroRangoValues("2013-2014",26.90,25.72,12.17,35.21));
-		srv.add(new SiniestroRangoValues("2014-2015",31.66,30.34,23.52,14.48));
-		srv.add(new SiniestroRangoValues("2015-2016",17.29,22.79,14.16,45.75));		
-		SiniestroRango sr = new SiniestroRango(srv);
+		ArrayList<SiniestroRangoValuesGrafica> srv = new ArrayList<SiniestroRangoValuesGrafica>();		
+		srv.add(new SiniestroRangoValuesGrafica("2013-2014",26.90,25.72,12.17,35.21));
+		srv.add(new SiniestroRangoValuesGrafica("2014-2015",31.66,30.34,23.52,14.48));
+		srv.add(new SiniestroRangoValuesGrafica("2015-2016",17.29,22.79,14.16,45.75));		
+		SiniestroRangoGrafica sr = new SiniestroRangoGrafica(srv);
 		
-		GeneradorReporte generador = new GeneradorReporte(ant,pc,iss,se,ph,sr);
+		ArrayList<SiniestroPadecimientoValues> spv = new ArrayList<SiniestroPadecimientoValues>();
+		spv.add(new SiniestroPadecimientoValues(1140257979L,"Linfangitis"));
+		spv.add(new SiniestroPadecimientoValues(1140242996L,"Hidronefrosis con obstrucción por cálculos del riñón y del uréter"));
+		spv.add(new SiniestroPadecimientoValues(3120202584L,"Linfangitis"));
+		spv.add(new SiniestroPadecimientoValues(1100244731L,"Gastroduodentis, no especificada"));
+		spv.add(new SiniestroPadecimientoValues(1130260716L,"Hemorragia subaracnoidea, no especificada"));
+		
+		String sptxt = "4. Debido a que los siniestros que a continuación se enlistan, "
+				+ "han presentado reclamaciones de manera consecutiva en las últimas vigencias, "
+				+ "buscaremos que la aseguradora les de seguimiento, ya que estos 5 siniestros "
+				+ "representan el 11.9% del monto pagado acumulado del periodo de análisis";
+		
+		SiniestroPadecimiento sp = new SiniestroPadecimiento(sptxt,spv);
+		
+		ArrayList<SiniestroRangoValuesTabla> bajas = new ArrayList<SiniestroRangoValuesTabla>();
+		ArrayList<SiniestroRangoValuesTabla> altas = new ArrayList<SiniestroRangoValuesTabla>();
+		ArrayList<SiniestroRangoValuesTabla> serveridades = new ArrayList<SiniestroRangoValuesTabla>();
+		ArrayList<SiniestroRangoValuesTabla> catastroficos = new ArrayList<SiniestroRangoValuesTabla>();
+		
+		SiniestroRangoTabla srt = new SiniestroRangoTabla(bajas,altas,serveridades,catastroficos);
+		
+		
+		GeneradorReporte generador = new GeneradorReporte(ant,pc,iss,se,ph,sr,sp,srt);
 		
 	}
 

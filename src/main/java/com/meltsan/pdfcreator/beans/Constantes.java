@@ -54,5 +54,8 @@ public class Constantes {
 	
 	public static String TOP_PADECIMIENTOS_TITULO =
 			"Top 5 de Padecimientos (en cuanto a frecuencia)";
+	
+	public static String SIN_PADECIMIENTO_TITULO =
+			"Siniestros";
 
 }
