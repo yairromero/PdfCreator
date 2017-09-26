@@ -1,22 +1,23 @@
 package com.meltsan.pdfcreator.beans.values;
 
-public class SiniestroRangoValuesTabla {
-
+public class SiniestroRangoTablaValues {
+		
 	private Long montoPagado;
 	private Long costoPerCapita;
 	private Long costoPromedio;
 	private Integer noSiniestro;
 	private Double representacion;
 	
-	public SiniestroRangoValuesTabla(Long montoPagado, Long costoPerCapita, 
+	public SiniestroRangoTablaValues(Long montoPagado, Long costoPerCapita, 
 									Long costoPromedio,Integer noSiniestro, Double representacion) {
-		
+				
 		this.montoPagado = montoPagado;
 		this.costoPerCapita = costoPerCapita;
 		this.costoPromedio = costoPromedio;
 		this.noSiniestro = noSiniestro;
 		this.representacion = representacion;
 	}
+
 
 	public Long getMontoPagado() {
 		return montoPagado;

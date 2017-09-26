@@ -8,10 +8,10 @@ public class Antecedentes {
 	private String periodoAnalisis;
 	private HashMap<String,String> tablaVigencias;
 	
-	public Antecedentes(String vigencia,String periodo, HashMap<String,String> tabla){
+	public Antecedentes(String vigencia,String periodo, HashMap<String,String> tablaVigencias){
 		this.vigenciaCompleta = vigencia;
 		this.periodoAnalisis = periodo;
-		this.tablaVigencias = tabla;
+		this.tablaVigencias = tablaVigencias;
 	}
 	
 	public String getVigenciaCompleta() {

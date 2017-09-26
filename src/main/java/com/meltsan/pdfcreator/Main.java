@@ -6,23 +6,27 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
-import com.meltsan.pdfcreator.beans.InflacionSS;
-import com.meltsan.pdfcreator.beans.PerCapita;
+import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
+import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
+import com.meltsan.pdfcreator.beans.SiniestroMonto;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
+import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
+import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
-import com.meltsan.pdfcreator.beans.values.SiniestroRangoValuesGrafica;
-import com.meltsan.pdfcreator.beans.values.SiniestroRangoValuesTabla;
+import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
 
 public class Main {
 	
 	public static void main(String[] args) {
+		
+		GeneradorReporte generador = new GeneradorReporte("/Users/Meltsan/Desktop/report.pdf");
 		
 		String l1 = "1 de Julio del 2016 al 1 de Julio del 2017";
 		String l2 = "1 de Julio del 2013 al 30 de Junio del 2016";
@@ -33,23 +37,27 @@ public class Main {
 		
 		Antecedentes ant = new Antecedentes(l1,l2,t1);
 		
-		PerCapitaValues p1 = new PerCapitaValues("2013-2014",new BigDecimal(11147),new BigDecimal(14106));
-		PerCapitaValues p2 = new PerCapitaValues("2014-2015",new BigDecimal(9455),new BigDecimal(14256));
-		PerCapitaValues p3 = new PerCapitaValues("2015-2016",new BigDecimal(11976),new BigDecimal(15203));
-		PerCapitaValues p4 = new PerCapitaValues("2016-2017",new BigDecimal(18028),new BigDecimal(15154));
+		generador.setReporteAntecedentes(ant);
+		
+		PerCapitaValues pcv1 = new PerCapitaValues("2013-2014",new BigDecimal(11147),new BigDecimal(14106));
+		PerCapitaValues pcv2 = new PerCapitaValues("2014-2015",new BigDecimal(9455),new BigDecimal(14256));
+		PerCapitaValues pcv3 = new PerCapitaValues("2015-2016",new BigDecimal(11976),new BigDecimal(15203));
+		PerCapitaValues pcv4 = new PerCapitaValues("2016-2017",new BigDecimal(18028),new BigDecimal(15154));
 		
 		ArrayList<PerCapitaValues> pcv = new ArrayList<PerCapitaValues>();
-		pcv.add(p1);
-		pcv.add(p2);
-		pcv.add(p3);
-		pcv.add(p4);
+		pcv.add(pcv1);
+		pcv.add(pcv2);
+		pcv.add(pcv3);
+		pcv.add(pcv4);
 		
 		String pctxt = " Podemos ver que de acuerdo a los montos de siniestralidad y "
 				+ "prima neta anual de las vigencias consideradas ha sido suficiente, "
 				+ "sin embargo dado la tendencia creciente que ha mostrado la siniestralidad "
 				+ "podría dejar de serlo para el cierre de la vigencia en curso.";
 		
-		PerCapita pc = new PerCapita(pctxt,pcv);
+		IndicadoresSiniestros pc = new IndicadoresSiniestros(pctxt,pcv);
+		
+		generador.setReporteIndicadoresSiniestralidad(pc);
 		
 		String itxt = "Un elemento importante que se debe considerar, es la tasa de inflación del "
 				+ "sector salud publicada por el Banco de México, la cual esta afectada por un "
@@ -67,7 +75,9 @@ public class Main {
 			it.add(new InflacionSSValues("2015", 11.51f));
 			it.add(new InflacionSSValues("2016", 12.65f));
 		
-		InflacionSS iss = new InflacionSS(itxt,it);
+		InflacionSectorSalud iss = new InflacionSectorSalud(itxt,it);
+		
+		generador.setReporteInflacionSectorSalud(iss);
 		
 		String setxt = "En base a la siniestralidad histórica mensual de las vigencias "
 				+ "anteriores y considerando la siniestralidad que se lleva hasta el momento se "
@@ -75,6 +85,8 @@ public class Main {
 				+ "final de la vigencia de $18,400,650.";	
 		
 		SiniestralidadEsperada se = new SiniestralidadEsperada(setxt);
+		
+		generador.setReporteSiniestralidadEsperada(se);
 		
 		String pht = "Durante las vigencias en consideración, la población incrementó un 5.03%, por su parte la prima per cápita ha "
 				+ "incrementado un  ́14.5%";
@@ -87,11 +99,14 @@ public class Main {
 				
 		PoblacionHistorica ph = new PoblacionHistorica(pht,phv);
 		
-		ArrayList<SiniestroRangoValuesGrafica> srv = new ArrayList<SiniestroRangoValuesGrafica>();		
-		srv.add(new SiniestroRangoValuesGrafica("2013-2014",26.90,25.72,12.17,35.21));
-		srv.add(new SiniestroRangoValuesGrafica("2014-2015",31.66,30.34,23.52,14.48));
-		srv.add(new SiniestroRangoValuesGrafica("2015-2016",17.29,22.79,14.16,45.75));		
-		SiniestroRangoGrafica sr = new SiniestroRangoGrafica(srv);
+		generador.setReportePoblacionHistorica(ph);
+		
+		ArrayList<SiniestroRangoGrafica> srv = new ArrayList<SiniestroRangoGrafica>();		
+		srv.add(new SiniestroRangoGrafica("2013-2014",26.90,25.72,12.17,35.21));
+		srv.add(new SiniestroRangoGrafica("2014-2015",31.66,30.34,23.52,14.48));
+		srv.add(new SiniestroRangoGrafica("2015-2016",17.29,22.79,14.16,45.75));		
+		
+		generador.setReporteSiniestroRangoGrafica(srv);
 		
 		ArrayList<SiniestroPadecimientoValues> spv = new ArrayList<SiniestroPadecimientoValues>();
 		spv.add(new SiniestroPadecimientoValues(1140257979L,"Linfangitis"));
@@ -107,15 +122,70 @@ public class Main {
 		
 		SiniestroPadecimiento sp = new SiniestroPadecimiento(sptxt,spv);
 		
-		ArrayList<SiniestroRangoValuesTabla> bajas = new ArrayList<SiniestroRangoValuesTabla>();
-		ArrayList<SiniestroRangoValuesTabla> altas = new ArrayList<SiniestroRangoValuesTabla>();
-		ArrayList<SiniestroRangoValuesTabla> serveridades = new ArrayList<SiniestroRangoValuesTabla>();
-		ArrayList<SiniestroRangoValuesTabla> catastroficos = new ArrayList<SiniestroRangoValuesTabla>();
+		generador.setReporteSiniestrosPadecimientos(sp);
+				
+		SiniestroRangoTablaValues  baja1 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
+		SiniestroRangoTablaValues  alta1 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
+		SiniestroRangoTablaValues  frec1 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
+		SiniestroRangoTablaValues  catas1 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
 		
-		SiniestroRangoTabla srt = new SiniestroRangoTabla(bajas,altas,serveridades,catastroficos);
+		SiniestroRangoTablaValues  baja2 = new SiniestroRangoTablaValues(3427031L,2993L,10021L,342,31.7);
+		SiniestroRangoTablaValues  alta2 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
+		SiniestroRangoTablaValues  frec2 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
+		SiniestroRangoTablaValues  catas2 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
+		
+		ArrayList<SiniestroRangoPeriodo> srp = new ArrayList<SiniestroRangoPeriodo>();
+		srp.add(new SiniestroRangoPeriodo("2013-2014",baja1,alta1,frec1,catas1));
+		srp.add(new SiniestroRangoPeriodo("2014-2015",baja2,alta2,frec2,catas2));	
+		
+		generador.setReporteSiniestroRangoTabla(srp);
+		
+		SiniestroPadecimientoValues p1 = new SiniestroPadecimientoValues(1150250772L,"Otros recién nacidos pre término");
+		SiniestroPadecimientoValues p2 = new SiniestroPadecimientoValues(1140209240L,"Otros recién nacidos pre término");
+		SiniestroPadecimientoValues p3 = new SiniestroPadecimientoValues(1150251720L,"Esclerosis múltiple SAI");
+		SiniestroPadecimientoValues p4 = new SiniestroPadecimientoValues(1140257979L,"Linfangitis");
+		SiniestroPadecimientoValues p5 = new SiniestroPadecimientoValues(1140242996L,"Hidronefrosis con obstrucción por cálculos del riñón y del uréter");
+		SiniestroPadecimientoValues p6 = new SiniestroPadecimientoValues(1100244731L,"Gastroduodentis, no especificada");
+		
+		SiniestroMonto s1 = new SiniestroMonto(p1,1997835L);
+		SiniestroMonto s2 = new SiniestroMonto(p2,1895998L);
+		SiniestroMonto s4 = new SiniestroMonto(p3,1894832L);
+		SiniestroMonto s5 = new SiniestroMonto(p4,132869L);
+		SiniestroMonto s6 = new SiniestroMonto(p4,339741L);
+		SiniestroMonto s7 = new SiniestroMonto(p5,78218L);
+		SiniestroMonto s8 = new SiniestroMonto(p5,1216460L);
+		SiniestroMonto s9 = new SiniestroMonto(p6,51293L);
+		SiniestroMonto s10 = new SiniestroMonto(p6,38210L);
+		SiniestroMonto s11 = new SiniestroMonto(p6,424248L);	
+		
+		ArrayList<SiniestroMonto> p2014 = new ArrayList<SiniestroMonto>();
+		p2014.add(s2);
+		p2014.add(s9);
 		
 		
-		GeneradorReporte generador = new GeneradorReporte(ant,pc,iss,se,ph,sr,sp,srt);
+		ArrayList<SiniestroMonto> p2015 = new ArrayList<SiniestroMonto>();		
+		p2015.add(s5);
+		p2015.add(s7);
+		p2015.add(s10);
+		
+		ArrayList<SiniestroMonto> p2016 = new ArrayList<SiniestroMonto>();
+		p2016.add(s1);
+		p2016.add(s4);
+		p2016.add(s6);
+		p2016.add(s8);
+		p2016.add(s11);
+				
+		ArrayList<SiniestrosMayores> siniestrosMayores = new ArrayList<SiniestrosMayores>();
+		siniestrosMayores.add(new SiniestrosMayores("2013-2014",p2014));
+		siniestrosMayores.add(new SiniestrosMayores("2014-2015",p2015));
+		siniestrosMayores.add(new SiniestrosMayores("2015-2016",p2016));
+		
+		generador.setReporteSiniestrosMayores(siniestrosMayores);
+		
+		
+		
+		
+		generador.generaReporte();
 		
 	}
 

@@ -1,23 +1,62 @@
 package com.meltsan.pdfcreator.beans;
 
-import java.util.ArrayList;
-
-import com.meltsan.pdfcreator.beans.values.SiniestroRangoValuesGrafica;
-
 public class SiniestroRangoGrafica {
 	
-	private ArrayList<SiniestroRangoValuesGrafica> siniestros;
-	
-	public SiniestroRangoGrafica(ArrayList<SiniestroRangoValuesGrafica> siniestros) {
-		this.siniestros = siniestros;
+	private String periodo;
+	private Double baja;
+	private Double alta;
+	private Double severa;
+	private Double catastrofe;
+
+	public SiniestroRangoGrafica(String periodo, Double baja, Double alta, Double severa, 
+								Double catastrofe) {
+		
+		this.periodo = periodo;
+		this.baja = baja;
+		this.alta = alta;
+		this.severa = severa;
+		this.catastrofe = catastrofe;
+		
 	}
 
-	public ArrayList<SiniestroRangoValuesGrafica> getSiniestros() {
-		return siniestros;
+	public String getPeriodo() {
+		return periodo;
 	}
 
-	public void setSiniestros(ArrayList<SiniestroRangoValuesGrafica> siniestros) {
-		this.siniestros = siniestros;
+	public void setPeriodo(String periodo) {
+		this.periodo = periodo;
+	}
+
+	public Double getBaja() {
+		return baja;
+	}
+
+	public void setBaja(Double baja) {
+		this.baja = baja;
+	}
+
+	public Double getAlta() {
+		return alta;
+	}
+
+	public void setAlta(Double alta) {
+		this.alta = alta;
+	}
+
+	public Double getSevera() {
+		return severa;
+	}
+
+	public void setSevera(Double severa) {
+		this.severa = severa;
+	}
+
+	public Double getCatastrofe() {
+		return catastrofe;
+	}
+
+	public void setCatastrofe(Double catastrofe) {
+		this.catastrofe = catastrofe;
 	}
 
 }

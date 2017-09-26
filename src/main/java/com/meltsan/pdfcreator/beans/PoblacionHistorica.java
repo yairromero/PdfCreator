@@ -7,12 +7,12 @@ import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 public class PoblacionHistorica {
 	
 	private String texto;
-	private ArrayList<PobHistoricaValues> grafica;
+	private ArrayList<PobHistoricaValues> valores;
 	
-	public PoblacionHistorica(String texto, ArrayList<PobHistoricaValues> grafica) {
+	public PoblacionHistorica(String texto, ArrayList<PobHistoricaValues> valores) {
 		
 		this.texto = texto;
-		this.grafica = grafica;
+		this.valores = valores;
 	}
 
 	public String getTexto() {
@@ -23,12 +23,12 @@ public class PoblacionHistorica {
 		this.texto = texto;
 	}
 
-	public ArrayList<PobHistoricaValues> getGrafica() {
-		return grafica;
+	public ArrayList<PobHistoricaValues> getValores() {
+		return valores;
 	}
 
-	public void setGrafica(ArrayList<PobHistoricaValues> grafica) {
-		this.grafica = grafica;
+	public void setGrafica(ArrayList<PobHistoricaValues> valores) {
+		this.valores = valores;
 	}
 
 }

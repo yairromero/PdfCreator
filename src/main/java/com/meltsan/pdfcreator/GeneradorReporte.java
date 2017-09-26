@@ -17,16 +17,19 @@ import javax.imageio.ImageIO;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.Constantes;
-import com.meltsan.pdfcreator.beans.InflacionSS;
-import com.meltsan.pdfcreator.beans.PerCapita;
+import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
+import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
+import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
+import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
 import com.meltsan.pdfcreator.customizers.CustomizedDecimalLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
 import com.meltsan.pdfcreator.util.Estilos;
@@ -34,32 +37,42 @@ import com.meltsan.pdfcreator.util.Estilos;
 import net.sf.dynamicreports.jasper.builder.JasperConcatenatedReportBuilder;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.Exporters;
+import net.sf.dynamicreports.report.builder.column.Columns;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
 import net.sf.dynamicreports.report.builder.component.ImageBuilder;
 import net.sf.dynamicreports.report.builder.component.RectangleBuilder;
+import net.sf.dynamicreports.report.builder.component.SubreportBuilder;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
 import net.sf.dynamicreports.report.builder.crosstab.CrosstabBuilder;
 import net.sf.dynamicreports.report.builder.crosstab.CrosstabColumnGroupBuilder;
 import net.sf.dynamicreports.report.builder.crosstab.CrosstabRowGroupBuilder;
+import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.constant.Calculation;
+import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
 import net.sf.dynamicreports.report.constant.ImageScale;
 import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.JREmptyDataSource;
 
 
 public class GeneradorReporte {
 	
 	private DataSources ds;
 	
-	private Antecedentes antecedentes;
-	private PerCapita sinPerCapita;
-	private InflacionSS inflacionSS;
-	private SiniestralidadEsperada sinEsperada;	
+	private Antecedentes reporteAntecedentes;
+	private SiniestralidadEsperada reporteSiniestralidadEsperada;
+	private PoblacionHistorica reportePoblacionHistorica;
+	private IndicadoresSiniestros reporteIndicadoresSiniestralidad;
+	private InflacionSectorSalud reporteInflacionSectorSalud;	
+	private SiniestroPadecimiento reporteSiniestrosPadecimientos;
+	private ArrayList<SiniestrosMayores> reporteSiniestrosMayores;
+	private ArrayList<SiniestroRangoGrafica> reporteSiniestroRangoGrafica;
+	private ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla;
 	
 	private ArrayList<JasperReportBuilder> listaReportes;
 	private BufferedImage img = null;
@@ -67,79 +80,82 @@ public class GeneradorReporte {
 	private ImageBuilder imgFooter = null;
 	private BufferedImage imgCal = null;
 	private File file = null;
+	private String path;
 	
-	public GeneradorReporte(Antecedentes antecedentes, PerCapita sinPerCapita,
-							InflacionSS inflacionSS, SiniestralidadEsperada sinEsperada,
-							PoblacionHistorica pobHistorica, SiniestroRangoGrafica sinRango,
-							SiniestroPadecimiento siniestroPadecimiento, SiniestroRangoTabla sinRangoTabla) {
+	public GeneradorReporte(String path) {
 		
-		ds = new DataSources();
-		this.antecedentes = antecedentes;
-		this.sinEsperada = sinEsperada;		
-		this.sinPerCapita = sinPerCapita;
-		this.inflacionSS = inflacionSS;		
+		this.path = path;
 		
 		try {
 			
-    	   		ClassLoader classLoader = getClass().getClassLoader();
-    	   		file = new File(classLoader.getResource("head.png").getFile());
-    	   		img = ImageIO.read(file);    	
-    	   		imgHeader = cmp.image(img).setImageScale(ImageScale.FILL_FRAME);
-    	   		file = new File(classLoader.getResource("foot.png").getFile());
-    	   		img = ImageIO.read(file);    	
-    	   		imgFooter = cmp.image(img);
-    	   		file = new File(classLoader.getResource("cal.png").getFile());
-    	   		imgCal = ImageIO.read(file);    	   		
-    	   		
-       } catch (IOException e) {
-       		e.printStackTrace();
-       }
-					
- 	 //imgBackgroud.setPrintWhenExpression(exp.printInFirstPage());
+	   		ClassLoader classLoader = getClass().getClassLoader();
+	   		file = new File(classLoader.getResource("head.png").getFile());
+	   		img = ImageIO.read(file);    	
+	   		imgHeader = cmp.image(img).setImageScale(ImageScale.FILL_FRAME);
+	   		file = new File(classLoader.getResource("foot.png").getFile());
+	   		img = ImageIO.read(file);    	
+	   		imgFooter = cmp.image(img);
+	   		file = new File(classLoader.getResource("cal.png").getFile());
+	   		imgCal = ImageIO.read(file);    	   		
+	   		
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+		
+		public void generaReporte() {
+		
+		ds = new DataSources();	
+			
  	   	
  	   listaReportes = new ArrayList<JasperReportBuilder>();
  	   
- 	   if(this.antecedentes != null) {
- 		   listaReportes.add(reporteAntecedentes());
+ 	   if(this.getReporteAntecedentes() != null) {
+ 		   listaReportes.add(reporteAntecedentes(this.getReporteAntecedentes()));
  	   }
  	   
- 	  if(this.sinEsperada != null) {
-		   listaReportes.add(reporteSiniestralidadEsperada());
+ 	  if(this.getReporteSiniestralidadEsperada() != null) {
+		   listaReportes.add(reporteSiniestralidadEsperada(this.getReporteSiniestralidadEsperada()));
 	   }
  	   
- 	  if(pobHistorica != null) {
- 		  listaReportes.add(reportePoblacionHistorica(pobHistorica));
+ 	  if(this.getReportePoblacionHistorica() != null) {
+ 		  listaReportes.add(reportePoblacionHistorica(this.getReportePoblacionHistorica()));
  	  }
  	  
- 	   if(this.sinPerCapita != null) {
- 		   listaReportes.add(reporteSinPerCapita());
+ 	   if(this.getReporteIndicadoresSiniestralidad() != null) {
+ 		   listaReportes.add(reporteSinPerCapita(this.getReporteIndicadoresSiniestralidad()));
  	   }
  	   
- 	   if(this.inflacionSS != null){
- 		   listaReportes.add(reporteInflacionSectorSalud());
+ 	   if(this.getReporteInflacionSectorSalud() != null){
+ 		   listaReportes.add(reporteInflacionSectorSalud(this.getReporteInflacionSectorSalud()));
  	   } 	  
  	   
- 	   if(sinRango != null){
- 		  listaReportes.add(reporteRangosSinGrafica(sinRango));
+ 	   if(this.getReporteSiniestroRangoGrafica() != null && !this.getReporteSiniestroRangoGrafica().isEmpty()){
+ 		  listaReportes.add(reporteRangosSinGrafica(this.getReporteSiniestroRangoGrafica()));
  	   }
  	   
- 	  if(sinRangoTabla != null) {
- 		  listaReportes.add(reporteRangosSinTabla(sinRangoTabla));
+ 	  if(this.getReporteSiniestroRangoTabla() != null && !this.getReporteSiniestroRangoTabla().isEmpty()) {
+ 		  listaReportes.add(reporteRangosSinTabla(this.getReporteSiniestroRangoTabla()));
  	   }
  	   
- 	   if(siniestroPadecimiento != null) {
- 		   listaReportes.add(reporteSinPadecimiento(siniestroPadecimiento));
- 	   } 	   	   
+ 	 if(getReporteSiniestrosMayores() != null && !getReporteSiniestrosMayores().isEmpty()) {
+		   listaReportes.add(reporteSiniestrosMayores(getReporteSiniestrosMayores()));
+	   }
+ 	  
+ 	   if(this.getReporteSiniestrosPadecimientos() != null) {
+ 		   listaReportes.add(reporteSinPadecimiento(this.getReporteSiniestrosPadecimientos()));
+ 	   } 	   	    	   	   
  	   
- 	   ejecutarReporte(listaReportes);
+ 	   ejecutarReporte(listaReportes,this.path);
 	}
+	
 	
 	/**
 	 * Genera el reporte de Antecedentes utilizando
 	 * la información del objeto Antecedentes.
 	 * @return JasperReportBuilder con la hoja de antecedentes.
 	 */
-	private JasperReportBuilder reporteAntecedentes() {       
+	private JasperReportBuilder reporteAntecedentes(Antecedentes antecedentes) {       
        
     	    JasperReportBuilder reporteAntecedentes = new JasperReportBuilder();
     	         	       			       			
@@ -160,7 +176,7 @@ public class GeneradorReporte {
 	    			col.column("Vigencia", "vigencia", type.stringType()),
 	    			col.column("Periodo", "periodo",  type.stringType())
 	    		)
-  	      .setDataSource(ds.crearAntecedentesDS(this.antecedentes.getTablaVigencias()));
+  	      .setDataSource(ds.crearAntecedentesDS(antecedentes.getTablaVigencias()));
     	    
     	    reporteAntecedentes    	    	
     	    		
@@ -182,7 +198,7 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de inidicadores
 	 * de siniestralidad per capita.
 	 */
-	private JasperReportBuilder reporteSinPerCapita() {
+	private JasperReportBuilder reporteSinPerCapita(IndicadoresSiniestros sinPerCapita) {
 		
 		JasperReportBuilder reportePerCapita = new JasperReportBuilder();
 		
@@ -190,7 +206,7 @@ public class GeneradorReporte {
 		ArrayList<BigDecimal> primas = new ArrayList<BigDecimal>();
 		
 		
-		for(PerCapitaValues pc: this.sinPerCapita.getGrafica()) {			
+		for(PerCapitaValues pc: sinPerCapita.getValores()) {			
 			costos.add(pc.getCostoPerCapita());
 			primas.add(pc.getPrimaPerCapita());
 		}
@@ -213,16 +229,12 @@ public class GeneradorReporte {
 		
 		HorizontalListBuilder textoInferior = cmp.horizontalList()
 									.add(textField)
-									.setBackgroundComponent(rectangulo);
-		
-		
-
+									.setBackgroundComponent(rectangulo);		
 													 
 		reportePerCapita
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.PERCAPITA_TITULO).setStyle(Estilos.reportTitleStyle))      		
-	      .setDataSource(ds.crearAntecedentesDS(this.antecedentes.getTablaVigencias()))
+   		.title(cmp.text(Constantes.PERCAPITA_TITULO).setStyle(Estilos.reportTitleStyle))	      
    		.summary(cmp.verticalList(
    				cht.lineChart()   				
    				.customizers(new CustomizedDecimalLineChart())
@@ -237,7 +249,7 @@ public class GeneradorReporte {
    					.setValueAxisFormat(   							
    							cht.axisFormat().setTickLabelMask("$ #,###.##").setRangeMinValueExpression(minRange).setRangeMaxValueExpression(maxRange)
    							)  
-   				.setDataSource(ds.crearPerCapitaDS(this.sinPerCapita.getGrafica())),
+   				.setDataSource(ds.crearPerCapitaDS(sinPerCapita.getValores())),
    				cmp.text(""),
    				textoInferior
    				)   			
@@ -253,10 +265,10 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de inflacion
 	 * del sector salud
 	 */
-	private JasperReportBuilder reporteInflacionSectorSalud() {
+	private JasperReportBuilder reporteInflacionSectorSalud(InflacionSectorSalud inflacionSS) {
 	
 		JasperReportBuilder reporteInflacion = new JasperReportBuilder();
-		JRDataSource jrds = ds.crearInflacionSSDS(this.inflacionSS.getGrafica());
+		JRDataSource jrds = ds.crearInflacionSSDS(inflacionSS.getValores());
 		
 		TextFieldBuilder<String> textField = cmp.text(inflacionSS.getTexto())
 				.setFixedHeight(100)											
@@ -266,7 +278,7 @@ public class GeneradorReporte {
 		TextColumnBuilder<Float> costoColumn = col.column("Índice de Inflación del Sector Salud", "indice", type.floatType());		
 		
 		ArrayList<Float> indices = new ArrayList<Float>();  		
-		for(InflacionSSValues pc: this.inflacionSS.getGrafica()) {			
+		for(InflacionSSValues pc: inflacionSS.getValores()) {			
 			indices.add(pc.getInflacion());
 		}
 		
@@ -303,7 +315,7 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de siniestralidad
 	 * esperada
 	 */
-	private JasperReportBuilder reporteSiniestralidadEsperada() {
+	private JasperReportBuilder reporteSiniestralidadEsperada(SiniestralidadEsperada sinEsperada) {
 	
 		JasperReportBuilder reporteSinEsperada = new JasperReportBuilder();
 		
@@ -351,7 +363,7 @@ public class GeneradorReporte {
 		
 		ArrayList<Integer> intPH = new ArrayList<Integer>();
 		
-		for(PobHistoricaValues pc:pob.getGrafica()) {
+		for(PobHistoricaValues pc:pob.getValores()) {
 			intPH.add(pc.getAsegurados());			
 		}
 		
@@ -363,17 +375,17 @@ public class GeneradorReporte {
 	      subreport		
 	         .setTemplate(Estilos.reportTemplate)		
 	         .columns(periodoColumn, aseguradosColumn, variacionAColumn, variacionVsAColumn,primaNetaColumn,primaPerCapitaColumn)		
-	         .setDataSource(ds.crearPobHistoricoTablaDS(pob.getGrafica()));
+	         .setDataSource(ds.crearPobHistoricoTablaDS(pob.getValores()));
 		
 		reportePobHistorica
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.POBLACION_HIST_TITULO).setStyle(Estilos.reportTitleStyle))   		
    		.summary(cmp.verticalList(
-   						cmp.subreport(subreport),
+   						
    						cmp.horizontalList(
    								cht.barChart()   									
-   									.setDataSource(ds.crearPobHistoricoDS(pob.getGrafica()))
+   									.setDataSource(ds.crearPobHistoricoDS(pob.getValores()))
    									//.customizers(new CustomizedLineChart())
    									.setTitle(Constantes.POBLACION_HIST_GRAFICA_TITULO)
    									.setTitleFont(Estilos.chartFontStyle)
@@ -445,7 +457,7 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de 
 	 * siniestralidad por rangos de monto pagado
 	 */
-	private JasperReportBuilder reporteRangosSinGrafica(SiniestroRangoGrafica siniestros) {
+	private JasperReportBuilder reporteRangosSinGrafica(ArrayList<SiniestroRangoGrafica> siniestros) {
 	
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
 		
@@ -457,7 +469,7 @@ public class GeneradorReporte {
 		
 		Map<String, Color> seriesColors = new HashMap<String, Color>();
 		seriesColors.put("Frecuencia Baja", Estilos.colorGreenLight);
-		seriesColors.put("Frecuencia Alta", Estilos.colorGrenDark);
+		seriesColors.put("Frecuencia Alta", Estilos.colorGreenDark);
 		seriesColors.put("Severidad", Estilos.colorOrange);
 		seriesColors.put("Catastrófico", Estilos.colorRedDark);
 		
@@ -473,7 +485,7 @@ public class GeneradorReporte {
    					.setTitleFont(Estilos.chartFontStyle)
    					.setTitleColor(Estilos.colorNavy)
    					.seriesColorsByName(seriesColors)
-   					.setDataSource(ds.crearSiniestroRangoDS(siniestros.getSiniestros()))
+   					.setDataSource(ds.crearSiniestroRangoDS(siniestros))
    					.setCategory(periodoColumn)
    					.series(
    							cht.serie(bajaColumn), cht.serie(altaColumn), cht.serie(severidadColumn), cht.serie(catastrofeColumn))   							
@@ -486,34 +498,38 @@ public class GeneradorReporte {
 	
 	/**
 	 * Genera el reporte de Tabla de Siniestralidad por
-	 * rangos de monto pagado utilizando el objeto ******** 
+	 * rangos de monto pagado utilizando el objeto SiniestroRangoTabla 
 	 * @return JasperReportBuilder con la hoja de 
 	 * siniestralidad por rangos de monto pagado
 	 */
-	private JasperReportBuilder reporteRangosSinTabla(SiniestroRangoTabla sinRangoTabla) {
-	
+	private JasperReportBuilder reporteRangosSinTabla(ArrayList<SiniestroRangoPeriodo> sinRangoTabla) {
+			
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
 		
+		SubreportBuilder subreport = cmp.subreport(new SubreportGroupExpression())
+									.setDataSource(ds.crearSiniestroRangoDSTabla(sinRangoTabla));
+	      
 		reporteRangosSin
+		.addParameter("columns",sinRangoTabla)
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.RANGOS_SIN_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
-   					)
-   				)
-   		.build();		
+   		.title(cmp.text(Constantes.RANGOS_SIN_TITULO).setStyle(Estilos.reportTitleStyle))   
+   		.detail(subreport)
+   		.setDataSource(new JREmptyDataSource(1))
+   		.build();
+		
 		return reporteRangosSin;
 	}
 	
-	
-	
 	/**
 	 * Genera el reporte de siniestros mayores
-	 * rangos de monto pagado utilizando el objeto ******** 
+	 * rangos de monto pagado 
+	 * @param siniestros ArrayList de objetos de tipo
+	 * SiniestrosMayores
 	 * @return JasperReportBuilder con la hoja de 
 	 * siniestros mayores
 	 */
-	private JasperReportBuilder reporteSiniestrosMayores() {
+	private JasperReportBuilder reporteSiniestrosMayores(ArrayList<SiniestrosMayores> siniestros) {
 	
 		JasperReportBuilder reporteSinMayores = new JasperReportBuilder();
 		
@@ -713,7 +729,7 @@ public class GeneradorReporte {
 	 * Concatena los reportes a crear y genera el archivo PDF
 	 * @param listaReportes Lista con los reportes a concatenar
 	 */
-	public void ejecutarReporte(ArrayList<JasperReportBuilder> listaReportes) {
+	private void ejecutarReporte(ArrayList<JasperReportBuilder> listaReportes,String path) {
 		
 		JasperConcatenatedReportBuilder report = new JasperConcatenatedReportBuilder();
 		Iterator<JasperReportBuilder> itr = listaReportes.iterator();
@@ -722,13 +738,86 @@ public class GeneradorReporte {
 	    		.concatenate(itr.next());
 		}
 		try {			
-				report.toPdf(Exporters.pdfExporter("/Users/Meltsan/Desktop/report.pdf"));			    			
+				report.toPdf(Exporters.pdfExporter(path));			    			
 			 } catch (DRException e) {			
 				 e.printStackTrace();			
 			 }
 
 	}	
 	
+	private ArrayList<SiniestrosMayores> getReporteSiniestrosMayores() {
+		return reporteSiniestrosMayores;
+	}
+
+	public void setReporteSiniestrosMayores(ArrayList<SiniestrosMayores> reporteSiniestrosMayores) {
+		this.reporteSiniestrosMayores = reporteSiniestrosMayores;
+	}
+	
+
+	private Antecedentes getReporteAntecedentes() {
+		return reporteAntecedentes;
+	}
+
+	public void setReporteAntecedentes(Antecedentes reporteAntecedentes) {
+		this.reporteAntecedentes = reporteAntecedentes;
+	}
+	
+	private SiniestralidadEsperada getReporteSiniestralidadEsperada() {
+		return reporteSiniestralidadEsperada;
+	}
+
+	public void setReporteSiniestralidadEsperada(SiniestralidadEsperada reporteSiniestralidadEsperada) {
+		this.reporteSiniestralidadEsperada = reporteSiniestralidadEsperada;
+	}
+	
+	private PoblacionHistorica getReportePoblacionHistorica() {
+		return reportePoblacionHistorica;
+	}
+
+	public void setReportePoblacionHistorica(PoblacionHistorica reportePoblacionHistorica) {
+		this.reportePoblacionHistorica = reportePoblacionHistorica;
+	}
+	
+	private IndicadoresSiniestros getReporteIndicadoresSiniestralidad() {
+		return reporteIndicadoresSiniestralidad;
+	}
+
+	public void setReporteIndicadoresSiniestralidad(IndicadoresSiniestros reporteIndicadoresSiniestralidad) {
+		this.reporteIndicadoresSiniestralidad = reporteIndicadoresSiniestralidad;
+	}
+	
+	private InflacionSectorSalud getReporteInflacionSectorSalud() {
+		return reporteInflacionSectorSalud;
+	}
+
+	public void setReporteInflacionSectorSalud(InflacionSectorSalud reporteInflacionSectorSalud) {
+		this.reporteInflacionSectorSalud = reporteInflacionSectorSalud;
+	}
+	
+	private ArrayList<SiniestroRangoGrafica> getReporteSiniestroRangoGrafica() {
+		return reporteSiniestroRangoGrafica;
+	}
+
+	public void setReporteSiniestroRangoGrafica(ArrayList<SiniestroRangoGrafica> reporteSiniestroRangoGrafica) {
+		this.reporteSiniestroRangoGrafica = reporteSiniestroRangoGrafica;
+	}
+	
+	private ArrayList<SiniestroRangoPeriodo> getReporteSiniestroRangoTabla() {
+		return reporteSiniestroRangoTabla;
+	}
+
+	public void setReporteSiniestroRangoTabla(ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla) {
+		this.reporteSiniestroRangoTabla = reporteSiniestroRangoTabla;
+	}
+
+	private SiniestroPadecimiento getReporteSiniestrosPadecimientos() {
+		return reporteSiniestrosPadecimientos;
+	}
+
+	public void setReporteSiniestrosPadecimientos(SiniestroPadecimiento reporteSiniestrosPadecimientos) {
+		this.reporteSiniestrosPadecimientos = reporteSiniestrosPadecimientos;
+	}
+
 	private void getColor(int r, int g, int b) {
 		float[] hbsvals = new float[3];
 		Color.RGBtoHSB(r, g, b, hbsvals);
