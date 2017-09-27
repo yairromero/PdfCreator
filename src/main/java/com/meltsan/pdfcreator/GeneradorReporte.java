@@ -1,6 +1,10 @@
 package com.meltsan.pdfcreator;
 
-import static net.sf.dynamicreports.report.builder.DynamicReports.*;
+import static net.sf.dynamicreports.report.builder.DynamicReports.cht;
+import static net.sf.dynamicreports.report.builder.DynamicReports.cmp;
+import static net.sf.dynamicreports.report.builder.DynamicReports.col;
+import static net.sf.dynamicreports.report.builder.DynamicReports.report;
+import static net.sf.dynamicreports.report.builder.DynamicReports.type;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -10,48 +14,40 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.Constantes;
-import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
+import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
+import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
-import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
-import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
 import com.meltsan.pdfcreator.customizers.CustomizedDecimalLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
+import com.meltsan.pdfcreator.customizers.CustomizedPercentagePieChart;
 import com.meltsan.pdfcreator.util.Estilos;
 
 import net.sf.dynamicreports.jasper.builder.JasperConcatenatedReportBuilder;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.Exporters;
-import net.sf.dynamicreports.report.builder.column.Columns;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
-import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
 import net.sf.dynamicreports.report.builder.component.ImageBuilder;
 import net.sf.dynamicreports.report.builder.component.RectangleBuilder;
 import net.sf.dynamicreports.report.builder.component.SubreportBuilder;
+import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
-import net.sf.dynamicreports.report.builder.crosstab.CrosstabBuilder;
-import net.sf.dynamicreports.report.builder.crosstab.CrosstabColumnGroupBuilder;
-import net.sf.dynamicreports.report.builder.crosstab.CrosstabRowGroupBuilder;
-import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
-import net.sf.dynamicreports.report.builder.style.StyleBuilder;
-import net.sf.dynamicreports.report.constant.Calculation;
-import net.sf.dynamicreports.report.constant.GroupHeaderLayout;
 import net.sf.dynamicreports.report.constant.ImageScale;
 import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
@@ -70,9 +66,10 @@ public class GeneradorReporte {
 	private IndicadoresSiniestros reporteIndicadoresSiniestralidad;
 	private InflacionSectorSalud reporteInflacionSectorSalud;	
 	private SiniestroPadecimiento reporteSiniestrosPadecimientos;
+	private PadecimientosFrecuencia reportePadecimientosFrecuentes;
 	private ArrayList<SiniestrosMayores> reporteSiniestrosMayores;
 	private ArrayList<SiniestroRangoGrafica> reporteSiniestroRangoGrafica;
-	private ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla;
+	private ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla;	
 	
 	private ArrayList<JasperReportBuilder> listaReportes;
 	private BufferedImage img = null;
@@ -138,10 +135,14 @@ public class GeneradorReporte {
  		  listaReportes.add(reporteRangosSinTabla(this.getReporteSiniestroRangoTabla()));
  	   }
  	   
- 	 if(getReporteSiniestrosMayores() != null && !getReporteSiniestrosMayores().isEmpty()) {
-		   listaReportes.add(reporteSiniestrosMayores(getReporteSiniestrosMayores()));
+ 	 if(this.getReporteSiniestrosMayores() != null && !this.getReporteSiniestrosMayores().isEmpty()) {
+		   listaReportes.add(reporteSiniestrosMayores(this.getReporteSiniestrosMayores()));
 	   }
  	  
+ 	if(this.getReportePadecimientosFrecuentes() != null) {
+		   listaReportes.add(reportePadecimientosFrecuentes(getReportePadecimientosFrecuentes()));
+	   }
+ 	 
  	   if(this.getReporteSiniestrosPadecimientos() != null) {
  		   listaReportes.add(reporteSinPadecimiento(this.getReporteSiniestrosPadecimientos()));
  	   } 	   	    	   	   
@@ -223,7 +224,7 @@ public class GeneradorReporte {
 		
 		TextFieldBuilder<String> textField = cmp.text(sinPerCapita.getTexto())
 											.setFixedHeight(100)											
-											.setStyle(Estilos.reportSubTitleStyle);
+											.setStyle(Estilos.reportTextAreaStyle);
 		
 		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
 		
@@ -506,7 +507,7 @@ public class GeneradorReporte {
 			
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportGroupExpression())
+		SubreportBuilder subreport = cmp.subreport(new SubreportSiniestroRangoExp())
 									.setDataSource(ds.crearSiniestroRangoDSTabla(sinRangoTabla));
 	      
 		reporteRangosSin
@@ -533,13 +534,16 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reporteSinMayores = new JasperReportBuilder();
 		
+		SubreportBuilder subreport = cmp.subreport(new SubreportSiniestrosMayoresExp())
+				.setDataSource(ds.crearSiniestrosMayoresDS(siniestros));
+		
 		reporteSinMayores
+		.addParameter("columns",siniestros)
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.SIN_MAYORES_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
-   					)
-   				)
+   		.detail(subreport)
+   		.setDataSource(new JREmptyDataSource(1))
    		.build();		
 		return reporteSinMayores;
 	}
@@ -635,94 +639,63 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de 
 	 * la Top 5 Padecimientos
 	 */
-	private JasperReportBuilder reporteTopPadecimientos() {
+	private JasperReportBuilder reportePadecimientosFrecuentes(PadecimientosFrecuencia padecimientos) {
 	
 		JasperReportBuilder reporteTopPadecimientos = new JasperReportBuilder();
 		
+		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "padecimiento", type.stringType());
+		TextColumnBuilder<Float> freqColumn = col.column("Frecuencia", "frecuencia", type.floatType());
+		
+		TextFieldBuilder<String> textField = cmp.text(padecimientos.getTexto())
+				.setFixedHeight(100)											
+				.setStyle(Estilos.reportTextAreaStyle);
+
+		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
+
+		HorizontalListBuilder textoInferior = cmp.horizontalList()
+														.add(textField)
+														.setBackgroundComponent(rectangulo);	
+		
 		reporteTopPadecimientos
+		.setLocale(Locale.US)
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.TOP_PADECIMIENTOS_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
-   					)
+   		.summary(cmp.verticalGap(20),
+   				cmp.verticalList(
+   					cmp.horizontalGap(20),	
+   					cmp.horizontalList(
+   							cht.pieChart()
+   							.setDataSource(ds.crearPadecimientoFrecuenciaDS(padecimientos.getPadecimientos(),1))
+   							.customizers(new CustomizedPercentagePieChart())   							
+   							.setLabelFormat("{2}")  
+   							.setTitle("Total de Padecimientos")   	
+   							.setTitleColor(Estilos.colorBlueLight)
+   			   				.setTitleFont(Estilos.chartFontStyle) 
+   							.setKey(padecimientoColumn)
+   							.series(   				
+   									cht.serie(freqColumn)),
+   							cht.pieChart()
+   							.setDataSource(ds.crearPadecimientoFrecuenciaDS(padecimientos.getPadecimientos(),2))
+   							.customizers(new CustomizedPercentagePieChart())						 
+   							.setLabelFormat("{2}")  
+   							.setTitle("Top "+padecimientos.getPadecimientos().size()+" padecimientos")   
+   							.setTitleColor(Estilos.colorBlueLight)
+   			   				.setTitleFont(Estilos.chartFontStyle) 
+   							.setKey(padecimientoColumn)
+   							.series(   				
+   									cht.serie(freqColumn))
+   							),
+   					cmp.text(""),
+   	   				textoInferior
+   				  	)
    				)
    		.build();		
 		return reporteTopPadecimientos;
 	}
-	
-	
-	
-	/**
-	 * Funcion para obtener el numero maximo
-	 * de una lista
-	 * @param data Lista con objetos de tipo BigDecimal
-	 * @return BigDecimal mayor de la lista
-	 */
-	private BigDecimal getMaxBD(ArrayList<BigDecimal> data) {
-				
-		BigDecimal max = data.get(0);	
-				
-		for(BigDecimal i: data) {			
-			max = i.max(max);
-		}
 		
-		return max;
-	}
 	
-	
-	
-	
-	/**
-	 * Funcion para obtener el numero minimo
-	 * de una lista
-	 * @param data Lista con objetos de tipo BigDecimal
-	 * @return BigDecimal menor de la lista
-	 */
-	private BigDecimal getMinBD(ArrayList<BigDecimal> data) {
-		
-		BigDecimal min = data.get(0);	
-				
-		for(BigDecimal i: data) {			
-			min = min.min(i);
-		}
-		
-		return min;
-	}
-	
-	
-	
-	private Float getMaxDouble(ArrayList<Float> data) {
-		Float min = data.get(0);
-        for (Float i : data){
-            min = min > i ? min : i;
-        }
-        return min;
-	}
-	
-	
-	private Float getMinDouble(ArrayList<Float> data) {
-		Float min = data.get(0);
-        for (Float i : data){
-            min = min < i ? min : i;
-        }
-        return min;
-	}
-	
-	private Integer getMaxInteger(ArrayList<Integer> data) {
-		Integer max = data.get(0);
-        for (Integer i : data){
-            max = max > i ? max : i;
-        }
-        return max;
-	}
-	
-	private Integer getMinInteger(ArrayList<Integer> data) {
-		Integer min = data.get(0);
-        for (Integer i : data){
-            min = min < i ? min : i;
-        }
-        return min;
-	}
+
 	
 	
 	/**
@@ -753,7 +726,6 @@ public class GeneradorReporte {
 		this.reporteSiniestrosMayores = reporteSiniestrosMayores;
 	}
 	
-
 	private Antecedentes getReporteAntecedentes() {
 		return reporteAntecedentes;
 	}
@@ -817,7 +789,82 @@ public class GeneradorReporte {
 	public void setReporteSiniestrosPadecimientos(SiniestroPadecimiento reporteSiniestrosPadecimientos) {
 		this.reporteSiniestrosPadecimientos = reporteSiniestrosPadecimientos;
 	}
+	
 
+	private PadecimientosFrecuencia getReportePadecimientosFrecuentes() {
+		return reportePadecimientosFrecuentes;
+	}
+
+	public void setReportePadecimientosFrecuentes(PadecimientosFrecuencia reportePadecimientosFrecuentes) {
+		this.reportePadecimientosFrecuentes = reportePadecimientosFrecuentes;
+	}
+
+	/**
+	 * Funcion para obtener el numero maximo
+	 * de una lista
+	 * @param data Lista con objetos de tipo BigDecimal
+	 * @return BigDecimal mayor de la lista
+	 */
+	private BigDecimal getMaxBD(ArrayList<BigDecimal> data) {
+				
+		BigDecimal max = data.get(0);	
+				
+		for(BigDecimal i: data) {			
+			max = i.max(max);
+		}
+		
+		return max;
+	}
+	
+	/**
+	 * Funcion para obtener el numero minimo
+	 * de una lista
+	 * @param data Lista con objetos de tipo BigDecimal
+	 * @return BigDecimal menor de la lista
+	 */
+	private BigDecimal getMinBD(ArrayList<BigDecimal> data) {
+		
+		BigDecimal min = data.get(0);	
+				
+		for(BigDecimal i: data) {			
+			min = min.min(i);
+		}
+		
+		return min;
+	}
+	
+	private Float getMaxDouble(ArrayList<Float> data) {
+		Float min = data.get(0);
+        for (Float i : data){
+            min = min > i ? min : i;
+        }
+        return min;
+	}
+	
+	private Float getMinDouble(ArrayList<Float> data) {
+		Float min = data.get(0);
+        for (Float i : data){
+            min = min < i ? min : i;
+        }
+        return min;
+	}
+	
+	private Integer getMaxInteger(ArrayList<Integer> data) {
+		Integer max = data.get(0);
+        for (Integer i : data){
+            max = max > i ? max : i;
+        }
+        return max;
+	}
+	
+	private Integer getMinInteger(ArrayList<Integer> data) {
+		Integer min = data.get(0);
+        for (Integer i : data){
+            min = min < i ? min : i;
+        }
+        return min;
+	}
+	
 	private void getColor(int r, int g, int b) {
 		float[] hbsvals = new float[3];
 		Color.RGBtoHSB(r, g, b, hbsvals);

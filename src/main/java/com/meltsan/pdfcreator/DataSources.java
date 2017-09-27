@@ -8,16 +8,15 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
+import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
-import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
-import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
+import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
-import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
 
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -340,11 +339,69 @@ public class DataSources {
 	}	
 	
 	/**
-	 * Genera datos para llenar datos de inflacion
-	 * Sector Salud
+	 * Genera datos para llenar tabla del reporte
+	 * Siniestros Mayores
 	 * 	
-	 * @param periodos Mapa con perido e indices de inflacion
+	 * @param siniestros Lista de objetos tipo SiniestrosMayores
 	 * @return JRDataSource para alimentar tabla
 	 */
+	public JRDataSource crearSiniestrosMayoresDS(ArrayList<SiniestrosMayores> siniestros) {
+		
+		int masterRowNumber = siniestros.size();	         
+        String[] columns = new String[masterRowNumber + 2];                
+        
+        columns[0] = "siniestro";
+        columns[1] = "padecimiento";
+        for (int i = 2; i <= masterRowNumber; i++) {	
+           columns[i] = siniestros.get(i-2).getPeriodo();
+        }        
+        
+        DRDataSource dataSource = new DRDataSource(columns);
+
+        
+		
+		return dataSource;
+	}	
+	
+	/**
+	 * Genera datos para llenar graficas reporte
+	 * Top 5 Padecimientos por Frecuencia
+	 * 	
+	 * @param padecimientos Lista de objetos tipo PadecimientosFrecuencia
+	 * @param tipoGrafica Entero donde 1 es la grafica de padecimientos totales
+	 * y 2 es la tabla de padecimientos especifica
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearPadecimientoFrecuenciaDS(ArrayList<PadecimientosFrecuenciaValues> padecimientos, int tipoGrafica) {
+		
+		DRDataSource dataSource = new DRDataSource("padecimiento","frecuencia");
+		
+		switch(tipoGrafica){
+		case 1:
+			
+			float porcentajePadecimientos = 0;
+			for(PadecimientosFrecuenciaValues pad: padecimientos){
+				porcentajePadecimientos += pad.getPorcentajeFrecuencia();
+			}
+			
+			dataSource.add("Top "+padecimientos.size()+" Padecimientos",(porcentajePadecimientos));
+			dataSource.add("Resto de Padecmientos",(100-porcentajePadecimientos));			
+			
+			break;
+			
+		case 2:
+			
+			for(PadecimientosFrecuenciaValues pad: padecimientos){
+				dataSource.add(pad.getPadecimiento(),pad.getPorcentajeFrecuencia());
+			}
+			
+			break;
+		default:
+			dataSource.add("Grafica no valida",100);
+			break;
+		}
+		
+		return dataSource;
+	}
 	
 }

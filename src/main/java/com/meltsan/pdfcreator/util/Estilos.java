@@ -32,6 +32,7 @@ public class Estilos {
 	public static final StyleBuilder groupSmallStyle;
 	public static final StyleBuilder subtotalStyle;
 	public static final StyleBuilder textAreaStyle;
+	public static final StyleBuilder reportTextAreaStyle;	
 	public static final ReportTemplateBuilder reportTemplate;
 	public static final ReportTemplateBuilder reportSmallTemplate;
 	public static final CurrencyType currencyType;
@@ -76,16 +77,25 @@ public class Estilos {
         				.setFontSize(18)
         				.setForegroundColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f));
 		      
+		      reportTextAreaStyle = stl.style(boldStyle)
+		    		  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
+      								.setFontSize(15)
+      								.setForegroundColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f));
+		                  
+		      
 		      reportSubTitleCenteredStyle = stl.style(boldCenteredStyle)		
                       				.setFontSize(13)
                       				.setForegroundColor(Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f));	 
-		      textAreaStyle = stl.style()
+		      
+		      textAreaStyle = stl.style()		    		  			
 		    		  			.setRadius(10)
 		    		  			.setBackgroundColor(Color.WHITE)
 		    		  			.setLinePen(stl.pen().setLineColor(Color.ORANGE));
+		      
 		      reportHeadStyle = stl.style(boldStyle)
 		    		  					.setForegroundColor(Color.GRAY)
-		    		  					.setFontSize(15);
+		    		  					.setFontSize(15);		     
+		      
 		      columnStyle         = stl.style(rootStyle).setVerticalTextAlignment(VerticalTextAlignment.MIDDLE)
 		    		  					.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER) 
 		    		  					.setBorder(stl.pen1Point());

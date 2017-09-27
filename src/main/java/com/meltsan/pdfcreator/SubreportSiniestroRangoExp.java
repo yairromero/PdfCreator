@@ -6,7 +6,6 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
-import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
 import com.meltsan.pdfcreator.util.Estilos;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
@@ -14,7 +13,7 @@ import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
 import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 
-public class SubreportGroupExpression extends AbstractSimpleExpression<JasperReportBuilder> {
+public class SubreportSiniestroRangoExp extends AbstractSimpleExpression<JasperReportBuilder> {
  
 	private static final long serialVersionUID = 1L;
 	

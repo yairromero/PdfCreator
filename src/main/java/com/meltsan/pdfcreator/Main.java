@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
+import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
@@ -14,9 +15,9 @@ import com.meltsan.pdfcreator.beans.SiniestroMonto;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
-import com.meltsan.pdfcreator.beans.SiniestroRangoTabla;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
@@ -182,8 +183,21 @@ public class Main {
 		
 		generador.setReporteSiniestrosMayores(siniestrosMayores);
 		
+		ArrayList<PadecimientosFrecuenciaValues> padecimientosFrecuencia = new ArrayList<PadecimientosFrecuenciaValues>();
+		padecimientosFrecuencia.add(new PadecimientosFrecuenciaValues("Presencia de anteojos y lentes de contacto",18.25f));
+		padecimientosFrecuencia.add(new PadecimientosFrecuenciaValues("Miopía y astigmatismo", 17.59f));
+		padecimientosFrecuencia.add(new PadecimientosFrecuenciaValues("Recién nacido sano",3.80f));
+		padecimientosFrecuencia.add(new PadecimientosFrecuenciaValues("Cesárea",3.39f));
+		padecimientosFrecuencia.add(new PadecimientosFrecuenciaValues("Embarazo Abdominal",2.23f));
 		
+		String textoTop ="Es importante destacar que el 45.25% de los siniestros no se deben a "
+				+ "una enfermedad como tal, mas bien son coberturas de apoyo que la empresa ha "
+				+ "contratado para sus empleados. Siendo la mas representativa la presencia de "
+				+ "anteojos y lentes de contacto.";
 		
+		PadecimientosFrecuencia pf = new PadecimientosFrecuencia(textoTop,padecimientosFrecuencia);
+		
+		generador.setReportePadecimientosFrecuentes(pf);
 		
 		generador.generaReporte();
 		
