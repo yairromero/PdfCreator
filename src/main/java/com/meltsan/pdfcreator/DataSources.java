@@ -8,15 +8,20 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.values.CausaValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
+import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
+import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
 
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -274,7 +279,7 @@ public class DataSources {
 	 * @param indicadores lista con objetos PobHistoricaValues 
 	 * @return JRDataSource para alimentar grafica 
 	 */
-	public JRDataSource crearPobHistoricoDS(ArrayList<PobHistoricaValues> indicadores) {
+	public JRDataSource crearPobHistoricoGraficaDS(ArrayList<PobHistoricaValues> indicadores) {
 		DRDataSource dataSource = new DRDataSource("periodo", "asegurados");
 		
 		for(PobHistoricaValues pc : indicadores) {
@@ -291,16 +296,128 @@ public class DataSources {
 	 * @return JRDataSource para alimentar grafica 
 	 */
 	public JRDataSource crearPobHistoricoTablaDS(ArrayList<PobHistoricaValues> indicadores) {		
-		DRDataSource dataSource = new DRDataSource("periodo", "asegurados","variacionA",
-				"variacionvsA","primaneta","variacionPN","variacionvsPN","primapercapita",
-				"variacionPC","variacionvsPC");
 		
-		for(PobHistoricaValues pc : indicadores) {
-			dataSource.add(pc.getPeriodo(),pc.getAsegurados(),pc.getVariacionAsegurados(),
-					pc.getVariacionVs1Asegurados(),pc.getPrimaNeta(),pc.getVariacionPrimaNeta(),
-					pc.getVariacionVs1PrimaNeta(),pc.getPrimaPerCapita(),pc.getVariacionPerCapita(),
-					pc.getVariacionVs1PerCapita());
-		}
+		int masterRowNumber = indicadores.size();	         
+        String[] columns = new String[masterRowNumber + 1];                
+        
+        columns[0] = "vigencia";
+        for (int i = 1; i <= masterRowNumber; i++) {	
+           columns[i] = indicadores.get(i-1).getPeriodo();
+        }        
+        
+        DRDataSource dataSource = new DRDataSource(columns);
+		
+        ArrayList<String>labels = new ArrayList<String>();
+        labels.add("Asegurados");
+        //labels.add("% Variación");
+        //labels.add("% Variación del año "+masterRowNumber+" Vs año 1");
+        labels.add("");
+        labels.add("Prima Neta Anual");
+        //labels.add("% Variación");
+        //labels.add("% Variación del año "+masterRowNumber+" Vs año 1");
+        labels.add("");
+        labels.add("Prima Per Cápita");
+        //labels.add("% Variación");
+        //labels.add("% Variación del año "+masterRowNumber+" Vs año 1");
+        
+        
+                
+        //Se llena datasource
+        for (int i = 0; i < labels.size(); i++) {
+
+           Object[] values = new Object[masterRowNumber+1];
+           Object[] variaciones = new Object[masterRowNumber+1];
+           Object[] variacionvs1 = new Object[masterRowNumber+1];           
+           
+           String label = labels.get(i);
+           values[0] = label;
+            
+           if(label.equals("Asegurados")){        	   
+        	   		
+        	   		for (int j = 1; j <= masterRowNumber; j++) {	
+        	   			values[j] = formatoEntero.format(indicadores.get(j-1).getAsegurados()).toString();        	   			
+        	   		}
+        	   		
+        	   		variaciones[0]="% Variación";
+        	   		variaciones[1]="";
+        	   		for(int j = 1; j < masterRowNumber; j++) {
+        	   			        	   			
+        	   			Float res = (float) (indicadores.get(j).getAsegurados()-indicadores.get(j-1).getAsegurados())/indicadores.get(j-1).getAsegurados();		
+        	   			Float res2 = res * 100.0f;        	   			
+        	   			
+        	   			variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+        	   		}
+        	   		
+        	   		variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+        	   		
+        	   		Float res = (float) (indicadores.get(masterRowNumber-1).getAsegurados()-indicadores.get(0).getAsegurados())/indicadores.get(0).getAsegurados();		
+    	   			Float res2 = res * 100.0f;
+    	   			
+        	   		variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+        	   		
+        	   		dataSource.add(values);
+        	   		dataSource.add(variaciones);
+        	   		dataSource.add(variacionvs1);
+           }
+           
+           if(label.equals("Prima Neta Anual")){
+        	   
+   	   			for (int j = 1; j <= masterRowNumber; j++) {	
+   	   				values[j] = "$"+formatoEntero.format(indicadores.get(j-1).getPrimaNeta()).toString();
+   	   			}
+   	   			
+   	   			variaciones[0]="% Variación";
+   	   			variaciones[1]="";
+   	   			for(int j = 1; j < masterRowNumber; j++) {
+	   			        	   			
+   	   				Float res = (float) (indicadores.get(j).getPrimaNeta()-indicadores.get(j-1).getPrimaNeta())/indicadores.get(j-1).getPrimaNeta();		
+   	   				Float res2 = res * 100.0f;        	   			
+	   			
+   	   				variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+   	   			}
+   	   			
+   	   			variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+	   		
+   	   			Float res = (float) (indicadores.get(masterRowNumber-1).getPrimaNeta()-indicadores.get(0).getPrimaNeta())/indicadores.get(0).getPrimaNeta();		
+   	   			Float res2 = res * 100.0f;
+   			
+   	   			variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+   	   			
+   	   			dataSource.add(values);
+   	   			dataSource.add(variaciones);
+   	   			dataSource.add(variacionvs1);
+           }
+           
+           if(label.equals("Prima Per Cápita")){
+  	   			for (int j = 1; j <= masterRowNumber; j++) {	
+  	   				values[j] = "$"+formatoEntero.format(indicadores.get(j-1).getPrimaPerCapita()).toString();
+  	   			}
+  	   			
+  	   			variaciones[0]="% Variación";
+  	   			variaciones[1]="";
+  	   			for(int j = 1; j < masterRowNumber; j++) {
+	   			        	   			
+  	   				Float res = (float) (indicadores.get(j).getPrimaPerCapita()-indicadores.get(j-1).getPrimaPerCapita())/indicadores.get(j-1).getPrimaPerCapita();		
+  	   				Float res2 = res * 100.0f;        	   			
+	   			
+  	   				variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+  	   			}
+  	   			
+  	   			variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+	   		
+	   			Float res = (float) (indicadores.get(masterRowNumber-1).getPrimaPerCapita()-indicadores.get(0).getPrimaPerCapita())/indicadores.get(0).getPrimaPerCapita();		
+	   			Float res2 = res * 100.0f;
+			
+	   			variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+	   			
+	   			dataSource.add(values);
+	   			dataSource.add(variaciones);
+	   			dataSource.add(variacionvs1); 	 
+           }
+           
+          
+           
+          }
 		
 		return dataSource;
 	}
@@ -399,6 +516,106 @@ public class DataSources {
 		default:
 			dataSource.add("Grafica no valida",100);
 			break;
+		}
+		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica Tipo de Pago 	
+	 * @param montos Lista de objetos tipo TipoPagoValues	 	 
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearMontosPagadosTPDS(ArrayList<TipoPagoValues> montos) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo","pagodirecto","reembolso");			
+		for(TipoPagoValues tpv: montos) {
+			dataSource.add(tpv.getPeriodo(),tpv.getMontoPagoDirecto(),tpv.getMontoReembolso());
+		}		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica Tipo de Pago 	
+	 * @param montos Lista de objetos tipo TipoPagoValues	 	 
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearMontosPagadosTipoPagoDS(ArrayList<TipoPagoValues> montos) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo","pagodirecto","reembolso");			
+		for(TipoPagoValues tpv: montos) {
+			dataSource.add(tpv.getPeriodo(),tpv.getMontoPagoDirecto(),tpv.getMontoReembolso());
+		}		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica Tipo de Pago 	
+	 * @param montos Lista de objetos tipo TipoPagoValues	 	 
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearMontosPagadosCausaDS(ArrayList<CausaValues> montos) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo","accidente","enfermedad","parto");			
+		for(CausaValues tpv: montos) {
+			dataSource.add(tpv.getPeriodo(),tpv.getMontoAccidente(),tpv.getMontoEnfermedad(),tpv.getMontoParto());
+		}		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica Tipo de Pago 	
+	 * @param montos Lista de objetos tipo TipoPagoValues	 	 
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearMontosPagadosSexoDS(ArrayList<SexoValues> montos) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo","femenino","masculino");			
+		for(SexoValues tpv: montos) {
+			dataSource.add(tpv.getPeriodo(),tpv.getMontoFemenino(),tpv.getMontoMasculino());
+		}		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica Tipo de Pago 	
+	 * @param montos Lista de objetos tipo TipoPagoValues	 	 
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearMontosPagadosParentescoDS(ArrayList<ParentescoValues> montos) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo","titular","dependiente");			
+		for(ParentescoValues tpv: montos) {
+			dataSource.add(tpv.getPeriodo(),tpv.getMontoTitular(),tpv.getMontoDependiente());
+		}		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica de Costo per capita vs tarifas 	
+	 * @param montos Lista de objetos tipo CostoPerCapitaTarifas	 	 
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearCostoVsTarifasDS(ArrayList<CostoPerCapitaTarifas> montos) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo","costopc","tarifas");
+		for(CostoPerCapitaTarifas cpc: montos){
+			dataSource.add(cpc.getGrupoEdad(),cpc.getCosto(),cpc.getTarifas());
+		}
+		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica de Morbilidad	
+	 * @param montos Lista de objetos tipo CostoPerCapitaTarifas	 	 
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearMorbilidadDS(ArrayList<CostoPerCapitaTarifas> montos) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo","morbilidad");
+		for(CostoPerCapitaTarifas cpc: montos){
+			dataSource.add(cpc.getGrupoEdad(),cpc.getMorbilidad());
 		}
 		
 		return dataSource;

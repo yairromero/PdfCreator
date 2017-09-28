@@ -6,10 +6,10 @@ public class Constantes {
 	"El análisis que a continuación se presenta, se realizó con base a los siguientes periodos:";
 	
 	public static String ANTE_VIGENCIA =
-						"Vigencia actual del Programa:";
+						"	Vigencia actual del Programa:";
 	
 	public static String ANTE_PERIODO =
-						"Periodo de Análisis:";  
+						"	Periodo de Análisis:";  
 	
 	public static String PERCAPITA_GRAFICA_TITULO =
 			"Costo per cápita Vs Prima per cápita";
@@ -34,6 +34,9 @@ public class Constantes {
 	public static String POBLACION_HIST_GRAFICA_TITULO =
 			"Comparativo de Población Histórica";
 	
+	public static String POBLACION_HIST_TABLA_TITULO =
+			"Distribución de asegurados y primas netas anuales";
+	
 	public static String INDICADORES_SIN_TITULO =
 			"Indicadores de siniestralidad"; 
 	
@@ -52,10 +55,40 @@ public class Constantes {
 	public static String PADECIMIENTOS_TITULO =
 			"Padecimientos Crónico-Degenerativos";
 	
+	public static String COSTOS_TARIFAS_FEM_TITULO =
+			"Costos Per Cápita vs Tarifas por Edad Femenino";
+	
+	public static String COSTOS_TARIFAS_MASC_TITULO =
+			"Costos Per Cápita vs Tarifas por Edad Masculino";
+	
 	public static String TOP_PADECIMIENTOS_TITULO =
 			"Top 5 de Padecimientos (en cuanto a frecuencia)";
 	
 	public static String SIN_PADECIMIENTO_TITULO =
 			"Siniestros";
+	
+	public static String TIPO_PAGO_GRAFICA_TITULO =
+			"Tipo de Pago";
+	
+	public static String CAUSA_GRAFICA_TITULO =
+			"Causa";
+	
+	public static String SEXO_GRAFICA_TITULO =
+			"Sexo";
+	
+	public static String PARENTESCO_GRAFICA_TITULO =
+			"Parentesco";
+	
+	public static String COSTO_TARIFAS_GRAFICA_TITULO =
+			"Costo Per Cápita vs Tarifas";
+	
+	public static String MORBILIDAD_GRAFICA_TITULO =
+			"Morbilidad";
+	
+	public static String WWW_LOCKTON_LINK =
+			"www.lockton.com.mx";
+	
+	public static String LOCKTON_RIGHTS =
+	"© 2015, Lockton, Inc. All rights reserved. Images © 2015 Thinkstock. All rights reserved.";
 
 }

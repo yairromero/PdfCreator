@@ -8,6 +8,7 @@ import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.labels.AbstractCategoryItemLabelGenerator;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
@@ -30,6 +31,8 @@ public class CustomizedDecimalLineChart implements DRIChartCustomizer {
 		lineAndShapeRenderer.setBaseItemLabelGenerator(new CustomLabelGenerator());
  
 		lineAndShapeRenderer.setBaseItemLabelsVisible(true);
+		
+		chart.getLegend().setFrame(BlockBorder.NONE);
 	}
  
 	// Clase customizada, para implementar la visibilidad de los valores del grafico

@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
+import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
+import com.meltsan.pdfcreator.beans.MisionObjetivo;
+import com.meltsan.pdfcreator.beans.MontosPagados;
 import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
@@ -16,12 +19,16 @@ import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.values.CausaValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
+import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
+import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
 
 public class Main {
 	
@@ -93,10 +100,10 @@ public class Main {
 				+ "incrementado un  ́14.5%";
 		
 		ArrayList<PobHistoricaValues> phv = new ArrayList<PobHistoricaValues>();
-		phv.add(new PobHistoricaValues("2013-2014",1093,new Double(0.0),0.0,15417673L,0.0,0.0,14106L,0.0,0.0));
-		phv.add(new PobHistoricaValues("2014-2015",1145,4.8,0.0,16322655L,5.9,0.0,14256L,1.9,5.03));
-		phv.add(new PobHistoricaValues("2015-2016",1149,0.4,0.0,17467912L,7.0,0.0,15203L,6.6,0.0));
-		phv.add(new PobHistoricaValues("2016-2017",1148,-0.9,5.03,18544881L,6.1,20.2,16154L,6.2,14.5));
+		phv.add(new PobHistoricaValues("2013-2014",1093,15417673L,14106L));
+		phv.add(new PobHistoricaValues("2014-2015",1145,16322655L,14256L));
+		phv.add(new PobHistoricaValues("2015-2016",1149,17467912L,15203L));
+		phv.add(new PobHistoricaValues("2016-2017",1148,18544881L,16154L));
 				
 		PoblacionHistorica ph = new PoblacionHistorica(pht,phv);
 		
@@ -198,6 +205,60 @@ public class Main {
 		PadecimientosFrecuencia pf = new PadecimientosFrecuencia(textoTop,padecimientosFrecuencia);
 		
 		generador.setReportePadecimientosFrecuentes(pf);
+		
+		ArrayList<TipoPagoValues> tp = new ArrayList<TipoPagoValues>();
+		tp.add(new TipoPagoValues("2013-2014",9f,3f));
+		tp.add(new TipoPagoValues("2014-2015",7f,2.7f));
+		tp.add(new TipoPagoValues("2015-2016",13f,2.1f));
+		
+		ArrayList<CausaValues> cp = new ArrayList<CausaValues>();
+		cp.add(new CausaValues("2013-2014",2f,10f,0.6f));
+		cp.add(new CausaValues("2014-2015",1.5f,8f,1f));
+		cp.add(new CausaValues("2015-2016",1f,13f,2f));
+		
+		ArrayList<SexoValues> sxp = new ArrayList<SexoValues>();
+		sxp.add(new SexoValues("2013-2014",9f,3f));
+		sxp.add(new SexoValues("2014-2015",7f,2.7f));
+		sxp.add(new SexoValues("2015-2016",13f,2.1f));
+		
+		ArrayList<ParentescoValues> pp = new ArrayList<ParentescoValues>();
+		pp.add(new ParentescoValues("2013-2014",9f,3f));
+		pp.add(new ParentescoValues("2014-2015",7f,2.7f));
+		pp.add(new ParentescoValues("2015-2016",13f,2.1f));
+		
+		MontosPagados mp = new MontosPagados(tp,cp,sxp,pp);
+		generador.setReporteMontosPagados(mp);
+		
+		ArrayList<CostoPerCapitaTarifas> cvt = new ArrayList<CostoPerCapitaTarifas>();
+		cvt.add(new CostoPerCapitaTarifas("0-4",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("5-9",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("10-14",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("15-19",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("20-24",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("25-29",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("30-34",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("35-39",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("40-44",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("45-49",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("50-54",9f,5f,30f));
+		cvt.add(new CostoPerCapitaTarifas("55-59",55f,25f,130f));
+		cvt.add(new CostoPerCapitaTarifas("60-64",1f,20f,10f));
+		cvt.add(new CostoPerCapitaTarifas("65-69",0f,30f,0f));
+		cvt.add(new CostoPerCapitaTarifas("70+",0f,50f,0f));
+		
+		generador.setReporteCostoVsTarifasFemenino(cvt);
+		
+		generador.setReporteCostoVsTarifasMasculino(cvt);
+		
+		String mT = "Misión";
+		String m = "Ser la empresa de valor y servicio líder a nivel mundial en corretaje de seguros, "
+				+ "administración de riesgos y servicios actuariales.";
+		String vT = "Objetivo";
+		String v = "Ser el mejor lugar para trabajar y hacer negocios.";
+		
+		MisionObjetivo mv = new MisionObjetivo(mT,m,vT,v);
+		
+		generador.setReporteMisionVision(mv);
 		
 		generador.generaReporte();
 		

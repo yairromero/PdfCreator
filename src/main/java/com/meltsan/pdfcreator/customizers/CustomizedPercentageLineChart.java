@@ -1,18 +1,17 @@
 package com.meltsan.pdfcreator.customizers;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.Locale;
-
-import net.sf.dynamicreports.report.definition.ReportParameters;
-import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.block.BlockBorder;
 import org.jfree.chart.labels.AbstractCategoryItemLabelGenerator;
 import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
+
+import net.sf.dynamicreports.report.definition.ReportParameters;
+import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
 
 
  
@@ -29,6 +28,8 @@ public class CustomizedPercentageLineChart implements DRIChartCustomizer {
 		lineAndShapeRenderer.setBaseItemLabelGenerator(new CustomLabelGenerator());
  
 		lineAndShapeRenderer.setBaseItemLabelsVisible(true);
+		
+		chart.getLegend().setFrame(BlockBorder.NONE);
 	}
  
 	// Clase customizada, para implementar la visibilidad de los valores del grafico

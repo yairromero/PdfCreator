@@ -25,7 +25,7 @@ public class SubreportSiniestroRangoExp extends AbstractSimpleExpression<JasperR
 			CustomGroupBuilder group = grp.group("categoria",String.class);
 			
 		         JasperReportBuilder report = report();		         
-		         report.setTemplate(Estilos.reportSmallTemplate);		
+		         report.setTemplate(Estilos.reportConditionalGroupTemplate);		
 		         report.addField("categoria", String.class);
 		         report.addColumn(col.column("Vigencia", "vigencia", type.stringType()));
 		         for (SiniestroRangoPeriodo srp : srt) {		

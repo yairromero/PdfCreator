@@ -24,7 +24,7 @@ public class SubreportSiniestrosMayoresExp extends AbstractSimpleExpression<Jasp
 		 ArrayList<SiniestrosMayores> sm = reportParameters.getValue("columns");							
 		 int noPeridos = sm.size();
 		         JasperReportBuilder report = report();		         
-		         report.setTemplate(Estilos.reportSmallTemplate);			         
+		         report.setTemplate(Estilos.reportTemplate);			         
 		         report.addColumn(col.reportRowNumberColumn("No."));
 		         report.addColumn(col.column("Siniestro","siniestro",type.stringType()));
 		         report.addColumn(col.column("Padecimiento","padecimiento",type.stringType()));

@@ -19,7 +19,7 @@ public class CustomizedPercentagePieChart implements DRIChartCustomizer {
 		PiePlot plot = (PiePlot)chart.getPlot();
         plot.setLabelOutlinePaint(null); 
         plot.setLabelShadowPaint(null);
-        chart.getLegend().setFrame(BlockBorder.NONE);
+        chart.getLegend().setFrame(BlockBorder.NONE);        
                         
 	}
    		   

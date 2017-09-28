@@ -21,8 +21,11 @@ import javax.imageio.ImageIO;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.Constantes;
+import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
+import com.meltsan.pdfcreator.beans.MisionObjetivo;
+import com.meltsan.pdfcreator.beans.MontosPagados;
 import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
@@ -30,10 +33,17 @@ import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.values.CausaValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
+import com.meltsan.pdfcreator.beans.values.SexoValues;
+import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
+import com.meltsan.pdfcreator.customizers.CustomizedBarChart;
 import com.meltsan.pdfcreator.customizers.CustomizedDecimalLineChart;
+import com.meltsan.pdfcreator.customizers.CustomizedLabelVertBarChart;
+import com.meltsan.pdfcreator.customizers.CustomizedLabelVertLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentagePieChart;
 import com.meltsan.pdfcreator.util.Estilos;
@@ -48,6 +58,8 @@ import net.sf.dynamicreports.report.builder.component.RectangleBuilder;
 import net.sf.dynamicreports.report.builder.component.SubreportBuilder;
 import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
+import net.sf.dynamicreports.report.constant.HorizontalImageAlignment;
+import net.sf.dynamicreports.report.constant.HorizontalTextAlignment;
 import net.sf.dynamicreports.report.constant.ImageScale;
 import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
@@ -67,15 +79,20 @@ public class GeneradorReporte {
 	private InflacionSectorSalud reporteInflacionSectorSalud;	
 	private SiniestroPadecimiento reporteSiniestrosPadecimientos;
 	private PadecimientosFrecuencia reportePadecimientosFrecuentes;
+	private MontosPagados reporteMontosPagados;
+	private MisionObjetivo reporteMisionVision;
 	private ArrayList<SiniestrosMayores> reporteSiniestrosMayores;
 	private ArrayList<SiniestroRangoGrafica> reporteSiniestroRangoGrafica;
 	private ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla;	
+	private ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasFemenino;
+	private ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasMasculino;
 	
 	private ArrayList<JasperReportBuilder> listaReportes;
 	private BufferedImage img = null;
 	private ImageBuilder imgHeader = null;
-	private ImageBuilder imgFooter = null;
+	private BufferedImage imgLogo = null;
 	private BufferedImage imgCal = null;
+	private BufferedImage imgHAnte = null;
 	private File file = null;
 	private String path;
 	
@@ -86,12 +103,12 @@ public class GeneradorReporte {
 		try {
 			
 	   		ClassLoader classLoader = getClass().getClassLoader();
-	   		file = new File(classLoader.getResource("head.png").getFile());
-	   		img = ImageIO.read(file);    	
+	   		file = new File(classLoader.getResource("head.png").getFile());	   		
+	   		imgHAnte = ImageIO.read(new File(classLoader.getResource("HeadAnte.png").getFile()));
+	   		img = ImageIO.read(file);
 	   		imgHeader = cmp.image(img).setImageScale(ImageScale.FILL_FRAME);
-	   		file = new File(classLoader.getResource("foot.png").getFile());
-	   		img = ImageIO.read(file);    	
-	   		imgFooter = cmp.image(img);
+	   		file = new File(classLoader.getResource("Logo13.png").getFile());
+	   		imgLogo = ImageIO.read(file);	   		
 	   		file = new File(classLoader.getResource("cal.png").getFile());
 	   		imgCal = ImageIO.read(file);    	   		
 	   		
@@ -131,22 +148,39 @@ public class GeneradorReporte {
  		  listaReportes.add(reporteRangosSinGrafica(this.getReporteSiniestroRangoGrafica()));
  	   }
  	   
- 	  if(this.getReporteSiniestroRangoTabla() != null && !this.getReporteSiniestroRangoTabla().isEmpty()) {
+ 	   if(this.getReporteSiniestroRangoTabla() != null && !this.getReporteSiniestroRangoTabla().isEmpty()) {
  		  listaReportes.add(reporteRangosSinTabla(this.getReporteSiniestroRangoTabla()));
  	   }
  	   
- 	 if(this.getReporteSiniestrosMayores() != null && !this.getReporteSiniestrosMayores().isEmpty()) {
+ 	   if(this.getReporteSiniestrosMayores() != null && !this.getReporteSiniestrosMayores().isEmpty()) {
 		   listaReportes.add(reporteSiniestrosMayores(this.getReporteSiniestrosMayores()));
 	   }
  	  
- 	if(this.getReportePadecimientosFrecuentes() != null) {
+ 	   if(this.getReporteSiniestrosPadecimientos() != null) {
+		   listaReportes.add(reporteSinPadecimiento(this.getReporteSiniestrosPadecimientos()));
+	   }
+ 	
+ 	   if(this.getReportePadecimientosFrecuentes() != null) {
 		   listaReportes.add(reportePadecimientosFrecuentes(getReportePadecimientosFrecuentes()));
 	   }
- 	 
- 	   if(this.getReporteSiniestrosPadecimientos() != null) {
- 		   listaReportes.add(reporteSinPadecimiento(this.getReporteSiniestrosPadecimientos()));
- 	   } 	   	    	   	   
+ 	  	    	   	    	   	   	   
+ 	   if(this.getReporteMontosPagados() != null){
+ 		   listaReportes.add(reporteMontosPagados(this.getReporteMontosPagados()));
+ 	   }
  	   
+ 	   if(this.getReporteCostoVsTarifasFemenino() != null && !this.getReporteCostoVsTarifasFemenino().isEmpty()) {
+ 		   listaReportes.add(reporteCostoVsTarifasFem(this.getReporteCostoVsTarifasFemenino()));
+ 	   }
+ 	   
+ 	  if(this.getReporteCostoVsTarifasMasculino() != null && !this.getReporteCostoVsTarifasMasculino().isEmpty()) {
+		   listaReportes.add(reporteCostoVsTarifasMasc(this.getReporteCostoVsTarifasMasculino()));
+	   }
+ 	  
+ 	  
+ 	  
+ 	  if(this.getReporteMisionVision() != null) {
+ 		  listaReportes.add(reporteMisionVision(this.getReporteMisionVision()));
+ 	  }
  	   ejecutarReporte(listaReportes,this.path);
 	}
 	
@@ -160,16 +194,6 @@ public class GeneradorReporte {
        
     	    JasperReportBuilder reporteAntecedentes = new JasperReportBuilder();
     	         	       			       			
-    	    VerticalListBuilder content = cmp.verticalList(
-    	    			cmp.text(Constantes.ANTE_HEADER).setStyle(Estilos.reportHeadStyle),
-     	    		cmp.text(""),
-   		        cmp.text(Constantes.ANTE_VIGENCIA).setStyle(Estilos.reportSubTitleStyle),
-   		        cmp.text(antecedentes.getVigenciaCompleta()).setStyle(Estilos.reportHeadStyle),
-   		        cmp.text(Constantes.ANTE_PERIODO).setStyle(Estilos.reportSubTitleStyle),
-   		        cmp.text(antecedentes.getPeriodoAnalisis()).setStyle(Estilos.reportHeadStyle),
-   		        cmp.text("")
-   		      );
-    	    
     	    JasperReportBuilder subreport = report();	
   	      subreport  	
   	      	.setTemplate(Estilos.reportTemplate) 
@@ -179,14 +203,24 @@ public class GeneradorReporte {
 	    		)
   	      .setDataSource(ds.crearAntecedentesDS(antecedentes.getTablaVigencias()));
     	    
-    	    reporteAntecedentes    	    	
-    	    		
+    	    reporteAntecedentes    	    	    	    		
     	   		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
-    	   		.setTitleBackgroundComponent(imgHeader)    	   		
-    	   		.title(cmp.text(Constantes.ANTE_TITULO).setStyle(Estilos.reportTitleStyle))    	   		
-    	   		.addPageHeader(content)    	   		
-    	   		.summary(
-    	   				cmp.horizontalList(cmp.subreport(subreport),cmp.image(imgCal)))      	   		
+    	   		.title(cmp.image(imgHAnte))    	   		   	   	
+    	   		.summary(cmp.verticalList(
+    	   					cmp.text(Constantes.ANTE_HEADER).setStyle(Estilos.reportHeadStyle),
+    	   					cmp.verticalGap(10),
+    	   					cmp.text(Constantes.ANTE_VIGENCIA).setStyle(Estilos.reportSubTitleStyle),
+    	   					cmp.text("	"+antecedentes.getVigenciaCompleta()).setStyle(Estilos.reportHeadStyle),
+    	   					cmp.verticalGap(10),
+    	   					cmp.text(Constantes.ANTE_PERIODO).setStyle(Estilos.reportSubTitleStyle),
+    	   					cmp.text("	"+antecedentes.getPeriodoAnalisis()).setStyle(Estilos.reportHeadStyle),
+    	   					cmp.verticalGap(25)
+    	   				),
+    	   				cmp.horizontalList(cmp.subreport(subreport),
+    	   									cmp.horizontalGap(10),
+    	   									cmp.image(imgCal)
+    	   									)
+    	   				)      	   		
     	   		.setColumnStyle(Estilos.columnStyle)    	   		
     	   		.build();
     	    		  
@@ -283,8 +317,8 @@ public class GeneradorReporte {
 			indices.add(pc.getInflacion());
 		}
 		
-		Float maxRange = getMaxDouble(indices) + 2;
-		Float minRange = getMinDouble(indices) - 2;
+		Float maxRange = getMaxFloat(indices) + 2;
+		Float minRange = getMinFloat(indices) - 2;
 					
 		reporteInflacion
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
@@ -325,7 +359,9 @@ public class GeneradorReporte {
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.SIN_ESPERADA_TITULO).setStyle(Estilos.reportTitleStyle))   		
    		.summary(cmp.verticalList(
-   					cmp.text(sinEsperada.getTexto()).setStyle(Estilos.reportSubTitleStyle)
+   					cmp.text(sinEsperada.getTexto())
+   							.setStyle(Estilos.reportSubTitleStyle)
+   							.setHorizontalTextAlignment(HorizontalTextAlignment.JUSTIFIED)
    					)
    				)
    		.build();		
@@ -342,12 +378,11 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reportePobHistorica = new JasperReportBuilder();
 		
+		SubreportBuilder subreport = cmp.subreport(new SubreportPoblacionHistoricaExp())
+				.setDataSource(ds.crearPobHistoricoTablaDS(pob.getValores()));
+		
 		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
-		TextColumnBuilder<Integer> aseguradosColumn = col.column("Asegurados", "asegurados", type.integerType());
-		TextColumnBuilder<Double> variacionAColumn = col.column("% Variacion", "variacionA", type.doubleType());
-		TextColumnBuilder<Double> variacionVsAColumn = col.column("% Variacion Vs Año 1", "variacionvsA", type.doubleType());
-		TextColumnBuilder<Long> primaNetaColumn = col.column("Prima Neta", "primaneta", type.longType());
-		TextColumnBuilder<Long> primaPerCapitaColumn = col.column("Prima PerCapita", "primapercapita", type.longType());
+		TextColumnBuilder<Integer> aseguradosColumn = col.column("Asegurados", "asegurados", type.integerType());		
 		
 		TextFieldBuilder<String> textField = cmp.text(pob.getTexto())
 				.setFixedHeight(50)											
@@ -371,23 +406,17 @@ public class GeneradorReporte {
 		Integer maxRange = getMaxInteger(intPH) + 100;
 		Integer minRange = getMinInteger(intPH) - 100;	
 		 
-		
-		JasperReportBuilder subreport = report();		
-	      subreport		
-	         .setTemplate(Estilos.reportTemplate)		
-	         .columns(periodoColumn, aseguradosColumn, variacionAColumn, variacionVsAColumn,primaNetaColumn,primaPerCapitaColumn)		
-	         .setDataSource(ds.crearPobHistoricoTablaDS(pob.getValores()));
-		
 		reportePobHistorica
+		.addParameter("columns",pob.getValores())
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.POBLACION_HIST_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.title(cmp.text(Constantes.POBLACION_HIST_TITULO).setStyle(Estilos.reportTitleStyle))  
+   		.setDataSource(new JREmptyDataSource(1))
    		.summary(cmp.verticalList(
-   						
+   						subreport,
    						cmp.horizontalList(
    								cht.barChart()   									
-   									.setDataSource(ds.crearPobHistoricoDS(pob.getValores()))
-   									//.customizers(new CustomizedLineChart())
+   									.setDataSource(ds.crearPobHistoricoGraficaDS(pob.getValores()))   									
    									.setTitle(Constantes.POBLACION_HIST_GRAFICA_TITULO)
    									.setTitleFont(Estilos.chartFontStyle)
    									.setTitleColor(Estilos.colorBlueLight)
@@ -472,7 +501,7 @@ public class GeneradorReporte {
 		seriesColors.put("Frecuencia Baja", Estilos.colorGreenLight);
 		seriesColors.put("Frecuencia Alta", Estilos.colorGreenDark);
 		seriesColors.put("Severidad", Estilos.colorOrange);
-		seriesColors.put("Catastrófico", Estilos.colorRedDark);
+		seriesColors.put("Catastrófico", Estilos.colorRed);
 		
 		reporteRangosSin
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
@@ -504,6 +533,7 @@ public class GeneradorReporte {
 	 * siniestralidad por rangos de monto pagado
 	 */
 	private JasperReportBuilder reporteRangosSinTabla(ArrayList<SiniestroRangoPeriodo> sinRangoTabla) {
+
 			
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
 		
@@ -573,6 +603,7 @@ public class GeneradorReporte {
 	
 	
 	
+	
 	/**
 	 * Genera el reporte de Tabla de padecimientos
 	 * cronicos utilizando el objeto ******** 
@@ -593,6 +624,7 @@ public class GeneradorReporte {
    		.build();		
 		return reportePadecimientos;
 	}
+	
 	
 	
 	
@@ -693,9 +725,363 @@ public class GeneradorReporte {
    		.build();		
 		return reporteTopPadecimientos;
 	}
-		
-	
+			
 
+	/**
+	 * Genera el reporte de Tablas de Montos Pagados
+	 * @param montos Objeto tipo MontosPagados
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteMontosPagados(MontosPagados montos) {
+	
+		JasperReportBuilder reportePadecimientos = new JasperReportBuilder();
+		
+		ArrayList<Float> maxmin = new ArrayList<Float>();
+		
+		for(TipoPagoValues pc:montos.getMontoTipoPago()) {
+			maxmin.add(pc.getMontoPagoDirecto());
+			maxmin.add(pc.getMontoReembolso());
+		}
+		
+		Float maxRangeTP = getMaxFloat(maxmin) + 2;
+		Float minRangeTP = getMinFloat(maxmin) - 2;
+		
+		maxmin.clear();
+		
+		for(CausaValues pc:montos.getMontoCausa()) {
+			maxmin.add(pc.getMontoAccidente());
+			maxmin.add(pc.getMontoEnfermedad());
+			maxmin.add(pc.getMontoParto());
+		}
+		
+		Float maxRangeC = getMaxFloat(maxmin) + 2;
+		Float minRangeC = getMinFloat(maxmin) - 2;
+		
+		maxmin.clear();
+		
+		for(SexoValues pc:montos.getMontoSexo()) {
+			maxmin.add(pc.getMontoMasculino());
+			maxmin.add(pc.getMontoFemenino());			
+		}
+		
+		Float maxRangeS = getMaxFloat(maxmin) + 2;
+		Float minRangeS = getMinFloat(maxmin) - 2;
+		
+		maxmin.clear();
+		
+		for(ParentescoValues pc:montos.getMontoParentesco()) {
+			maxmin.add(pc.getMontoTitular());
+			maxmin.add(pc.getMontoDependiente());			
+		}
+		
+		Float maxRangeP = getMaxFloat(maxmin) + 2;
+		Float minRangeP = getMinFloat(maxmin) - 2;
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Float> pagoDirectoColumn = col.column("Pago Directo", "pagodirecto", type.floatType());
+		TextColumnBuilder<Float> reembolsoColumn = col.column("Reembolso", "reembolso", type.floatType());
+		TextColumnBuilder<Float> accidenteColumn = col.column("Accidente", "accidente", type.floatType());
+		TextColumnBuilder<Float> enfermedadColumn = col.column("Enfermedad", "enfermedad", type.floatType());
+		TextColumnBuilder<Float> partoColumn = col.column("Parto", "parto", type.floatType());
+		TextColumnBuilder<Float> femeninoColumn = col.column("Femenino", "femenino", type.floatType());
+		TextColumnBuilder<Float> masculinoColumn = col.column("Masculino", "masculino", type.floatType());
+		TextColumnBuilder<Float> titularColumn = col.column("Titular", "titular", type.floatType());
+		TextColumnBuilder<Float> dependienteColumn = col.column("Dependiente", "dependiente", type.floatType());						
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("Pago Directo", Estilos.colorRedDark);
+		seriesColors.put("Reembolso", Estilos.colorNavy);
+		seriesColors.put("Femenino", Estilos.colorRedDark);
+		seriesColors.put("Masculino", Estilos.colorNavy);
+		seriesColors.put("Accidente", Estilos.colorRedDark);
+		seriesColors.put("Enfermedad", Estilos.colorNavy);
+		seriesColors.put("Dependiente", Estilos.colorRedDark);
+		seriesColors.put("Titular", Estilos.colorNavy);
+		seriesColors.put("Parto", Color.GRAY);
+		
+		reportePadecimientos
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(" "))   		
+   		.summary(cmp.verticalList(
+   					cmp.horizontalList(
+   							//Grafica Tipo Pago
+   							cht.barChart()
+   								.setHeight(190)
+   								.customizers(new CustomizedBarChart())
+								.setDataSource(ds.crearMontosPagadosTipoPagoDS(montos.getMontoTipoPago()))   									
+								.setTitle(Constantes.TIPO_PAGO_GRAFICA_TITULO)
+								.setTitleFont(Estilos.chartFontStyle)
+								.setTitleColor(Estilos.colorBlueLight)
+								.seriesColorsByName(seriesColors)
+								.setCategory(periodoColumn)
+									.series(
+											cht.serie(pagoDirectoColumn),cht.serie(reembolsoColumn))												
+												.setValueAxisFormat(
+														cht.axisFormat().setLabel("Millones")
+																		.setTickLabelMask("$ #0")
+																		.setRangeMinValueExpression(minRangeTP)
+																		.setRangeMaxValueExpression(maxRangeTP)
+														),   							
+   							//Grafica Causa
+							cht.barChart()  
+								.setHeight(190)
+								.customizers(new CustomizedBarChart())
+								.setDataSource(ds.crearMontosPagadosCausaDS(montos.getMontoCausa()))   									
+								.setTitle(Constantes.CAUSA_GRAFICA_TITULO)
+								.setTitleFont(Estilos.chartFontStyle)
+								.setTitleColor(Estilos.colorBlueLight)
+								.seriesColorsByName(seriesColors)
+								.setCategory(periodoColumn)
+									.series(
+											cht.serie(accidenteColumn),cht.serie(enfermedadColumn),cht.serie(partoColumn))
+												.setValueAxisFormat(
+													cht.axisFormat().setLabel("Millones")
+																.setTickLabelMask("$ #0")
+																.setRangeMinValueExpression(minRangeC)
+																.setRangeMaxValueExpression(maxRangeC)
+												)
+   							),
+   					cmp.verticalGap(5),
+   					cmp.horizontalList(
+   							//Grafica Sexo
+   							cht.barChart()
+   							.setHeight(190)
+   							.customizers(new CustomizedBarChart())
+							.setDataSource(ds.crearMontosPagadosSexoDS(montos.getMontoSexo()))   									
+							.setTitle(Constantes.SEXO_GRAFICA_TITULO)
+							.setTitleFont(Estilos.chartFontStyle)
+							.setTitleColor(Estilos.colorBlueLight)
+							.seriesColorsByName(seriesColors)
+							.setCategory(periodoColumn)							
+								.series(
+										cht.serie(femeninoColumn),cht.serie(masculinoColumn))
+											.setShowTickLabels(true)
+											.setValueAxisFormat(
+													cht.axisFormat().setLabel("Millones")
+															.setTickLabelMask("$ #0")
+															.setRangeMinValueExpression(minRangeS)
+															.setRangeMaxValueExpression(maxRangeS)
+													),   							
+							//Grafica Parentesco
+						cht.barChart()
+							.setHeight(190) 
+							.customizers(new CustomizedBarChart())
+							.setDataSource(ds.crearMontosPagadosParentescoDS(montos.getMontoParentesco()))   									
+							.setTitle(Constantes.PARENTESCO_GRAFICA_TITULO)
+							.setTitleFont(Estilos.chartFontStyle)
+							.setTitleColor(Estilos.colorBlueLight)
+							.seriesColorsByName(seriesColors)
+							.setCategory(periodoColumn)
+								.series(
+										cht.serie(dependienteColumn),cht.serie(titularColumn))
+											.setValueAxisFormat(
+												cht.axisFormat().setLabel("Millones")
+																.setTickLabelMask("$ #0")
+																.setRangeMinValueExpression(minRangeP)
+																.setRangeMaxValueExpression(maxRangeP)
+											)
+   							)
+   					)
+   				)
+   		.build();		
+		return reportePadecimientos;
+	}
+	
+	/**
+	 * Genera el reporte de Costo Per Capita vs Tarifas
+	 * Femenino
+	 * @param montos Lista de objetos tipo CostoPerCapitaTarifas
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteCostoVsTarifasFem(ArrayList<CostoPerCapitaTarifas> montos) {
+		
+		JasperReportBuilder reporteCPCT = new JasperReportBuilder();
+		
+		ArrayList<Float> cpc = new ArrayList<Float>();
+		ArrayList<Float> morb = new ArrayList<Float>();
+		
+		for(CostoPerCapitaTarifas pc:montos) {
+			cpc.add(pc.getCosto());
+			cpc.add(pc.getTarifas());
+			morb.add(pc.getMorbilidad());
+		}
+		
+		Float maxRangeCPC = getMaxFloat(cpc) + 10;
+		Float maxRangeMorb = getMaxFloat(morb) + 10;								
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Float> costoPCColumn = col.column("Costo Per Cápita", "costopc", type.floatType());
+		TextColumnBuilder<Float> tarifasColumn = col.column("Tarifas", "tarifas", type.floatType());
+		TextColumnBuilder<Float> morbilidadColumn = col.column("Morbilidad", "morbilidad", type.floatType());
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("Costo Per Cápita", Estilos.colorRedDark);
+		seriesColors.put("Tarifas", Estilos.colorNavy);
+		seriesColors.put("Morbilidad", Color.GRAY);
+		
+		reporteCPCT
+		.setLocale(Locale.US)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.COSTOS_TARIFAS_FEM_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.summary(cmp.verticalList(
+   				cht.barChart()	
+   					.setHeight(180)
+					.customizers(new CustomizedLabelVertBarChart())
+					.setDataSource(ds.crearCostoVsTarifasDS(montos))   									
+					.setTitle(Constantes.COSTO_TARIFAS_GRAFICA_TITULO)
+					.setTitleFont(Estilos.chartFontStyle)
+					.setTitleColor(Estilos.colorBlueLight)
+					.seriesColorsByName(seriesColors)
+					.setCategory(periodoColumn)
+					.series(
+							cht.serie(costoPCColumn),cht.serie(tarifasColumn))												
+								.setValueAxisFormat(
+										cht.axisFormat().setLabel("Millares")
+														.setTickLabelMask("$ #0")														
+														.setRangeMaxValueExpression(maxRangeCPC)
+										),
+								cmp.verticalGap(5),
+				cht.lineChart()					
+					.setHeight(180) 
+					.customizers(new CustomizedLabelVertLineChart())
+					.setDataSource(ds.crearMorbilidadDS(montos))   									
+					.setTitle(Constantes.MORBILIDAD_GRAFICA_TITULO)
+					.setTitleFont(Estilos.chartFontStyle)
+					.setTitleColor(Estilos.colorBlueLight)
+					.seriesColorsByName(seriesColors)
+					.setCategory(periodoColumn)
+					.series(
+							cht.serie(morbilidadColumn))	
+								.setCategoryAxisFormat(
+										cht.axisFormat().setLabelFont(Estilos.chartFontSmallStyle)
+										)
+								.setValueAxisFormat(
+										cht.axisFormat()													
+														.setRangeMaxValueExpression(maxRangeMorb)
+													)
+   					)
+   				)
+   		.build();
+		
+		return reporteCPCT;
+	}
+	
+	/**
+	 * Genera el reporte de Costo Per Capita vs Tarifas
+	 * Masculino
+	 * @param montos Lista de objetos tipo CostoPerCapitaTarifas
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteCostoVsTarifasMasc(ArrayList<CostoPerCapitaTarifas> montos) {
+		
+		JasperReportBuilder reporteCPCT = new JasperReportBuilder();
+		
+		ArrayList<Float> cpc = new ArrayList<Float>();
+		ArrayList<Float> morb = new ArrayList<Float>();
+		
+		for(CostoPerCapitaTarifas pc:montos) {
+			cpc.add(pc.getCosto());
+			cpc.add(pc.getTarifas());
+			morb.add(pc.getMorbilidad());
+		}
+		
+		Float maxRangeCPC = getMaxFloat(cpc) + 10;
+		Float maxRangeMorb = getMaxFloat(morb) + 10;								
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Float> costoPCColumn = col.column("Costo Per Cápita", "costopc", type.floatType());
+		TextColumnBuilder<Float> tarifasColumn = col.column("Tarifas", "tarifas", type.floatType());
+		TextColumnBuilder<Float> morbilidadColumn = col.column("Morbilidad", "morbilidad", type.floatType());
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("Costo Per Cápita", Estilos.colorRedDark);
+		seriesColors.put("Tarifas", Estilos.colorNavy);
+		seriesColors.put("Morbilidad", Color.GRAY);
+		
+		reporteCPCT
+		.setLocale(Locale.US)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.COSTOS_TARIFAS_MASC_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.summary(cmp.verticalList(
+   				cht.barChart()	
+   					.setHeight(180)
+					.customizers(new CustomizedLabelVertBarChart())
+					.setDataSource(ds.crearCostoVsTarifasDS(montos))   									
+					.setTitle(Constantes.COSTO_TARIFAS_GRAFICA_TITULO)
+					.setTitleFont(Estilos.chartFontStyle)
+					.setTitleColor(Estilos.colorBlueLight)
+					.seriesColorsByName(seriesColors)
+					.setCategory(periodoColumn)
+					.series(
+							cht.serie(costoPCColumn),cht.serie(tarifasColumn))												
+								.setValueAxisFormat(
+										cht.axisFormat().setLabel("Millares")
+														.setTickLabelMask("$ #0")														
+														.setRangeMaxValueExpression(maxRangeCPC)
+										),
+								cmp.verticalGap(5),
+				cht.lineChart()					
+					.setHeight(180) 
+					.customizers(new CustomizedLabelVertLineChart())
+					.setDataSource(ds.crearMorbilidadDS(montos))   									
+					.setTitle(Constantes.MORBILIDAD_GRAFICA_TITULO)
+					.setTitleFont(Estilos.chartFontStyle)
+					.setTitleColor(Estilos.colorBlueLight)
+					.seriesColorsByName(seriesColors)
+					.setCategory(periodoColumn)
+					.series(
+							cht.serie(morbilidadColumn))	
+								.setCategoryAxisFormat(
+										cht.axisFormat().setLabelFont(Estilos.chartFontSmallStyle)
+										)
+								.setValueAxisFormat(
+										cht.axisFormat()													
+														.setRangeMaxValueExpression(maxRangeMorb)
+													)
+   					)
+   				)
+   		.build();
+		
+		return reporteCPCT;
+	}
+	
+	/**
+	 * Genera el reporte de Mision y Vision 
+	 * @param info Objeto tipo MisionVision
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteMisionVision(MisionObjetivo info){
+		JasperReportBuilder reporteMision = new JasperReportBuilder();
+		
+		reporteMision		
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.summary(cmp.verticalList(
+   					cmp.verticalGap(50),
+   					cmp.text(info.getMisionTitulo()).setStyle(Estilos.misionTitleStyle),
+   					cmp.verticalGap(10),
+   					cmp.text(info.getMision()).setStyle(Estilos.misionStyle),
+   					cmp.verticalGap(50),
+   					cmp.text(info.getObjetivoTitulo()).setStyle(Estilos.misionTitleStyle),
+   					cmp.verticalGap(10),
+   					cmp.text(info.getObjetivo()).setStyle(Estilos.misionStyle)   					
+   					)		
+   				)
+   		.pageFooter(cmp.verticalList(
+   					cmp.image(imgLogo).setHorizontalImageAlignment(HorizontalImageAlignment.CENTER),
+   					cmp.verticalGap(5),
+   					cmp.text(Constantes.WWW_LOCKTON_LINK).setStyle(Estilos.misionSmallStyle),
+   					cmp.text(Constantes.LOCKTON_RIGHTS).setStyle(Estilos.misionSmallStyle)
+   					)
+   				);
+		return reporteMision;
+	}
 	
 	
 	/**
@@ -718,9 +1104,11 @@ public class GeneradorReporte {
 
 	}	
 	
+	
 	private ArrayList<SiniestrosMayores> getReporteSiniestrosMayores() {
 		return reporteSiniestrosMayores;
 	}
+	
 
 	public void setReporteSiniestrosMayores(ArrayList<SiniestrosMayores> reporteSiniestrosMayores) {
 		this.reporteSiniestrosMayores = reporteSiniestrosMayores;
@@ -758,7 +1146,7 @@ public class GeneradorReporte {
 		this.reporteIndicadoresSiniestralidad = reporteIndicadoresSiniestralidad;
 	}
 	
-	private InflacionSectorSalud getReporteInflacionSectorSalud() {
+	private InflacionSectorSalud getReporteInflacionSectorSalud() {		
 		return reporteInflacionSectorSalud;
 	}
 
@@ -785,11 +1173,11 @@ public class GeneradorReporte {
 	private SiniestroPadecimiento getReporteSiniestrosPadecimientos() {
 		return reporteSiniestrosPadecimientos;
 	}
+	
 
 	public void setReporteSiniestrosPadecimientos(SiniestroPadecimiento reporteSiniestrosPadecimientos) {
 		this.reporteSiniestrosPadecimientos = reporteSiniestrosPadecimientos;
 	}
-	
 
 	private PadecimientosFrecuencia getReportePadecimientosFrecuentes() {
 		return reportePadecimientosFrecuentes;
@@ -797,6 +1185,38 @@ public class GeneradorReporte {
 
 	public void setReportePadecimientosFrecuentes(PadecimientosFrecuencia reportePadecimientosFrecuentes) {
 		this.reportePadecimientosFrecuentes = reportePadecimientosFrecuentes;
+	}
+	
+	private MontosPagados getReporteMontosPagados() {
+		return reporteMontosPagados;
+	}
+
+	public void setReporteMontosPagados(MontosPagados reporteMontosPagados) {
+		this.reporteMontosPagados = reporteMontosPagados;
+	}
+
+	private ArrayList<CostoPerCapitaTarifas> getReporteCostoVsTarifasFemenino() {
+		return reporteCostoVsTarifasFemenino;
+	}
+
+	public void setReporteCostoVsTarifasFemenino(ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasFemenino) {
+		this.reporteCostoVsTarifasFemenino = reporteCostoVsTarifasFemenino;
+	}
+
+	private ArrayList<CostoPerCapitaTarifas> getReporteCostoVsTarifasMasculino() {
+		return reporteCostoVsTarifasMasculino;
+	}
+
+	public void setReporteCostoVsTarifasMasculino(ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasMasculino) {
+		this.reporteCostoVsTarifasMasculino = reporteCostoVsTarifasMasculino;
+	}
+		
+	private MisionObjetivo getReporteMisionVision() {
+		return reporteMisionVision;
+	}
+
+	public void setReporteMisionVision(MisionObjetivo reporteMisionVision) {
+		this.reporteMisionVision = reporteMisionVision;
 	}
 
 	/**
@@ -816,6 +1236,7 @@ public class GeneradorReporte {
 		return max;
 	}
 	
+	
 	/**
 	 * Funcion para obtener el numero minimo
 	 * de una lista
@@ -833,7 +1254,8 @@ public class GeneradorReporte {
 		return min;
 	}
 	
-	private Float getMaxDouble(ArrayList<Float> data) {
+	
+	private Float getMaxFloat(ArrayList<Float> data) {
 		Float min = data.get(0);
         for (Float i : data){
             min = min > i ? min : i;
@@ -841,13 +1263,15 @@ public class GeneradorReporte {
         return min;
 	}
 	
-	private Float getMinDouble(ArrayList<Float> data) {
+	
+	private Float getMinFloat(ArrayList<Float> data) {
 		Float min = data.get(0);
         for (Float i : data){
             min = min < i ? min : i;
         }
         return min;
 	}
+	
 	
 	private Integer getMaxInteger(ArrayList<Integer> data) {
 		Integer max = data.get(0);
@@ -856,6 +1280,7 @@ public class GeneradorReporte {
         }
         return max;
 	}
+	
 	
 	private Integer getMinInteger(ArrayList<Integer> data) {
 		Integer min = data.get(0);
