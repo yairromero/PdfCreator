@@ -9,15 +9,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
-import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
+import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
+import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
 import com.meltsan.pdfcreator.beans.values.ParentescoValues;
-import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
@@ -308,20 +308,12 @@ public class DataSources {
         DRDataSource dataSource = new DRDataSource(columns);
 		
         ArrayList<String>labels = new ArrayList<String>();
-        labels.add("Asegurados");
-        //labels.add("% Variación");
-        //labels.add("% Variación del año "+masterRowNumber+" Vs año 1");
+        labels.add("Asegurados");        
         labels.add("");
-        labels.add("Prima Neta Anual");
-        //labels.add("% Variación");
-        //labels.add("% Variación del año "+masterRowNumber+" Vs año 1");
+        labels.add("Prima Neta Anual");        
         labels.add("");
-        labels.add("Prima Per Cápita");
-        //labels.add("% Variación");
-        //labels.add("% Variación del año "+masterRowNumber+" Vs año 1");
-        
-        
-                
+        labels.add("Prima Per Cápita");        
+                               
         //Se llena datasource
         for (int i = 0; i < labels.size(); i++) {
 
@@ -423,15 +415,220 @@ public class DataSources {
 	}
 	
 	/**
+	 * Genera datos para crear tabla de Poblacion
+	 * historica
+	 * @param indicadores lista con objetos PobHistoricaValues 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearIndicadoresSiniestroDS(ArrayList<IndicadoresSiniestroValues> indicadores) {		
+		
+		int masterRowNumber = indicadores.size();	         
+        String[] columns = new String[masterRowNumber + 1];                
+        
+        columns[0] = "vigencia";
+        for (int i = 1; i <= masterRowNumber; i++) {	
+           columns[i] = indicadores.get(i-1).getPeriodo();
+        }        
+        
+        DRDataSource dataSource = new DRDataSource(columns);
+		
+        ArrayList<String>labels = new ArrayList<String>();
+        labels.add("Monto Pagado");        
+        labels.add("");
+        labels.add("No. de Siniestros");        
+        labels.add("");
+        labels.add("Costo Per cápita de siniestro");
+        labels.add("");
+        labels.add("% Siniestralidad");
+        labels.add("");
+        labels.add("%Siniestralidad(sin catastróficos)");
+                              
+        //Se llena datasource
+        for (int i = 0; i < labels.size(); i++) {
+
+           Object[] values = new Object[masterRowNumber+1];
+           Object[] variaciones = new Object[masterRowNumber+1];
+           Object[] variacionvs1 = new Object[masterRowNumber+1];           
+           
+           String label = labels.get(i);
+           values[0] = label;
+            
+           if(label.equals("Monto Pagado")){        	   
+        	   		
+        	   		for (int j = 1; j <= masterRowNumber; j++) {	
+        	   			values[j] = formatoEntero.format(indicadores.get(j-1).getMontoPagado()).toString();        	   			
+        	   		}
+        	   		
+        	   		variaciones[0]="% Variación";
+        	   		variaciones[1]="";
+        	   		for(int j = 1; j < masterRowNumber; j++) {
+        	   			        	   			
+        	   			Float res = (float) (indicadores.get(j).getMontoPagado()-indicadores.get(j-1).getMontoPagado())/indicadores.get(j-1).getMontoPagado();		
+        	   			Float res2 = res * 100.0f;        	   			
+        	   			
+        	   			variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+        	   		}
+        	   		
+        	   		variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+        	   		
+        	   		Float res = (float) (indicadores.get(masterRowNumber-1).getMontoPagado()-indicadores.get(0).getMontoPagado())/indicadores.get(0).getMontoPagado();		
+    	   			Float res2 = res * 100.0f;
+    	   			
+        	   		variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+        	   		
+        	   		dataSource.add(values);
+        	   		dataSource.add(variaciones);
+        	   		dataSource.add(variacionvs1);
+           }
+           
+           if(label.equals("No. de Siniestros")){
+        	   
+   	   			for (int j = 1; j <= masterRowNumber; j++) {	
+   	   				values[j] = "$"+formatoEntero.format(indicadores.get(j-1).getNoSiniestros()).toString();
+   	   			}
+   	   			
+   	   			variaciones[0]="% Variación";
+   	   			variaciones[1]="";
+   	   			for(int j = 1; j < masterRowNumber; j++) {
+	   			        	   			
+   	   				Float res = (float) (indicadores.get(j).getNoSiniestros()-indicadores.get(j-1).getNoSiniestros())/indicadores.get(j-1).getNoSiniestros();		
+   	   				Float res2 = res * 100.0f;        	   			
+	   			
+   	   				variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+   	   			}
+   	   			
+   	   			variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+	   		
+   	   			Float res = (float) (indicadores.get(masterRowNumber-1).getNoSiniestros()-indicadores.get(0).getNoSiniestros())/indicadores.get(0).getNoSiniestros();		
+   	   			Float res2 = res * 100.0f;
+   			
+   	   			variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+   	   			
+   	   			dataSource.add(values);
+   	   			dataSource.add(variaciones);
+   	   			dataSource.add(variacionvs1);
+           }
+           
+           if(label.equals("Costo Per cápita de siniestro")){
+  	   			for (int j = 1; j <= masterRowNumber; j++) {	
+  	   				values[j] = "$"+formatoEntero.format(indicadores.get(j-1).getCostoPerCapita()).toString();
+  	   			}
+  	   			
+  	   			variaciones[0]="% Variación";
+  	   			variaciones[1]="";
+  	   			for(int j = 1; j < masterRowNumber; j++) {
+	   			        	   			
+  	   				Float res = (float) (indicadores.get(j).getCostoPerCapita()-indicadores.get(j-1).getCostoPerCapita())/indicadores.get(j-1).getCostoPerCapita();		
+  	   				Float res2 = res * 100.0f;        	   			
+	   			
+  	   				variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+  	   			}
+  	   			
+  	   			variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+	   		
+	   			Float res = (float) (indicadores.get(masterRowNumber-1).getCostoPerCapita()-indicadores.get(0).getCostoPerCapita())/indicadores.get(0).getCostoPerCapita();		
+	   			Float res2 = res * 100.0f;
+			
+	   			variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+	   			
+	   			dataSource.add(values);
+	   			dataSource.add(variaciones);
+	   			dataSource.add(variacionvs1); 	 
+           }
+           
+           if(label.equals("% Siniestralidad")){
+ 	   			for (int j = 1; j <= masterRowNumber; j++) {	
+ 	   				values[j] = formatoEntero.format(indicadores.get(j-1).getPorcentajeSiniestralidad()).toString() + "%";
+ 	   			}
+ 	   			
+ 	   			variaciones[0]="% Variación";
+ 	   			variaciones[1]="";
+ 	   			for(int j = 1; j < masterRowNumber; j++) {
+	   			        	   			
+ 	   				Float res = (float) (indicadores.get(j).getPorcentajeSiniestralidad()-indicadores.get(j-1).getPorcentajeSiniestralidad())
+ 	   																								/indicadores.get(j-1).getPorcentajeSiniestralidad();		
+ 	   				Float res2 = res * 100.0f;        	   			
+	   			
+ 	   				variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+ 	   			}
+ 	   			
+ 	   			variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+	   		
+	   			Float res = (float) (indicadores.get(masterRowNumber-1).getPorcentajeSiniestralidad()-indicadores.get(0).getPorcentajeSiniestralidad())
+	   																											/indicadores.get(0).getPorcentajeSiniestralidad();		
+	   			Float res2 = res * 100.0f;
+			
+	   			variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+	   			
+	   			dataSource.add(values);
+	   			dataSource.add(variaciones);
+	   			dataSource.add(variacionvs1); 	 
+          }
+           
+           if(label.equals("%Siniestralidad(sin catastróficos)")){
+ 	   			for (int j = 1; j <= masterRowNumber; j++) {	
+ 	   				
+ 	   				Float x = indicadores.get(j-1).getPorcienSiniestroSinCatastrofe();
+ 	   				if ( x != null)
+ 	   					values[j] = formatoEntero.format(x).toString() + "%";
+ 	   			}
+ 	   			
+ 	   			variaciones[0]="% Variación";
+ 	   			variaciones[1]="";
+ 	   			for(int j = 1; j < masterRowNumber; j++) {
+	   			        	   			
+ 	   				Float x = indicadores.get(j).getPorcienSiniestroSinCatastrofe();
+ 	   				
+ 	   				if(x!=null){
+ 	   					Float res = (float) (indicadores.get(j).getPorcienSiniestroSinCatastrofe()-indicadores.get(j-1).getPorcienSiniestroSinCatastrofe())
+ 	   																								/indicadores.get(j-1).getPorcienSiniestroSinCatastrofe();		
+ 	   					Float res2 = res * 100.0f;        	   				   			
+ 	   					variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+ 	   				}
+ 	   			}
+ 	   			
+ 	   			variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+ 	   			
+ 	   			Float x = indicadores.get(masterRowNumber-1).getPorcienSiniestroSinCatastrofe();
+ 	   			
+ 	   			if(x!=null) {
+ 	   				Float res = (float) (indicadores.get(masterRowNumber-1).getPorcienSiniestroSinCatastrofe()-indicadores.get(0).getPorcienSiniestroSinCatastrofe())	   																										/indicadores.get(0).getPorcienSiniestroSinCatastrofe();		
+	   				Float res2 = res * 100.0f;			
+	   				variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+ 	   			}
+ 	   			else {
+ 	   			variacionvs1[0]="%Variación año "+(masterRowNumber-1)+" Vs año 1";
+ 	   				Float res = (float) (indicadores.get(masterRowNumber-2).getPorcienSiniestroSinCatastrofe()-indicadores.get(0).getPorcienSiniestroSinCatastrofe())	   																										/indicadores.get(0).getPorcienSiniestroSinCatastrofe();		
+ 	   				Float res2 = res * 100.0f;			
+ 	   				variacionvs1[variacionvs1.length - 2]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+ 	   			}
+	   			dataSource.add(values);
+	   			dataSource.add(variaciones);
+	   			dataSource.add(variacionvs1); 	 
+          }
+           
+           if(label.equals("")){
+        	   		for (int j = 0; j <= masterRowNumber; j++) {
+        	   			values[j] = "";
+        	   		}
+        	   		dataSource.add(values);
+           }
+                               
+          }
+		
+		return dataSource;
+	}
+	
+	/**
 	 * Genera datos para crear grafica de Siniestralidad
 	 * per capita
 	 * @param indicadores lista con objetos PerCapita 
 	 * @return JRDataSource para alimentar grafica 
 	 */
-	public JRDataSource crearPerCapitaDS(ArrayList<PerCapitaValues> indicadores) {
+	public JRDataSource crearIndicadoresSiniestroGraficaDS(ArrayList<IndicadoresSiniestroValues> indicadores) {
 		DRDataSource dataSource = new DRDataSource("periodo", "costo","prima");
 		
-		for(PerCapitaValues pc : indicadores) {
+		for(IndicadoresSiniestroValues pc : indicadores) {
 			dataSource.add(pc.getPeriodo(),pc.getCostoPerCapita(),pc.getPrimaPerCapita());
 		}
 		
@@ -454,6 +651,128 @@ public class DataSources {
 		
 		return dataSource;
 	}	
+	
+	/**
+	 * Genera datos para llenar grafica de Costo
+	 * Promedio de Siniestros
+	 * 	
+	 * @param siniestros Lista con objetos tipo CostoPromedioSiniestroValues
+	 * @return JRDataSource para alimentar tabla
+	 */
+	public JRDataSource crearCostoPromedioGraficaDS (ArrayList<CostoPromedioSiniestroValues> siniestros) {
+		
+		DRDataSource dataSource = new DRDataSource("periodo", "costo", "costosinc","costoinfl");
+		
+		for(CostoPromedioSiniestroValues pc : siniestros) {
+			dataSource.add(pc.getPeriodo(),pc.getCostoPromedio(),pc.getCostoPromSinCatastrofe(),pc.getCostoPromInflacionSS());
+		}
+		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar tabla de Costo
+	 * Promedio de Siniestros
+	 * 	
+	 * @param siniestros Lista con objetos tipo CostoPromedioSiniestroValues
+	 * @return JRDataSource para alimentar tabla
+	 */
+	public JRDataSource crearCostoPromedioTablaDS (ArrayList<CostoPromedioSiniestroValues> siniestros) {
+		
+		int masterRowNumber = siniestros.size();	         
+        String[] columns = new String[masterRowNumber + 1];                
+        
+        columns[0] = "vigencia";
+        for (int i = 1; i <= masterRowNumber; i++) {	
+           columns[i] = siniestros.get(i-1).getPeriodo();
+        }        
+        
+        DRDataSource dataSource = new DRDataSource(columns);
+		
+        ArrayList<String>labels = new ArrayList<String>();
+        labels.add("Costo Promedio de siniestro");        
+        labels.add("");        
+        labels.add("Costo Promedio de siniestro (sin catastróficos)");        
+       
+                              
+        //Se llena datasource
+        for (int i = 0; i < labels.size(); i++) {
+
+           Object[] values = new Object[masterRowNumber+1];
+           Object[] variaciones = new Object[masterRowNumber+1];
+           Object[] variacionvs1 = new Object[masterRowNumber+1];           
+           
+           String label = labels.get(i);
+           values[0] = label;
+            
+           if(label.equals("Costo Promedio de siniestro")){        	   
+        	   		
+        	   		for (int j = 1; j <= masterRowNumber; j++) {	
+        	   			values[j] = formatoEntero.format(siniestros.get(j-1).getCostoPromedio()).toString();        	   			
+        	   		}
+        	   		
+        	   		variaciones[0]="% Variación";
+        	   		variaciones[1]="";
+        	   		for(int j = 1; j < masterRowNumber; j++) {
+        	   			        	   			
+        	   			Float res = (float) (siniestros.get(j).getCostoPromedio()-siniestros.get(j-1).getCostoPromedio())/siniestros.get(j-1).getCostoPromedio();		
+        	   			Float res2 = res * 100.0f;        	   			
+        	   			
+        	   			variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+        	   		}
+        	   		
+        	   		variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+        	   		
+        	   		Float res = (float) (siniestros.get(masterRowNumber-1).getCostoPromedio()-siniestros.get(0).getCostoPromedio())/siniestros.get(0).getCostoPromedio();		
+    	   			Float res2 = res * 100.0f;
+    	   			
+        	   		variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+        	   		
+        	   		dataSource.add(values);
+        	   		dataSource.add(variaciones);
+        	   		dataSource.add(variacionvs1);
+           }
+           
+           if(label.equals("Costo Promedio de siniestro (sin catastróficos)")){        	   
+   	   		
+   	   		for (int j = 1; j <= masterRowNumber; j++) {	
+   	   			values[j] = formatoEntero.format(siniestros.get(j-1).getCostoPromSinCatastrofe()).toString();        	   			
+   	   		}
+   	   		
+   	   		variaciones[0]="% Variación";
+   	   		variaciones[1]="";
+   	   		for(int j = 1; j < masterRowNumber; j++) {
+   	   			        	   			
+   	   			Float res = (float) (siniestros.get(j).getCostoPromSinCatastrofe()-siniestros.get(j-1).getCostoPromSinCatastrofe())/siniestros.get(j-1).getCostoPromSinCatastrofe();		
+   	   			Float res2 = res * 100.0f;        	   			
+   	   			
+   	   			variaciones[j+1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+   	   		}
+   	   		
+   	   		variacionvs1[0]="%Variación año "+masterRowNumber+" Vs año 1";
+   	   		
+   	   		Float res = (float) (siniestros.get(masterRowNumber-1).getCostoPromSinCatastrofe()-siniestros.get(0).getCostoPromSinCatastrofe())/siniestros.get(0).getCostoPromSinCatastrofe();		
+	   			Float res2 = res * 100.0f;
+	   			
+   	   		variacionvs1[variacionvs1.length - 1]=formatoEntero.format(Math.round(res2 * 100.0) / 100.0) +"%";
+   	   		
+   	   		dataSource.add(values);
+   	   		dataSource.add(variaciones);
+   	   		dataSource.add(variacionvs1);
+           }                       	   			
+           
+           if(label.equals("")){
+        	   		for (int j = 0; j <= masterRowNumber; j++) {
+        	   			values[j] = "";
+        	   		}
+        	   		dataSource.add(values);
+           }
+                               
+          }
+		
+		return dataSource;
+	}
+	
 	
 	/**
 	 * Genera datos para llenar tabla del reporte

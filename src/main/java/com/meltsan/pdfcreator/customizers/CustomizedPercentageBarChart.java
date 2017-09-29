@@ -2,9 +2,6 @@ package com.meltsan.pdfcreator.customizers;
 
 import java.text.NumberFormat;
 
-import net.sf.dynamicreports.report.definition.ReportParameters;
-import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
-
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.NumberTickUnit;
@@ -14,6 +11,9 @@ import org.jfree.chart.labels.CategoryItemLabelGenerator;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
+
+import net.sf.dynamicreports.report.definition.ReportParameters;
+import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
 
 
  
@@ -39,7 +39,8 @@ public class CustomizedPercentageBarChart implements DRIChartCustomizer {
 	static class CustomLabelGenerator extends AbstractCategoryItemLabelGenerator implements CategoryItemLabelGenerator {
  
  
-		   /**
+		private static final long serialVersionUID = 1L;
+		/**
 		   * Creates a new generator that only displays labels that are greater
 		   * than or equal to the threshold value.
 		   *

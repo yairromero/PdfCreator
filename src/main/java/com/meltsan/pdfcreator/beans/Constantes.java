@@ -85,6 +85,9 @@ public class Constantes {
 	public static String MORBILIDAD_GRAFICA_TITULO =
 			"Morbilidad";
 	
+	public static String COSTO_PROMEDIO_GRAFICA_TITULO =
+			"Costo Promedio del Siniestro";
+	
 	public static String WWW_LOCKTON_LINK =
 			"www.lockton.com.mx";
 	

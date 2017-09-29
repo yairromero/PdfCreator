@@ -1,6 +1,7 @@
 package com.meltsan.pdfcreator.customizers;
 
 import java.text.NumberFormat;
+import java.util.Locale;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.block.BlockBorder;
@@ -35,8 +36,8 @@ public class CustomizedPercentageLineChart implements DRIChartCustomizer {
 	// Clase customizada, para implementar la visibilidad de los valores del grafico
 	static class CustomLabelGenerator extends AbstractCategoryItemLabelGenerator implements CategoryItemLabelGenerator {
  
- 
-		   /**
+		private static final long serialVersionUID = 1L;
+		/**
 		   * Creates a new generator that only displays labels that are greater
 		   * than or equal to the threshold value.
 		   *
@@ -58,9 +59,10 @@ public class CustomizedPercentageLineChart implements DRIChartCustomizer {
 		   */
 		   public String generateLabel(CategoryDataset dataset, int series,int category) {
  
-			   String result = null;		      
+			   String result = null;	
+			   	  NumberFormat formatoEntero = NumberFormat.getInstance(Locale.US);
 			      Number value = dataset.getValue(series, category);		      
-			      result = value.toString() + " %";
+			      result = formatoEntero.format(value) + "%";
 			      return result;
 		   }		   		   
 	}

@@ -1,8 +1,10 @@
-package com.meltsan.pdfcreator;
+package com.meltsan.pdfcreator.subreports;
 
-import static net.sf.dynamicreports.report.builder.DynamicReports.*;
+import static net.sf.dynamicreports.report.builder.DynamicReports.col;
+import static net.sf.dynamicreports.report.builder.DynamicReports.grp;
+import static net.sf.dynamicreports.report.builder.DynamicReports.report;
+import static net.sf.dynamicreports.report.builder.DynamicReports.type;
 
-import java.awt.Color;
 import java.util.ArrayList;
 
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;

@@ -2,14 +2,14 @@ package com.meltsan.pdfcreator.beans;
 
 import java.util.ArrayList;
 
-import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
+import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
 
 public class IndicadoresSiniestros {
 	
 	private String texto;
-	private ArrayList<PerCapitaValues> valores;
+	private ArrayList<IndicadoresSiniestroValues> valores;
 	
-	public IndicadoresSiniestros(String texto, ArrayList<PerCapitaValues> valores) {
+	public IndicadoresSiniestros(String texto, ArrayList<IndicadoresSiniestroValues> valores) {
 		this.texto = texto;
 		this.valores = valores;
 	}
@@ -22,11 +22,11 @@ public class IndicadoresSiniestros {
 		this.texto = texto;
 	}
 
-	public ArrayList<PerCapitaValues> getValores() {
+	public ArrayList<IndicadoresSiniestroValues> getValores() {
 		return valores;
 	}
 
-	public void setValores(ArrayList<PerCapitaValues> valores) {
+	public void setValores(ArrayList<IndicadoresSiniestroValues> valores) {
 		this.valores = valores;
 	}
 

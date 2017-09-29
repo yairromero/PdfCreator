@@ -22,6 +22,7 @@ import javax.imageio.ImageIO;
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.Constantes;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
+import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.MisionObjetivo;
@@ -34,18 +35,26 @@ import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
+import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
+import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.ParentescoValues;
-import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
 import com.meltsan.pdfcreator.customizers.CustomizedBarChart;
-import com.meltsan.pdfcreator.customizers.CustomizedDecimalLineChart;
+import com.meltsan.pdfcreator.customizers.CustomizedCurrencyLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedLabelVertBarChart;
 import com.meltsan.pdfcreator.customizers.CustomizedLabelVertLineChart;
+import com.meltsan.pdfcreator.customizers.CustomizedNoBorderLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
+import com.meltsan.pdfcreator.customizers.CustomizedPercentageLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentagePieChart;
+import com.meltsan.pdfcreator.subreports.SubreportCostoPromedioSinExp;
+import com.meltsan.pdfcreator.subreports.SubreportIndicadoresSinExp;
+import com.meltsan.pdfcreator.subreports.SubreportPoblacionHistoricaExp;
+import com.meltsan.pdfcreator.subreports.SubreportSiniestroRangoExp;
+import com.meltsan.pdfcreator.subreports.SubreportSiniestrosMayoresExp;
 import com.meltsan.pdfcreator.util.Estilos;
 
 import net.sf.dynamicreports.jasper.builder.JasperConcatenatedReportBuilder;
@@ -57,7 +66,6 @@ import net.sf.dynamicreports.report.builder.component.ImageBuilder;
 import net.sf.dynamicreports.report.builder.component.RectangleBuilder;
 import net.sf.dynamicreports.report.builder.component.SubreportBuilder;
 import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
-import net.sf.dynamicreports.report.builder.component.VerticalListBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalImageAlignment;
 import net.sf.dynamicreports.report.constant.HorizontalTextAlignment;
 import net.sf.dynamicreports.report.constant.ImageScale;
@@ -81,6 +89,7 @@ public class GeneradorReporte {
 	private PadecimientosFrecuencia reportePadecimientosFrecuentes;
 	private MontosPagados reporteMontosPagados;
 	private MisionObjetivo reporteMisionVision;
+	private CostoPromedioSiniestro reporteCostoPromedio;
 	private ArrayList<SiniestrosMayores> reporteSiniestrosMayores;
 	private ArrayList<SiniestroRangoGrafica> reporteSiniestroRangoGrafica;
 	private ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla;	
@@ -136,13 +145,18 @@ public class GeneradorReporte {
  		  listaReportes.add(reportePoblacionHistorica(this.getReportePoblacionHistorica()));
  	  }
  	  
- 	   if(this.getReporteIndicadoresSiniestralidad() != null) {
- 		   listaReportes.add(reporteSinPerCapita(this.getReporteIndicadoresSiniestralidad()));
+ 	   if(this.getReporteIndicadoresSiniestralidad() != null) { 		   
+ 		  listaReportes.add(reporteIndicadoresSiniestro(this.getReporteIndicadoresSiniestralidad()));
+ 		  listaReportes.add(reporteIndicadoresSiniestroGrafica(this.getReporteIndicadoresSiniestralidad()));
  	   }
  	   
  	   if(this.getReporteInflacionSectorSalud() != null){
  		   listaReportes.add(reporteInflacionSectorSalud(this.getReporteInflacionSectorSalud()));
  	   } 	  
+ 	 
+ 	   if(this.getReporteCostoPromedio() != null) {
+ 		   listaReportes.add(reporteCostoPromedioSiniestro(this.getReporteCostoPromedio()));
+ 	   }
  	   
  	   if(this.getReporteSiniestroRangoGrafica() != null && !this.getReporteSiniestroRangoGrafica().isEmpty()){
  		  listaReportes.add(reporteRangosSinGrafica(this.getReporteSiniestroRangoGrafica()));
@@ -185,6 +199,7 @@ public class GeneradorReporte {
 	}
 	
 	
+
 	/**
 	 * Genera el reporte de Antecedentes utilizando
 	 * la información del objeto Antecedentes.
@@ -228,125 +243,8 @@ public class GeneradorReporte {
 	}
 	
 	/**
-	 * Genera el reporte de Siniestralidad Per Capita utilizando
-	 * una lista de objetos PerCapita
-	 * @return JasperReportBuilder con la hoja de inidicadores
-	 * de siniestralidad per capita.
-	 */
-	private JasperReportBuilder reporteSinPerCapita(IndicadoresSiniestros sinPerCapita) {
-		
-		JasperReportBuilder reportePerCapita = new JasperReportBuilder();
-		
-		ArrayList<BigDecimal> costos = new ArrayList<BigDecimal>();
-		ArrayList<BigDecimal> primas = new ArrayList<BigDecimal>();
-		
-		
-		for(PerCapitaValues pc: sinPerCapita.getValores()) {			
-			costos.add(pc.getCostoPerCapita());
-			primas.add(pc.getPrimaPerCapita());
-		}
-		
-		BigDecimal maxRange = getMaxBD(costos).max(getMaxBD(primas));
-		BigDecimal minRange = getMinBD(costos).min(getMinBD(primas));				
-		
-		maxRange = maxRange.add(new BigDecimal(2000));
-		minRange = minRange.subtract(new BigDecimal(2000));						
-		
-		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
-		TextColumnBuilder<BigDecimal> costoColumn = col.column("Costo Per Cápita", "costo", type.bigDecimalType());
-		TextColumnBuilder<BigDecimal> primaColumn = col.column("Prima Per Cápita", "prima", type.bigDecimalType());
-		
-		TextFieldBuilder<String> textField = cmp.text(sinPerCapita.getTexto())
-											.setFixedHeight(100)											
-											.setStyle(Estilos.reportTextAreaStyle);
-		
-		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
-		
-		HorizontalListBuilder textoInferior = cmp.horizontalList()
-									.add(textField)
-									.setBackgroundComponent(rectangulo);		
-													 
-		reportePerCapita
-		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
-   		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.PERCAPITA_TITULO).setStyle(Estilos.reportTitleStyle))	      
-   		.summary(cmp.verticalList(
-   				cht.lineChart()   				
-   				.customizers(new CustomizedDecimalLineChart())
-   				.setTitle(Constantes.PERCAPITA_GRAFICA_TITULO)
-   				.setTitleColor(Estilos.colorBlueLight)
-   				.setTitleFont(Estilos.chartFontStyle)   				
-   				.setCategory(periodoColumn)   				
-   				.series(
-   					cht.serie(costoColumn), cht.serie(primaColumn))
-   					.setCategoryAxisFormat(
-   					cht.axisFormat().setLabel("Periodo"))
-   					.setValueAxisFormat(   							
-   							cht.axisFormat().setTickLabelMask("$ #,###.##").setRangeMinValueExpression(minRange).setRangeMaxValueExpression(maxRange)
-   							)  
-   				.setDataSource(ds.crearPerCapitaDS(sinPerCapita.getValores())),
-   				cmp.text(""),
-   				textoInferior
-   				)   			
-   			)   		
-   		.build();
-		
-		return reportePerCapita;
-	}
-	
-	/**
-	 * Genera el reporte de Inflacion en Sector Salud utilizando
-	 * el atributo grafica del objeto InflacionSSValues 
-	 * @return JasperReportBuilder con la hoja de inflacion
-	 * del sector salud
-	 */
-	private JasperReportBuilder reporteInflacionSectorSalud(InflacionSectorSalud inflacionSS) {
-	
-		JasperReportBuilder reporteInflacion = new JasperReportBuilder();
-		JRDataSource jrds = ds.crearInflacionSSDS(inflacionSS.getValores());
-		
-		TextFieldBuilder<String> textField = cmp.text(inflacionSS.getTexto())
-				.setFixedHeight(100)											
-				.setStyle(Estilos.rootStyle);
-		
-		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());						
-		TextColumnBuilder<Float> costoColumn = col.column("Índice de Inflación del Sector Salud", "indice", type.floatType());		
-		
-		ArrayList<Float> indices = new ArrayList<Float>();  		
-		for(InflacionSSValues pc: inflacionSS.getValores()) {			
-			indices.add(pc.getInflacion());
-		}
-		
-		Float maxRange = getMaxFloat(indices) + 2;
-		Float minRange = getMinFloat(indices) - 2;
-					
-		reporteInflacion
-		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
-   		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.INFLACIONSS_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
-   					textField,   					
-   					cht.lineChart()   	
-   					.customizers(new CustomizedDecimalLineChart())
-   	   				.setTitle(Constantes.INFLACIONSS_GRAFICA_TITULO)
-   	   				.setTitleColor(Estilos.colorBlueLight)
-   	   				.setTitleFont(Estilos.chartFontStyle)   				
-   	   				.setCategory(periodoColumn)   				
-   	   				.series(
-   	   					cht.serie(costoColumn))   	   				
-   	   					.setValueAxisFormat(   							
-   	   							cht.axisFormat().setTickLabelMask("##,## %").setRangeMinValueExpression(minRange).setRangeMaxValueExpression(maxRange)
-   	   							)  
-   	   				.setDataSource(jrds)   				
-   					)
-   				)
-   		.build();
-		return reporteInflacion;
-	}
-	
-	/**
 	 * Genera el reporte de Siniestralidad Esperada utilizando
-	 * el objeto ******** 
+	 * el objeto SiniestralidadEsperada
 	 * @return JasperReportBuilder con la hoja de siniestralidad
 	 * esperada
 	 */
@@ -436,27 +334,146 @@ public class GeneradorReporte {
 	}
 	
 	/**
-	 * Genera el reporte de Indicadores Siniestralidad utilizando
-	 * el objeto ******** 
+	 * Genera el reporte de Tabla de Indicadores Siniestralidad utilizando
+	 * el objeto IndicadoresSiniestros
 	 * @return JasperReportBuilder con la hoja de indicadores
 	 * de siniestralidad
 	 */
-	private JasperReportBuilder reporteIndicadoresSiniestro() {
+	private JasperReportBuilder reporteIndicadoresSiniestro(IndicadoresSiniestros siniestros) {
 	
 		JasperReportBuilder reporteIndicadoresSin = new JasperReportBuilder();
 		
+		SubreportBuilder subreport = cmp.subreport(new SubreportIndicadoresSinExp())
+				.setDataSource(ds.crearIndicadoresSiniestroDS(siniestros.getValores()));
+		
 		reporteIndicadoresSin
+		.addParameter("columns",siniestros.getValores())
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.INDICADORES_SIN_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
-   					)
+   		.title(cmp.text(Constantes.INDICADORES_SIN_TITULO).setStyle(Estilos.reportTitleStyle)) 
+   		.setDataSource(new JREmptyDataSource(2))
+   		.summary(subreport
    				)
    		.build();		
 		return reporteIndicadoresSin;
 	}
 	
+	/**
+	 * Genera el reporte de Grafica de Indicadores Siniestralidad utilizando
+	 * una lista de objetos IndicadoresSiniestros
+	 * @return JasperReportBuilder con la hoja de inidicadores
+	 * de siniestralidad per capita.
+	 */
+	private JasperReportBuilder reporteIndicadoresSiniestroGrafica(IndicadoresSiniestros sinPerCapita) {
+		
+		JasperReportBuilder reportePerCapita = new JasperReportBuilder();
+		
+		ArrayList<Integer> costos = new ArrayList<Integer>();
+		ArrayList<Integer> primas = new ArrayList<Integer>();
+		
+		
+		for(IndicadoresSiniestroValues pc: sinPerCapita.getValores()) {			
+			costos.add(pc.getCostoPerCapita());
+			primas.add(pc.getPrimaPerCapita());
+		}
+		
+		Integer maxRange = getMaxInteger(costos) > getMaxInteger(primas) ? getMaxInteger(costos) : getMaxInteger(primas);
+		Integer minRange = getMinInteger(costos) < getMinInteger(primas) ? getMinInteger(costos) : getMinInteger(primas);			
+		
+		maxRange = maxRange + 2000;
+		minRange = minRange - 2000;						
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<BigDecimal> costoColumn = col.column("Costo Per Cápita", "costo", type.bigDecimalType());
+		TextColumnBuilder<BigDecimal> primaColumn = col.column("Prima Per Cápita", "prima", type.bigDecimalType());
+		
+		TextFieldBuilder<String> textField = cmp.text(sinPerCapita.getTexto())
+											.setFixedHeight(100)											
+											.setStyle(Estilos.reportTextAreaStyle);
+		
+		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
+		
+		HorizontalListBuilder textoInferior = cmp.horizontalList()
+									.add(textField)
+									.setBackgroundComponent(rectangulo);		
+													 
+		reportePerCapita
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.PERCAPITA_TITULO).setStyle(Estilos.reportTitleStyle))	      
+   		.summary(cmp.verticalList(
+   				cht.lineChart()   				
+   				.customizers(new CustomizedCurrencyLineChart())
+   				.setTitle(Constantes.PERCAPITA_GRAFICA_TITULO)
+   				.setTitleColor(Estilos.colorBlueLight)
+   				.setTitleFont(Estilos.chartFontStyle)   				
+   				.setCategory(periodoColumn)   				
+   				.series(
+   					cht.serie(costoColumn), cht.serie(primaColumn))
+   					.setCategoryAxisFormat(
+   					cht.axisFormat().setLabel("Periodo"))
+   					.setValueAxisFormat(   							
+   							cht.axisFormat().setTickLabelMask("$ #,###.##").setRangeMinValueExpression(minRange).setRangeMaxValueExpression(maxRange)
+   							)  
+   				.setDataSource(ds.crearIndicadoresSiniestroGraficaDS(sinPerCapita.getValores())),
+   				cmp.verticalGap(20),
+   				textoInferior
+   				)   			
+   			)   		
+   		.build();
+		
+		return reportePerCapita;
+	}
 	
+	/**
+	 * Genera el reporte de Inflacion en Sector Salud utilizando
+	 * el atributo grafica del objeto InflacionSSValues 
+	 * @return JasperReportBuilder con la hoja de inflacion
+	 * del sector salud
+	 */
+	private JasperReportBuilder reporteInflacionSectorSalud(InflacionSectorSalud inflacionSS) {
+	
+		JasperReportBuilder reporteInflacion = new JasperReportBuilder();
+		JRDataSource jrds = ds.crearInflacionSSDS(inflacionSS.getValores());
+		
+		TextFieldBuilder<String> textField = cmp.text(inflacionSS.getTexto())
+				.setFixedHeight(100)											
+				.setStyle(Estilos.boldCenteredStyle);
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());						
+		TextColumnBuilder<Float> costoColumn = col.column("Índice de Inflación del Sector Salud", "indice", type.floatType());		
+		
+		ArrayList<Float> indices = new ArrayList<Float>();  		
+		for(InflacionSSValues pc: inflacionSS.getValores()) {			
+			indices.add(pc.getInflacion());
+		}
+		
+		Float maxRange = getMaxFloat(indices) + 2;
+		Float minRange = getMinFloat(indices) - 2;
+					
+		reporteInflacion
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.INFLACIONSS_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.summary(cmp.verticalList(
+   					textField,   					
+   					cht.lineChart()   	
+   					.customizers(new CustomizedPercentageLineChart())
+   	   				.setTitle(Constantes.INFLACIONSS_GRAFICA_TITULO)
+   	   				.setTitleColor(Estilos.colorBlueLight)
+   	   				.setTitleFont(Estilos.chartFontStyle)   				
+   	   				.setCategory(periodoColumn)   				
+   	   				.series(
+   	   					cht.serie(costoColumn))   	   				
+   	   					.setValueAxisFormat(   							
+   	   							cht.axisFormat().setTickLabelMask("##,## %").setRangeMinValueExpression(minRange).setRangeMaxValueExpression(maxRange)
+   	   							)  
+   	   				.setDataSource(jrds)   				
+   					)
+   				)
+   		.build();
+		return reporteInflacion;
+	}
 	
 	/**
 	 * Genera el reporte de Costo promedio de siniestro
@@ -464,22 +481,115 @@ public class GeneradorReporte {
 	 * @return JasperReportBuilder con la hoja de costo
 	 * promedio de siniestro
 	 */
-	private JasperReportBuilder reporteCostoPromedioSin() {
+	private JasperReportBuilder reporteCostoPromedioSiniestro(CostoPromedioSiniestro siniestros) {
 	
 		JasperReportBuilder reporteCostoPromedioSin = new JasperReportBuilder();
+				
+		SubreportBuilder subreport = cmp.subreport(new SubreportCostoPromedioSinExp())
+				.setDataSource(ds.crearCostoPromedioTablaDS(siniestros.getValores()));
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Integer> costoColumn = col.column("Costo Promedio de siniestro", "costo", type.integerType());
+		TextColumnBuilder<Integer> costoSinCatasColumn = col.column("Costo Promedio de siniestro (sin catastróficos)", "costosinc", type.integerType());
+		TextColumnBuilder<Integer> costoInflSSColumn = col.column("Costo Promedio de siniestro considerando la inflación del sector salud", "costoinfl", type.integerType());
+		
+		ArrayList<Integer> costos = new ArrayList<Integer>();
+		ArrayList<Integer> costossin = new ArrayList<Integer>();
+		ArrayList<Integer> costosinf = new ArrayList<Integer>();
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("Costo Promedio de siniestro", Estilos.colorBlueLight);
+		seriesColors.put("Costo Promedio de siniestro (sin catastróficos)", Estilos.colorRedDark);
+		seriesColors.put("Costo Promedio de siniestro considerando la inflación del sector salud", Estilos.colorGreenLight);		
+		
+		for(CostoPromedioSiniestroValues pc: siniestros.getValores()) {			
+			costos.add(pc.getCostoPromedio());
+			costossin.add(pc.getCostoPromSinCatastrofe());
+			costosinf.add(pc.getCostoPromInflacionSS());
+		}
+		
+		int maxcostos = getMaxInteger(costos);
+		int maxcostossin = getMaxInteger(costossin);
+		int maxcostosinfl = getMaxInteger(costosinf);
+		int maxRange = 0;
+		
+		int mincostos = getMinInteger(costos);
+		int mincostossin = getMinInteger(costossin);
+		int mincostosinfl = getMinInteger(costosinf);
+		int minRange = 0;
+		
+		if(maxcostos > maxcostossin)
+	           if(maxcostos>maxcostosinfl)
+	        	   		maxRange = maxcostos;
+	        	   		else	
+	        	   			maxRange = maxcostosinfl;
+		else if(maxcostossin>maxcostosinfl)
+					maxRange = maxcostossin;
+				else
+					maxRange = maxcostosinfl;
+		
+		if(mincostos < mincostossin)
+	           if(mincostos < mincostosinfl)
+	        	   		minRange = mincostos;
+	        	   		else	
+	        	   			minRange = mincostosinfl;
+		else if(mincostossin < mincostosinfl)
+					minRange = mincostossin;
+				else
+					minRange = mincostosinfl;
+		
+		
+		maxRange = maxRange + 5000;
+		minRange = minRange - 5000;
+		
+		TextFieldBuilder<String> textField = cmp.text(siniestros.getTexto())
+				.setFixedHeight(100)											
+				.setStyle(Estilos.reportTextAreaStyle);
+
+		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
+
+		HorizontalListBuilder textoInferior = cmp.horizontalList()
+												.add(textField)
+												.setBackgroundComponent(rectangulo);	
 		
 		reporteCostoPromedioSin
+		.addParameter("columns",siniestros.getValores())
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.COSTO_PROMEDIO_SIN_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
+   		.summary(cmp.verticalList(subreport,
+   					cmp.verticalGap(10),
+   					cmp.horizontalList(
+   							cht.lineChart()
+   							.setHeight(190)
+   							.customizers(new CustomizedNoBorderLineChart())
+   							.setTitle(Constantes.COSTO_PROMEDIO_GRAFICA_TITULO)
+   							.setTitleColor(Estilos.colorBlueLight)
+   							.setTitleFont(Estilos.chartFontStyle)   				
+   							.setCategory(periodoColumn)
+   							.seriesColorsByName(seriesColors)
+   							.setLegendFont(Estilos.chartFontMediumStyle)
+   							.series(
+   									cht.serie(costoColumn), cht.serie(costoSinCatasColumn), cht.serie(costoInflSSColumn))
+   										.setCategoryAxisFormat(
+   												cht.axisFormat().setLabel("Periodo"))
+   															.setValueAxisFormat(   							
+   																	cht.axisFormat()
+   																		.setTickLabelMask("$ #,###.##")
+   																		.setRangeMinValueExpression(minRange)
+   																		.setRangeMaxValueExpression(maxRange)
+   																	)  
+   															.setDataSource(
+   																	ds.crearCostoPromedioGraficaDS(siniestros.getValores())
+   																), 
+   															
+   								   							textoInferior
+   							)
    					)
    				)
    		.build();		
 		return reporteCostoPromedioSin;
 	}
-	
-	
 	
 	/**
 	 * Genera el reporte de Grafica de Siniestralidad por
@@ -523,8 +633,6 @@ public class GeneradorReporte {
    		.build();		
 		return reporteRangosSin;
 	}
-	
-	
 	
 	/**
 	 * Genera el reporte de Tabla de Siniestralidad por
@@ -577,8 +685,6 @@ public class GeneradorReporte {
    		.build();		
 		return reporteSinMayores;
 	}
-	
-	
 	
 	/**
 	 * Genera el reporte de Grafica de padecimientos
@@ -1209,6 +1315,13 @@ public class GeneradorReporte {
 
 	public void setReporteCostoVsTarifasMasculino(ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasMasculino) {
 		this.reporteCostoVsTarifasMasculino = reporteCostoVsTarifasMasculino;
+	}
+	private CostoPromedioSiniestro getReporteCostoPromedio() {
+		return reporteCostoPromedio;
+	}
+
+	public void setReporteCostoPromedio(CostoPromedioSiniestro reporteCostoPromedio) {
+		this.reporteCostoPromedio = reporteCostoPromedio;
 	}
 		
 	private MisionObjetivo getReporteMisionVision() {

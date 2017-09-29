@@ -1,4 +1,4 @@
-package com.meltsan.pdfcreator;
+package com.meltsan.pdfcreator.subreports;
 
 import static net.sf.dynamicreports.report.builder.DynamicReports.*;
 
@@ -20,12 +20,10 @@ public class SubreportPoblacionHistoricaExp extends AbstractSimpleExpression<Jas
 	@Override
 	public JasperReportBuilder evaluate(ReportParameters reportParameters) {
 	
-		   ArrayList<PobHistoricaValues> srt = reportParameters.getValue("columns");							
-		   String ultimoPeriodo = srt.get(srt.size()-1).getPeriodo();
+		   ArrayList<PobHistoricaValues> srt = reportParameters.getValue("columns");		   
 		   
 		         JasperReportBuilder report = report();		         
-		         report.setTemplate(Estilos.reportSmallTemplate)
-		         		.addParameter("ultimoPeriodo", ultimoPeriodo)
+		         report.setTemplate(Estilos.reportSmallTemplate)	
 		         		.title(cmp.text(Constantes.POBLACION_HIST_TABLA_TITULO).setStyle(Estilos.chartTitleStyle)
 		         																.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER))
 		         		.addColumn(col.column("Vigencia", "vigencia", type.stringType()).setWidth(150));

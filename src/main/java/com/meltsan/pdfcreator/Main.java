@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
+import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.MisionObjetivo;
 import com.meltsan.pdfcreator.beans.MontosPagados;
@@ -20,10 +21,11 @@ import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
+import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
 import com.meltsan.pdfcreator.beans.values.ParentescoValues;
-import com.meltsan.pdfcreator.beans.values.PerCapitaValues;
+import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
@@ -45,14 +47,13 @@ public class Main {
 		
 		Antecedentes ant = new Antecedentes(l1,l2,t1);
 		
-		generador.setReporteAntecedentes(ant);
+	
+		IndicadoresSiniestroValues pcv1 = new IndicadoresSiniestroValues("2013-2014",12183742L,436,11147,14106,79f,51f);
+		IndicadoresSiniestroValues pcv2 = new IndicadoresSiniestroValues("2014-2015",10825495L,396,9455,14256,66f,57f);
+		IndicadoresSiniestroValues pcv3 = new IndicadoresSiniestroValues("2015-2016",16058004L,379,11976,15203,92f,50f);
+		IndicadoresSiniestroValues pcv4 = new IndicadoresSiniestroValues("2016-2017",18400650L,404,18028,15154,99f);
 		
-		PerCapitaValues pcv1 = new PerCapitaValues("2013-2014",new BigDecimal(11147),new BigDecimal(14106));
-		PerCapitaValues pcv2 = new PerCapitaValues("2014-2015",new BigDecimal(9455),new BigDecimal(14256));
-		PerCapitaValues pcv3 = new PerCapitaValues("2015-2016",new BigDecimal(11976),new BigDecimal(15203));
-		PerCapitaValues pcv4 = new PerCapitaValues("2016-2017",new BigDecimal(18028),new BigDecimal(15154));
-		
-		ArrayList<PerCapitaValues> pcv = new ArrayList<PerCapitaValues>();
+		ArrayList<IndicadoresSiniestroValues> pcv = new ArrayList<IndicadoresSiniestroValues>();
 		pcv.add(pcv1);
 		pcv.add(pcv2);
 		pcv.add(pcv3);
@@ -65,7 +66,7 @@ public class Main {
 		
 		IndicadoresSiniestros pc = new IndicadoresSiniestros(pctxt,pcv);
 		
-		generador.setReporteIndicadoresSiniestralidad(pc);
+		
 		
 		String itxt = "Un elemento importante que se debe considerar, es la tasa de inflación del "
 				+ "sector salud publicada por el Banco de México, la cual esta afectada por un "
@@ -85,7 +86,7 @@ public class Main {
 		
 		InflacionSectorSalud iss = new InflacionSectorSalud(itxt,it);
 		
-		generador.setReporteInflacionSectorSalud(iss);
+		
 		
 		String setxt = "En base a la siniestralidad histórica mensual de las vigencias "
 				+ "anteriores y considerando la siniestralidad que se lleva hasta el momento se "
@@ -94,7 +95,7 @@ public class Main {
 		
 		SiniestralidadEsperada se = new SiniestralidadEsperada(setxt);
 		
-		generador.setReporteSiniestralidadEsperada(se);
+		
 		
 		String pht = "Durante las vigencias en consideración, la población incrementó un 5.03%, por su parte la prima per cápita ha "
 				+ "incrementado un  ́14.5%";
@@ -107,14 +108,14 @@ public class Main {
 				
 		PoblacionHistorica ph = new PoblacionHistorica(pht,phv);
 		
-		generador.setReportePoblacionHistorica(ph);
+		
 		
 		ArrayList<SiniestroRangoGrafica> srv = new ArrayList<SiniestroRangoGrafica>();		
 		srv.add(new SiniestroRangoGrafica("2013-2014",26.90,25.72,12.17,35.21));
 		srv.add(new SiniestroRangoGrafica("2014-2015",31.66,30.34,23.52,14.48));
 		srv.add(new SiniestroRangoGrafica("2015-2016",17.29,22.79,14.16,45.75));		
 		
-		generador.setReporteSiniestroRangoGrafica(srv);
+		
 		
 		ArrayList<SiniestroPadecimientoValues> spv = new ArrayList<SiniestroPadecimientoValues>();
 		spv.add(new SiniestroPadecimientoValues(1140257979L,"Linfangitis"));
@@ -130,7 +131,7 @@ public class Main {
 		
 		SiniestroPadecimiento sp = new SiniestroPadecimiento(sptxt,spv);
 		
-		generador.setReporteSiniestrosPadecimientos(sp);
+		
 				
 		SiniestroRangoTablaValues  baja1 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
 		SiniestroRangoTablaValues  alta1 = new SiniestroRangoTablaValues(3277431L,2999L,8491L,386,26.9);
@@ -146,7 +147,7 @@ public class Main {
 		srp.add(new SiniestroRangoPeriodo("2013-2014",baja1,alta1,frec1,catas1));
 		srp.add(new SiniestroRangoPeriodo("2014-2015",baja2,alta2,frec2,catas2));	
 		
-		generador.setReporteSiniestroRangoTabla(srp);
+		
 		
 		SiniestroPadecimientoValues p1 = new SiniestroPadecimientoValues(1150250772L,"Otros recién nacidos pre término");
 		SiniestroPadecimientoValues p2 = new SiniestroPadecimientoValues(1140209240L,"Otros recién nacidos pre término");
@@ -188,7 +189,7 @@ public class Main {
 		siniestrosMayores.add(new SiniestrosMayores("2014-2015",p2015));
 		siniestrosMayores.add(new SiniestrosMayores("2015-2016",p2016));
 		
-		generador.setReporteSiniestrosMayores(siniestrosMayores);
+		
 		
 		ArrayList<PadecimientosFrecuenciaValues> padecimientosFrecuencia = new ArrayList<PadecimientosFrecuenciaValues>();
 		padecimientosFrecuencia.add(new PadecimientosFrecuenciaValues("Presencia de anteojos y lentes de contacto",18.25f));
@@ -204,7 +205,7 @@ public class Main {
 		
 		PadecimientosFrecuencia pf = new PadecimientosFrecuencia(textoTop,padecimientosFrecuencia);
 		
-		generador.setReportePadecimientosFrecuentes(pf);
+		
 		
 		ArrayList<TipoPagoValues> tp = new ArrayList<TipoPagoValues>();
 		tp.add(new TipoPagoValues("2013-2014",9f,3f));
@@ -227,7 +228,7 @@ public class Main {
 		pp.add(new ParentescoValues("2015-2016",13f,2.1f));
 		
 		MontosPagados mp = new MontosPagados(tp,cp,sxp,pp);
-		generador.setReporteMontosPagados(mp);
+		
 		
 		ArrayList<CostoPerCapitaTarifas> cvt = new ArrayList<CostoPerCapitaTarifas>();
 		cvt.add(new CostoPerCapitaTarifas("0-4",9f,5f,30f));
@@ -246,9 +247,7 @@ public class Main {
 		cvt.add(new CostoPerCapitaTarifas("65-69",0f,30f,0f));
 		cvt.add(new CostoPerCapitaTarifas("70+",0f,50f,0f));
 		
-		generador.setReporteCostoVsTarifasFemenino(cvt);
 		
-		generador.setReporteCostoVsTarifasMasculino(cvt);
 		
 		String mT = "Misión";
 		String m = "Ser la empresa de valor y servicio líder a nivel mundial en corretaje de seguros, "
@@ -258,7 +257,35 @@ public class Main {
 		
 		MisionObjetivo mv = new MisionObjetivo(mT,m,vT,v);
 		
+		
+		String cpsTxt = "Con base a las medidas implementadas de contención se han logrado mantener los costos promedio de siniestro "
+				+ "por debajo de los costos promedio actualizados por la inflación del sector salud a pesar de los "
+				+ "siniestros catastróficos.";
+				
+		ArrayList<CostoPromedioSiniestroValues> cpsv = new ArrayList<CostoPromedioSiniestroValues>();
+		cpsv.add(new CostoPromedioSiniestroValues("2013-2014",27944,18273,31500));
+		cpsv.add(new CostoPromedioSiniestroValues("2014-2015",27337,23557,28500));
+		cpsv.add(new CostoPromedioSiniestroValues("2015-2016",42369,23292,49500));
+		
+		CostoPromedioSiniestro cps = new CostoPromedioSiniestro(cpsTxt,cpsv); 
+		
+		
+		generador.setReporteAntecedentes(ant);
+		generador.setReporteSiniestralidadEsperada(se);
+		generador.setReportePoblacionHistorica(ph);
+		generador.setReporteIndicadoresSiniestralidad(pc);
+		generador.setReporteInflacionSectorSalud(iss);		
+		generador.setReporteCostoPromedio(cps);
+		generador.setReporteSiniestroRangoGrafica(srv);
+		generador.setReporteSiniestroRangoTabla(srp);
+		generador.setReporteSiniestrosMayores(siniestrosMayores);
+		generador.setReporteSiniestrosPadecimientos(sp);
+		generador.setReportePadecimientosFrecuentes(pf);
+		generador.setReporteMontosPagados(mp);
+		generador.setReporteCostoVsTarifasFemenino(cvt);		
+		generador.setReporteCostoVsTarifasMasculino(cvt);
 		generador.setReporteMisionVision(mv);
+		
 		
 		generador.generaReporte();
 		

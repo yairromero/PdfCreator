@@ -1,11 +1,7 @@
 package com.meltsan.pdfcreator.customizers;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.Locale;
-
-import net.sf.dynamicreports.report.definition.ReportParameters;
-import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
 
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.block.BlockBorder;
@@ -15,9 +11,12 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.LineAndShapeRenderer;
 import org.jfree.data.category.CategoryDataset;
 
+import net.sf.dynamicreports.report.definition.ReportParameters;
+import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
+
 
  
-public class CustomizedDecimalLineChart implements DRIChartCustomizer {
+public class CustomizedCurrencyLineChart implements DRIChartCustomizer {
  
 	private static final long serialVersionUID = 1L;
 
@@ -38,8 +37,8 @@ public class CustomizedDecimalLineChart implements DRIChartCustomizer {
 	// Clase customizada, para implementar la visibilidad de los valores del grafico
 	static class CustomLabelGenerator extends AbstractCategoryItemLabelGenerator implements CategoryItemLabelGenerator {
  
- 
-		   /**
+		private static final long serialVersionUID = 1L;
+		/**
 		   * Creates a new generator that only displays labels that are greater
 		   * than or equal to the threshold value.
 		   *
@@ -63,11 +62,10 @@ public class CustomizedDecimalLineChart implements DRIChartCustomizer {
  
 		      String result = null;
 		      
-		      NumberFormat formatter = NumberFormat.getNumberInstance(Locale.getDefault());
-		      formatter = new DecimalFormat("#0.00"); 
+		      NumberFormat formatter = NumberFormat.getNumberInstance(Locale.US);		       
 		      Number value = dataset.getValue(series, category);		      
 		      
-		      result = formatter.format(value);
+		      result = "$"+formatter.format(value);
 		      
 		      return result;   
 		   }		   		   

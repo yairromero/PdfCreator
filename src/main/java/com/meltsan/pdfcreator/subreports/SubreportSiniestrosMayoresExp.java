@@ -1,17 +1,16 @@
-package com.meltsan.pdfcreator;
+package com.meltsan.pdfcreator.subreports;
 
-import static net.sf.dynamicreports.report.builder.DynamicReports.*;
+import static net.sf.dynamicreports.report.builder.DynamicReports.col;
+import static net.sf.dynamicreports.report.builder.DynamicReports.report;
+import static net.sf.dynamicreports.report.builder.DynamicReports.type;
 
-import java.awt.Color;
 import java.util.ArrayList;
 
-import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.util.Estilos;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
-import net.sf.dynamicreports.report.builder.group.CustomGroupBuilder;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 
 public class SubreportSiniestrosMayoresExp extends AbstractSimpleExpression<JasperReportBuilder> {

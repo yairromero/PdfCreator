@@ -44,6 +44,7 @@ public class Estilos {
 	public static final CurrencyType currencyType;
 	public static final FontBuilder chartFontStyle;
 	public static final FontBuilder chartFontSmallStyle;
+	public static final FontBuilder chartFontMediumStyle;
 	public static final Color colorNavy;
 	public static final Color colorBlueLight;
 	public static final Color colorGreenLight;
@@ -83,8 +84,10 @@ public class Estilos {
 		      ConditionalStyleBuilder catasCol = stl.conditionalStyle(new CatastroficaExp()).setBackgroundColor(colorCatastrofe);
 		      
 		      ConditionalStyleBuilder porcentajeHL = stl.conditionalStyle(new PorcentajeHighLightExp()).setBackgroundColor(Color.lightGray);
+		      		      
 			  
 			  chartFontStyle		= stl.fontArialBold().setFontSize(12);
+			  chartFontMediumStyle = stl.fontArialBold().setFontSize(9);
 			  chartFontSmallStyle = stl.fontArialBold().setFontSize(4);
 		      rootStyle           = stl.style().setPadding(2).setFontSize(12);
 		      boldStyle           = stl.style(rootStyle).bold();		
@@ -105,7 +108,7 @@ public class Estilos {
 		      
 		      reportTextAreaStyle = stl.style(boldStyle)
 		    		  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
-      								.setFontSize(15)
+      								.setFontSize(13)
       								.setForegroundColor(colorBlueLight);
 		                  
 		      
@@ -197,8 +200,6 @@ public class Estilos {
 		                         
 		
 		      currencyType = new CurrencyType();
-		      
-		      
 		
 		   }
 		
@@ -270,18 +271,16 @@ public class Estilos {
 		private static final long serialVersionUID = 1L;
 
 		public Boolean evaluate(ReportParameters reportParameters) {
+		    		    
+		    String celda = reportParameters.getFieldValue("vigencia");
 		    
-		    String ultimoPeriodo = reportParameters.getValue("ultimoPeriodo");
-		    String celda = reportParameters.getFieldValue(ultimoPeriodo);
-		    
-		    if( celda.contains("%"))		    	
+		    if( celda.contains("Variaci"))		    	
 		    		return true;
 		    else 
 		    		return false;
 		  }
 		}
 	
-
 }
 
 
