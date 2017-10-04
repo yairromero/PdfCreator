@@ -19,6 +19,7 @@ public class Estilos {
 	public static final StyleBuilder rootStyle;
 	public static final StyleBuilder boldStyle;
 	public static final StyleBuilder boldCenteredStyle;
+	public static final StyleBuilder boldJustifedStyle;
 	public static final StyleBuilder centeredStyle;
 	public static final StyleBuilder boldWhiteStyle;	
 	public static final StyleBuilder reportTitleStyle;
@@ -44,6 +45,7 @@ public class Estilos {
 	public static final CurrencyType currencyType;
 	public static final FontBuilder chartFontStyle;
 	public static final FontBuilder chartFontSmallStyle;
+	public static final FontBuilder chartFontBoldMediumStyle;
 	public static final FontBuilder chartFontMediumStyle;
 	public static final Color colorNavy;
 	public static final Color colorBlueLight;
@@ -58,9 +60,7 @@ public class Estilos {
 	
 	
 	static {
-		
-			
-		
+				
 			  colorBlueLight = Color.getHSBColor(0.5868056f, 0.6315789f, 0.59607846f);
 			  colorNavy = Color.getHSBColor(0.6763285f, 0.6764706f, 0.4f);
 			  colorGreenLight = Color.getHSBColor(0.25694445f, 0.57416266f, 0.81960785f);
@@ -87,10 +87,12 @@ public class Estilos {
 		      		      
 			  
 			  chartFontStyle		= stl.fontArialBold().setFontSize(12);
-			  chartFontMediumStyle = stl.fontArialBold().setFontSize(9);
+			  chartFontBoldMediumStyle = stl.fontArialBold().setFontSize(9);
+			  chartFontMediumStyle = stl.fontArial().setFontSize(7);
 			  chartFontSmallStyle = stl.fontArialBold().setFontSize(4);
 		      rootStyle           = stl.style().setPadding(2).setFontSize(12);
-		      boldStyle           = stl.style(rootStyle).bold();		
+		      boldStyle           = stl.style(rootStyle).bold();
+		      boldJustifedStyle           = stl.style(rootStyle).bold().setTextAlignment(HorizontalTextAlignment.JUSTIFIED,VerticalTextAlignment.JUSTIFIED);
 		      boldCenteredStyle   = stl.style(rootStyle).bold().setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE);
 		      centeredStyle         = stl.style(rootStyle).setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE);		
 		      boldWhiteStyle   = stl.style(boldStyle)		
@@ -145,8 +147,7 @@ public class Estilos {
 		                               .setBorder(stl.pen1Point())		
 		                               .setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)		
 		                               .setBackgroundColor(colorNavy)
-		                               .setForegroundColor(Color.WHITE)
-		                               .bold();		
+		                               .setForegroundColor(Color.WHITE);		                             		
 		      
 		      groupStyle          = stl.style(boldStyle)		    		  						
                       .setHorizontalTextAlignment(HorizontalTextAlignment.CENTER);                      

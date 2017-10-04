@@ -23,10 +23,14 @@ import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.Constantes;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
+import com.meltsan.pdfcreator.beans.DistribucionGastos;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.MisionObjetivo;
 import com.meltsan.pdfcreator.beans.MontosPagados;
+import com.meltsan.pdfcreator.beans.PadCronicoClienteMercado;
+import com.meltsan.pdfcreator.beans.PadCronicosMontos;
+import com.meltsan.pdfcreator.beans.PadecimientoCronicos;
 import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
@@ -34,6 +38,7 @@ import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.TopPadecimientosCronicos;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
 import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
@@ -50,8 +55,11 @@ import com.meltsan.pdfcreator.customizers.CustomizedNoBorderLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentagePieChart;
+import com.meltsan.pdfcreator.customizers.CustomizedSmallPercentageBarChart;
 import com.meltsan.pdfcreator.subreports.SubreportCostoPromedioSinExp;
+import com.meltsan.pdfcreator.subreports.SubreportDistribucionGastosExp;
 import com.meltsan.pdfcreator.subreports.SubreportIndicadoresSinExp;
+import com.meltsan.pdfcreator.subreports.SubreportPadecimientosCronicosExp;
 import com.meltsan.pdfcreator.subreports.SubreportPoblacionHistoricaExp;
 import com.meltsan.pdfcreator.subreports.SubreportSiniestroRangoExp;
 import com.meltsan.pdfcreator.subreports.SubreportSiniestrosMayoresExp;
@@ -71,6 +79,7 @@ import net.sf.dynamicreports.report.constant.HorizontalTextAlignment;
 import net.sf.dynamicreports.report.constant.ImageScale;
 import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
+import net.sf.dynamicreports.report.constant.Position;
 import net.sf.dynamicreports.report.exception.DRException;
 import net.sf.jasperreports.engine.JRDataSource;
 import net.sf.jasperreports.engine.JREmptyDataSource;
@@ -90,6 +99,8 @@ public class GeneradorReporte {
 	private MontosPagados reporteMontosPagados;
 	private MisionObjetivo reporteMisionVision;
 	private CostoPromedioSiniestro reporteCostoPromedio;
+	private PadecimientoCronicos reportePadecimientosCronicos;
+	private DistribucionGastos reporteGastosNoCubiertos;
 	private ArrayList<SiniestrosMayores> reporteSiniestrosMayores;
 	private ArrayList<SiniestroRangoGrafica> reporteSiniestroRangoGrafica;
 	private ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla;	
@@ -126,7 +137,7 @@ public class GeneradorReporte {
 		}
 	}
 		
-		public void generaReporte() {
+	public void generaReporte() {
 		
 		ds = new DataSources();	
 			
@@ -169,15 +180,29 @@ public class GeneradorReporte {
  	   if(this.getReporteSiniestrosMayores() != null && !this.getReporteSiniestrosMayores().isEmpty()) {
 		   listaReportes.add(reporteSiniestrosMayores(this.getReporteSiniestrosMayores()));
 	   }
+ 	   
+ 	  if(this.getReportePadecimientosCronicos() != null) {
+ 		  
+ 		  if((this.getReportePadecimientosCronicos().getClienteMercado() != null && !this.getReportePadecimientosCronicos().getClienteMercado().isEmpty())
+ 				  && (this.getReportePadecimientosCronicos().getPadecimientos() != null && !this.getReportePadecimientosCronicos().getPadecimientos().isEmpty())) {
+ 			 listaReportes.add(reportePadecimientosCronicosBarras(this.getReportePadecimientosCronicos().getPadecimientos(),
+ 					 													this.getReportePadecimientosCronicos().getClienteMercado()));
+ 		  }
+ 		 listaReportes.add(reportePadecimientosCronicosPie(this.getReportePadecimientosCronicos().getTopCronicos()));
+ 	  }
  	  
  	   if(this.getReporteSiniestrosPadecimientos() != null) {
 		   listaReportes.add(reporteSinPadecimiento(this.getReporteSiniestrosPadecimientos()));
 	   }
  	
  	   if(this.getReportePadecimientosFrecuentes() != null) {
-		   listaReportes.add(reportePadecimientosFrecuentes(getReportePadecimientosFrecuentes()));
+		   listaReportes.add(reportePadecimientosFrecuentes(this.getReportePadecimientosFrecuentes()));
 	   }
  	  	    	   	    	   	   	   
+ 	   if(this.getReporteGastosNoCubiertos() != null) {
+ 		   listaReportes.add(reporteGastosNoCubiertos(this.getReporteGastosNoCubiertos()));
+ 	   }
+ 	   
  	   if(this.getReporteMontosPagados() != null){
  		   listaReportes.add(reporteMontosPagados(this.getReporteMontosPagados()));
  	   }
@@ -190,15 +215,11 @@ public class GeneradorReporte {
 		   listaReportes.add(reporteCostoVsTarifasMasc(this.getReporteCostoVsTarifasMasculino()));
 	   }
  	  
- 	  
- 	  
  	  if(this.getReporteMisionVision() != null) {
  		  listaReportes.add(reporteMisionVision(this.getReporteMisionVision()));
  	  }
  	   ejecutarReporte(listaReportes,this.path);
 	}
-	
-	
 
 	/**
 	 * Genera el reporte de Antecedentes utilizando
@@ -568,7 +589,7 @@ public class GeneradorReporte {
    							.setTitleFont(Estilos.chartFontStyle)   				
    							.setCategory(periodoColumn)
    							.seriesColorsByName(seriesColors)
-   							.setLegendFont(Estilos.chartFontMediumStyle)
+   							.setLegendFont(Estilos.chartFontBoldMediumStyle)
    							.series(
    									cht.serie(costoColumn), cht.serie(costoSinCatasColumn), cht.serie(costoInflSSColumn))
    										.setCategoryAxisFormat(
@@ -687,52 +708,125 @@ public class GeneradorReporte {
 	}
 	
 	/**
+	 * Genera el reporte de Gráfica de Barras y tabla
+	 * para el reporte padecimientos cronicos
+	 * @param mercados Lista de 
+	 * objetos tipo PadCronicoClienteMercado 
+	 * @param  
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reportePadecimientosCronicosBarras(ArrayList<PadCronicosMontos> padecimientos, ArrayList<PadCronicoClienteMercado> mercados) {
+	
+		JasperReportBuilder reportePadecimientos = new JasperReportBuilder();
+		
+		SubreportBuilder subreport = cmp.subreport(new SubreportPadecimientosCronicosExp())
+				.setDataSource(ds.crearPadecimientoCronicoTablaDS(padecimientos));
+		
+		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "padecimiento", type.stringType());
+		TextColumnBuilder<Float> clienteColumn = col.column("Cliente", "cliente", type.floatType());
+		TextColumnBuilder<Float> mercadoColumn = col.column("Mercado", "mercado", type.floatType());
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("Cliente", Color.LIGHT_GRAY);
+		seriesColors.put("Mercado", Estilos.colorNavy);
+						
+		ArrayList<Float> maxmin = new ArrayList<Float>();
+		
+		for(PadCronicoClienteMercado pc:mercados) {
+			maxmin.add(pc.getPorcentajeCliente());
+			maxmin.add(pc.getPorcentajeMercado());
+		}
+		
+		Float maxRange = getMaxFloat(maxmin) + 1;		
+		
+		reportePadecimientos
+		.addParameter("columns", padecimientos)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.PADECIMIENTOS_CRONICOS_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.summary(cmp.verticalList(subreport,
+   				cmp.verticalGap(20),
+   				cht.barChart()					
+				.customizers(new CustomizedSmallPercentageBarChart())
+				.seriesColorsByName(seriesColors)
+				.setDataSource(ds.crearPadecimientoCronicoBarraDS(mercados))   									
+				.setTitle(Constantes.PAD_CRONICO_GRAFICA_TITULO)
+				.setTitleFont(Estilos.chartFontStyle)
+				.setTitleColor(Estilos.colorBlueLight)
+				.seriesColorsByName(seriesColors)
+				.setCategory(padecimientoColumn)
+					.series(
+							cht.serie(clienteColumn),cht.serie(mercadoColumn))
+							.setCategoryAxisFormat(cht.axisFormat().setTickLabelFont(Estilos.chartFontMediumStyle))
+							.setValueAxisFormat(
+								cht.axisFormat().setTickLabelMask("##,## %")
+												.setRangeMaxValueExpression(maxRange)
+								)
+   					)
+   				)
+   		.build();		
+		return reportePadecimientos;
+	}
+	
+	/**
 	 * Genera el reporte de Grafica de padecimientos
 	 * cronicos utilizando el objeto ******** 
 	 * @return JasperReportBuilder con la hoja de 
 	 * la grafica de padecimientos cronicos 
 	 */
-	private JasperReportBuilder reportePadecimientosGrafica() {
+	private JasperReportBuilder reportePadecimientosCronicosPie(TopPadecimientosCronicos padecimientos) {
 	
 		JasperReportBuilder reportePadecimientos = new JasperReportBuilder();
+		
+		TextFieldBuilder<String> textField = cmp.text(padecimientos.getPiePagina())										
+				.setStyle(Estilos.reportTextAreaStyle);
+
+		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
+
+		HorizontalListBuilder textoInferior = cmp.horizontalList()
+														.add(textField)
+														.setBackgroundComponent(rectangulo);
+		
+		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "padecimiento", type.stringType());
+		TextColumnBuilder<Float> porcentajeColumn = col.column("Porcentaje", "porcentaje", type.floatType());
 		
 		reportePadecimientos
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.PADECIMIENTOS_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.title(cmp.text(Constantes.PADECIMIENTOS_CRONICOS_TITULO).setStyle(Estilos.reportTitleStyle))   		
    		.summary(cmp.verticalList(
+   					cmp.text(padecimientos.getEncabezado()).setStyle(Estilos.boldJustifedStyle),
+   					cmp.verticalGap(10),
+   					cmp.horizontalList(
+   							cht.pieChart()
+   								.setDataSource(ds.crearPadecimientoCronicoPieDS(padecimientos,1))
+   								.customizers(new CustomizedPercentagePieChart())   							
+   								.setLabelFormat("{2}")  
+   								.setTitle(Constantes.PAD_CRONICO_TOTAL_PIE_TITULO)   	
+   								.setTitleColor(Estilos.colorBlueLight)
+   								.setTitleFont(Estilos.chartFontStyle) 
+   								.setKey(padecimientoColumn)
+   								.series(   				
+   										cht.serie(porcentajeColumn)),
+   							cht.pieChart()
+   								.setDataSource(ds.crearPadecimientoCronicoPieDS(padecimientos,2))
+   								.customizers(new CustomizedPercentagePieChart())						 
+   								.setLabelFormat("{2}")  
+   								.setTitle(Constantes.PAD_CRONICO_DETALLE_PIE_TITULO)   
+   								.setTitleColor(Estilos.colorBlueLight)
+   								.setTitleFont(Estilos.chartFontStyle) 
+   								.setKey(padecimientoColumn)
+   								.series(   				
+   										cht.serie(porcentajeColumn))	
+						),
+   					cmp.verticalGap(20),
+   					textoInferior
    					)
    				)
    		.build();		
 		return reportePadecimientos;
 	}
-	
-	
-	
-	
-	/**
-	 * Genera el reporte de Tabla de padecimientos
-	 * cronicos utilizando el objeto ******** 
-	 * @return JasperReportBuilder con la hoja de 
-	 * la tabla de padecimientos cronicos 
-	 */
-	private JasperReportBuilder reportePadecimientosTabla() {
-	
-		JasperReportBuilder reportePadecimientos = new JasperReportBuilder();
-		
-		reportePadecimientos
-		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
-   		.setTitleBackgroundComponent(imgHeader)    	   		
-   		.title(cmp.text(Constantes.PADECIMIENTOS_TITULO).setStyle(Estilos.reportTitleStyle))   		
-   		.summary(cmp.verticalList(
-   					)
-   				)
-   		.build();		
-		return reportePadecimientos;
-	}
-	
-	
-	
 	
 	/**
 	 * Genera el reporte de Siniestros padecimientos
@@ -768,9 +862,7 @@ public class GeneradorReporte {
    		.build();		
 		return reporteSinPadecimiento;
 	}
-	
-	
-	
+		
 	/**
 	 * Genera el reporte de Top de padecimientos
 	 * utilizando el objeto ******** 
@@ -824,15 +916,59 @@ public class GeneradorReporte {
    							.series(   				
    									cht.serie(freqColumn))
    							),
-   					cmp.text(""),
+   					cmp.horizontalGap(10),
    	   				textoInferior
    				  	)
    				)
    		.build();		
 		return reporteTopPadecimientos;
 	}
-			
 
+	/**
+	 * Genera el reporte de Distribucion de Gastos
+	 * No Cubiertos
+	 * @param  gastos Objeto tipo Distribucion Gastos
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteGastosNoCubiertos(DistribucionGastos periodos) {
+	
+		JasperReportBuilder reportePadecimientos = new JasperReportBuilder();
+		
+		SubreportBuilder subreport = cmp.subreport(new SubreportDistribucionGastosExp())
+				.setDataSource(ds.crearGastosNoCubiertosTablaDS(periodos.getGastos()));
+		
+		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "concepto", type.stringType());
+		TextColumnBuilder<Integer> montoColumn = col.column("Monto", "monto", type.integerType());
+		
+		
+		
+		reportePadecimientos
+		.addParameter("columns", periodos.getGastos())
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.DISTRITUCION_GASTOS_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.summary(cmp.verticalList(subreport,
+   				cmp.verticalGap(10),
+   				cht.pieChart()
+					.setDataSource(ds.crearGastosNoCubiertosGraficaDS(periodos.getGastosTotales()))
+					.customizers(new CustomizedPercentagePieChart())   							
+					.setLabelFormat("{2}")  
+					.setLegendPosition(Position.RIGHT)
+					.setTitle(Constantes.DISTRITUCION_GASTOS_TITULO)   	
+					.setTitleColor(Estilos.colorBlueLight)
+	   				.setTitleFont(Estilos.chartFontStyle) 
+					.setKey(padecimientoColumn)
+					.series(   				
+							cht.serie(montoColumn)),
+   				cmp.verticalGap(10),
+   				cmp.text(periodos.getNota()).setStyle(Estilos.misionSmallStyle)
+   					)
+   				)
+   		.build();		
+		return reportePadecimientos;
+	}
+	
 	/**
 	 * Genera el reporte de Tablas de Montos Pagados
 	 * @param montos Objeto tipo MontosPagados
@@ -1189,7 +1325,6 @@ public class GeneradorReporte {
 		return reporteMision;
 	}
 	
-	
 	/**
 	 * Concatena los reportes a crear y genera el archivo PDF
 	 * @param listaReportes Lista con los reportes a concatenar
@@ -1211,11 +1346,11 @@ public class GeneradorReporte {
 	}	
 	
 	
+	//Getters y Setters de reportes
 	private ArrayList<SiniestrosMayores> getReporteSiniestrosMayores() {
 		return reporteSiniestrosMayores;
 	}
 	
-
 	public void setReporteSiniestrosMayores(ArrayList<SiniestrosMayores> reporteSiniestrosMayores) {
 		this.reporteSiniestrosMayores = reporteSiniestrosMayores;
 	}
@@ -1276,11 +1411,18 @@ public class GeneradorReporte {
 		this.reporteSiniestroRangoTabla = reporteSiniestroRangoTabla;
 	}
 
+	private PadecimientoCronicos getReportePadecimientosCronicos() {
+		return reportePadecimientosCronicos;
+	}
+
+	public void setReportePadecimientosCronicos(PadecimientoCronicos reportePadecimientosCronicos) {
+		this.reportePadecimientosCronicos = reportePadecimientosCronicos;
+	}
+
 	private SiniestroPadecimiento getReporteSiniestrosPadecimientos() {
 		return reporteSiniestrosPadecimientos;
 	}
 	
-
 	public void setReporteSiniestrosPadecimientos(SiniestroPadecimiento reporteSiniestrosPadecimientos) {
 		this.reporteSiniestrosPadecimientos = reporteSiniestrosPadecimientos;
 	}
@@ -1331,43 +1473,15 @@ public class GeneradorReporte {
 	public void setReporteMisionVision(MisionObjetivo reporteMisionVision) {
 		this.reporteMisionVision = reporteMisionVision;
 	}
+	
+	private DistribucionGastos getReporteGastosNoCubiertos() {
+		return reporteGastosNoCubiertos;
+	}
 
-	/**
-	 * Funcion para obtener el numero maximo
-	 * de una lista
-	 * @param data Lista con objetos de tipo BigDecimal
-	 * @return BigDecimal mayor de la lista
-	 */
-	private BigDecimal getMaxBD(ArrayList<BigDecimal> data) {
-				
-		BigDecimal max = data.get(0);	
-				
-		for(BigDecimal i: data) {			
-			max = i.max(max);
-		}
-		
-		return max;
+	public void setReporteGastosNoCubiertos(DistribucionGastos reporteGastosNoCubiertos) {
+		this.reporteGastosNoCubiertos = reporteGastosNoCubiertos;
 	}
-	
-	
-	/**
-	 * Funcion para obtener el numero minimo
-	 * de una lista
-	 * @param data Lista con objetos de tipo BigDecimal
-	 * @return BigDecimal menor de la lista
-	 */
-	private BigDecimal getMinBD(ArrayList<BigDecimal> data) {
-		
-		BigDecimal min = data.get(0);	
-				
-		for(BigDecimal i: data) {			
-			min = min.min(i);
-		}
-		
-		return min;
-	}
-	
-	
+
 	private Float getMaxFloat(ArrayList<Float> data) {
 		Float min = data.get(0);
         for (Float i : data){
@@ -1375,7 +1489,6 @@ public class GeneradorReporte {
         }
         return min;
 	}
-	
 	
 	private Float getMinFloat(ArrayList<Float> data) {
 		Float min = data.get(0);

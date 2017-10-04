@@ -4,6 +4,7 @@ import java.text.NumberFormat;
 import java.util.Locale;
 
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.NumberTickUnit;
 import org.jfree.chart.block.BlockBorder;
@@ -13,12 +14,14 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.CategoryDataset;
 
+import com.meltsan.pdfcreator.util.Estilos;
+
 import net.sf.dynamicreports.report.definition.ReportParameters;
 import net.sf.dynamicreports.report.definition.chart.DRIChartCustomizer;
 
 
  
-public class CustomizedPercentageBarChart implements DRIChartCustomizer {
+public class CustomizedSmallPercentageBarChart implements DRIChartCustomizer {
  
 	private static final long serialVersionUID = 1L;
 
@@ -33,7 +36,11 @@ public class CustomizedPercentageBarChart implements DRIChartCustomizer {
 		chart.getLegend().setFrame(BlockBorder.NONE);
 				
 		NumberAxis valueAxis = (NumberAxis) chart.getCategoryPlot().getRangeAxis();
-		valueAxis.setTickUnit(new NumberTickUnit(10));
+		valueAxis.setTickUnit(new NumberTickUnit(.5));
+		
+		CategoryAxis domainaxis = categoryPlot.getDomainAxis();		
+        domainaxis.setTickMarksVisible(true);
+        domainaxis.setMaximumCategoryLabelLines(5);
 	}
  
 	// Clase customizada, para implementar la visibilidad de los valores del grafico

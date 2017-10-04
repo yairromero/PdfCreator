@@ -8,9 +8,14 @@ import java.util.HashMap;
 import com.meltsan.pdfcreator.beans.Antecedentes;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
+import com.meltsan.pdfcreator.beans.DistribucionGastos;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.MisionObjetivo;
 import com.meltsan.pdfcreator.beans.MontosPagados;
+import com.meltsan.pdfcreator.beans.PadCronicoClienteMercado;
+import com.meltsan.pdfcreator.beans.PadCronicosMontos;
+import com.meltsan.pdfcreator.beans.ConceptoMonto;
+import com.meltsan.pdfcreator.beans.PadecimientoCronicos;
 import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
@@ -20,9 +25,12 @@ import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.TopPadecimientosCronicos;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
 import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
+import com.meltsan.pdfcreator.beans.values.DistribucionGastosValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.PadecimientoCronicoValues;
 import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
 import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
@@ -269,7 +277,91 @@ public class Main {
 		
 		CostoPromedioSiniestro cps = new CostoPromedioSiniestro(cpsTxt,cpsv); 
 		
+		ArrayList<ConceptoMonto> pm = new ArrayList<ConceptoMonto>();
+		pm.add(new ConceptoMonto("Diabetes",102626));
+		pm.add(new ConceptoMonto("Trastornos de Columna",699781));
+		pm.add(new ConceptoMonto("Tumor Maligno",608634));
 		
+		String hpc = "Considerando el acumulado de los 3 años del análisis, el comportamiento de "
+				+ "los padecimientos crónico-degenerativos es el siguiente:";
+		String ppc = " Las tres especialidades que generan mayor gasto son: Pediatría 15% , "
+				+ "Ortopedia 13.4% y Gastroenterología 9% (porcentaje respecto al monto pagado "
+				+ "acumulado del periodo de análisis).\n" + 
+				"Por otro lado las tres especialidades con mayor número de siniestros son: "
+				+ "Oftalmología 45.5%, Ortopedia 12.7% y Gastroenterología 6.9% (porcentaje "
+				+ "respecto al total de siniestros acumulados en el periodo de análisis).";
+		
+		TopPadecimientosCronicos tpc = new TopPadecimientosCronicos(hpc,ppc,37656198.61,pm);
+		
+		ArrayList<PadCronicoClienteMercado> pcm = new ArrayList<PadCronicoClienteMercado>(); 
+		pcm.add(new PadCronicoClienteMercado("Diabetes",0.4f,2.0f));
+		pcm.add(new PadCronicoClienteMercado("Hipertensión",0.0f,2.1f));
+		pcm.add(new PadCronicoClienteMercado("Insuficiencia",0.0f,0.7f));
+		pcm.add(new PadCronicoClienteMercado("Transtornos de Columna",2.5f,1.8f));
+		pcm.add(new PadCronicoClienteMercado("Trastornos Reumatológicos",0.0f,0.8f));
+		pcm.add(new PadCronicoClienteMercado("Tumor Maligno",1.2f,2.9f));
+		
+		ArrayList<PadecimientoCronicoValues> pcl1 = new ArrayList<PadecimientoCronicoValues>();
+		pcl1.add(new PadecimientoCronicoValues("Diabetes",27745,1));
+		pcl1.add(new PadecimientoCronicoValues("Hipertensión",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Insuficiencia Renal",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Trastornos de Columna",276441,11));
+		pcl1.add(new PadecimientoCronicoValues("Trastornos Reumatológicos",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Tumor Maligno",378493,4));	
+		
+		ArrayList<PadecimientoCronicoValues> pcl2 = new ArrayList<PadecimientoCronicoValues>();
+		pcl1.add(new PadecimientoCronicoValues("Diabetes",40563,2));
+		pcl1.add(new PadecimientoCronicoValues("Hipertensión",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Insuficiencia Renal",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Trastornos de Columna",332579,11));
+		pcl1.add(new PadecimientoCronicoValues("Trastornos Reumatológicos",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Tumor Maligno",155552,4));
+		
+		ArrayList<PadecimientoCronicoValues> pcl3 = new ArrayList<PadecimientoCronicoValues>();
+		pcl1.add(new PadecimientoCronicoValues("Diabetes",34319,2));
+		pcl1.add(new PadecimientoCronicoValues("Hipertensión",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Insuficiencia Renal",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Trastornos de Columna",90762,8));
+		pcl1.add(new PadecimientoCronicoValues("Trastornos Reumatológicos",0,0));
+		pcl1.add(new PadecimientoCronicoValues("Tumor Maligno",74590,6));
+		
+		ArrayList<PadCronicosMontos> pcml = new ArrayList<PadCronicosMontos>();
+		pcml.add(new PadCronicosMontos("2013-2014",pcl1));
+		pcml.add(new PadCronicosMontos("2014-2015",pcl2));
+		pcml.add(new PadCronicosMontos("2015-2016",pcl3));
+		
+		PadecimientoCronicos pcd = new PadecimientoCronicos(pcml,tpc,pcm);	
+		
+		String dgt = "NOTA: La cifra del gasto no cubierto fue deducida con base a diversos conceptos proporcionados por la aseguradora. "
+				+ "Por otra parte las cifras mostradas en esta lámina se basan en la distribución proporcionada por el área "
+				+ "de siniestros para los casos de reembolso.";
+		
+		ArrayList<ConceptoMonto> dgv1 = new ArrayList<ConceptoMonto>();
+		dgv1.add(new ConceptoMonto("Medicamentos sin relación con el padecimiento",205333));
+		dgv1.add(new ConceptoMonto("Honorarios que exceden tabulador",124666));
+		dgv1.add(new ConceptoMonto("Estudios sin relación con padecimiento",73333));
+		dgv1.add(new ConceptoMonto("Coberturas con suma asegurada topada",329999));
+		
+		ArrayList<ConceptoMonto> dgv2 = new ArrayList<ConceptoMonto>();
+		dgv2.add(new ConceptoMonto("Medicamentos sin relación con el padecimiento",241471));
+		dgv2.add(new ConceptoMonto("Honorarios que exceden tabulador",146607));
+		dgv2.add(new ConceptoMonto("Estudios sin relación con padecimiento",86240));
+		dgv2.add(new ConceptoMonto("Coberturas con suma asegurada topada",388078));
+		
+		ArrayList<ConceptoMonto> dgv3 = new ArrayList<ConceptoMonto>();
+		dgv3.add(new ConceptoMonto("Medicamentos sin relación con el padecimiento",204250));
+		dgv3.add(new ConceptoMonto("Honorarios que exceden tabulador",124009));
+		dgv3.add(new ConceptoMonto("Estudios sin relación con padecimiento",72946));
+		dgv3.add(new ConceptoMonto("Coberturas con suma asegurada topada",328259));
+		
+
+		ArrayList<DistribucionGastosValues> dgv = new ArrayList<DistribucionGastosValues>();
+		dgv.add(new DistribucionGastosValues("2013-2014",dgv1));
+		dgv.add(new DistribucionGastosValues("2014-2015",dgv2));
+		dgv.add(new DistribucionGastosValues("2016-2016",dgv3));
+		
+		DistribucionGastos dg = new DistribucionGastos(dgt,dgv,dgv1);
+				
 		generador.setReporteAntecedentes(ant);
 		generador.setReporteSiniestralidadEsperada(se);
 		generador.setReportePoblacionHistorica(ph);
@@ -279,8 +371,10 @@ public class Main {
 		generador.setReporteSiniestroRangoGrafica(srv);
 		generador.setReporteSiniestroRangoTabla(srp);
 		generador.setReporteSiniestrosMayores(siniestrosMayores);
+		generador.setReportePadecimientosCronicos(pcd);
 		generador.setReporteSiniestrosPadecimientos(sp);
 		generador.setReportePadecimientosFrecuentes(pf);
+		generador.setReporteGastosNoCubiertos(dg);
 		generador.setReporteMontosPagados(mp);
 		generador.setReporteCostoVsTarifasFemenino(cvt);		
 		generador.setReporteCostoVsTarifasMasculino(cvt);

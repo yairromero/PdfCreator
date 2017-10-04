@@ -4,19 +4,9 @@ public class PobHistoricaValues {
 	
 	private String periodo;
 	private Integer asegurados;
-	//private Double variacionAsegurados;
-	//private Double variacionVs1Asegurados;
 	private Long primaNeta;
-	//private Double variacionPrimaNeta;
-	//private Double variacionVs1PrimaNeta;
 	private Long primaPerCapita;
-	//private Double variacionPerCapita;
-	//private Double variacionVs1PerCapita;
-	
-	/*public PobHistoricaValues(String periodo, Integer asegurados, Double variacionAsegurados,
-			Double variacionVs1Asegurados, Long primaNeta, Double variacionPrimaNeta,
-			Double variacionVs1PrimaNeta, Long primaPerCapita, Double variacionPerCapita,
-			Double variacionVs1PerCapita) {*/
+
 	
 	public PobHistoricaValues(String periodo,Integer asegurados, Long primaNeta, Long primaPerCapita) {
 		this.periodo = periodo;

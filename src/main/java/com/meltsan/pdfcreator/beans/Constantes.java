@@ -52,8 +52,8 @@ public class Constantes {
 	public static String SIN_MAYORES_TITULO = 
 			"Siniestros mayores a $400,000";
 	
-	public static String PADECIMIENTOS_TITULO =
-			"Padecimientos Crónico-Degenerativos";
+	public static String PADECIMIENTOS_CRONICOS_TITULO =
+			"Padecimientos Crónico-Degenerativos";	
 	
 	public static String COSTOS_TARIFAS_FEM_TITULO =
 			"Costos Per Cápita vs Tarifas por Edad Femenino";
@@ -63,6 +63,9 @@ public class Constantes {
 	
 	public static String TOP_PADECIMIENTOS_TITULO =
 			"Top 5 de Padecimientos (en cuanto a frecuencia)";
+	
+	public static String DISTRITUCION_GASTOS_TITULO =
+			"Distribución de Gastos No Cubiertos";
 	
 	public static String SIN_PADECIMIENTO_TITULO =
 			"Siniestros";
@@ -87,6 +90,15 @@ public class Constantes {
 	
 	public static String COSTO_PROMEDIO_GRAFICA_TITULO =
 			"Costo Promedio del Siniestro";
+	
+	public static String PAD_CRONICO_GRAFICA_TITULO =
+	"Comparativo del Siniestros Ocurridos. Experiencia del Cliente vs Mercado Asegurador";
+	
+	public static String PAD_CRONICO_TOTAL_PIE_TITULO =
+			"Total de Padecimientos";
+			
+	public static String PAD_CRONICO_DETALLE_PIE_TITULO =
+			"Padecimientos Crónico-Degenerativos";
 	
 	public static String WWW_LOCKTON_LINK =
 			"www.lockton.com.mx";

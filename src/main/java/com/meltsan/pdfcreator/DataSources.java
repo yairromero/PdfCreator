@@ -3,19 +3,26 @@ package com.meltsan.pdfcreator;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
+import com.meltsan.pdfcreator.beans.PadCronicoClienteMercado;
+import com.meltsan.pdfcreator.beans.PadCronicosMontos;
+import com.meltsan.pdfcreator.beans.ConceptoMonto;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.TopPadecimientosCronicos;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
 import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
+import com.meltsan.pdfcreator.beans.values.DistribucionGastosValues;
 import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
+import com.meltsan.pdfcreator.beans.values.PadecimientoCronicoValues;
 import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
 import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
@@ -773,7 +780,6 @@ public class DataSources {
 		return dataSource;
 	}
 	
-	
 	/**
 	 * Genera datos para llenar tabla del reporte
 	 * Siniestros Mayores
@@ -938,6 +944,296 @@ public class DataSources {
 		}
 		
 		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica Padecimientos Cronicos 
+	 * de pie 	
+	 * @param padecimientos Objeto tipo TopPadecimientosCronico
+	 * @param tipoGrafica Entero donde 1 es la grafica de padecimientos totales
+	 * y 2 es la tabla de padecimientos detalle del top
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearPadecimientoCronicoPieDS(TopPadecimientosCronicos padecimientos, int tipoGrafica) {
+		
+		DRDataSource dataSource = new DRDataSource("padecimiento","porcentaje");
+		
+		switch(tipoGrafica){
+		case 1:
+			
+			Double porcentajePadecimientos = 0.0;
+			for(ConceptoMonto pad: padecimientos.getPadecimientosCronicos()){
+				porcentajePadecimientos += pad.getMontoTotalPadecimiento();
+			}
+			
+			dataSource.add("No crónicos",padecimientos.getMontoNoCronicos());
+			dataSource.add("Crónicos",porcentajePadecimientos);			
+			
+			break;
+			
+		case 2:
+			
+			for(ConceptoMonto pad: padecimientos.getPadecimientosCronicos()){
+				dataSource.add(pad.getPadecimiento(),pad.getMontoTotalPadecimiento());
+			}
+			
+			break;
+		default:
+			dataSource.add("Grafica no valida",100);
+			break;
+		}
+		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar grafica  Padecimientos Cronicos
+	 * de barras
+	 * @param padecimientos Lista de objetos tipo PadCronicoClienteMercado
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearPadecimientoCronicoBarraDS(ArrayList<PadCronicoClienteMercado> padecimientos) {
+		
+		DRDataSource dataSource = new DRDataSource("padecimiento","cliente","mercado");
+		
+		for(PadCronicoClienteMercado pcm: padecimientos) {
+			dataSource.add(pcm.getPadecimiento(),pcm.getPorcentajeCliente(),pcm.getPorcentajeMercado());
+		}
+		
+		padecimientos = null;
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar tabla Padecimientos Cronicos 
+	 * 	
+	 * @param padecimientos Lista de objetos tipo PadCronicosMontos
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearPadecimientoCronicoTablaDS(ArrayList<PadCronicosMontos> padecimientos) {
+		
+		  	int masterRowNumber = padecimientos.size();
+		  	int noCols = masterRowNumber * 3;
+		  	noCols = noCols +1;
+	        String[] columns = new String[noCols];                
+	        ArrayList<String> namesCols = new ArrayList<String>();
+	        ArrayList<String> labels = new ArrayList<String>();
+	        
+	        for (int i = 0; i < masterRowNumber; i++) {
+	        		namesCols.add("monto"+i);
+	        		namesCols.add("siniestro"+i);
+	        		namesCols.add("costo"+i);
+	        }
+	        
+	        columns[0] = "vigencia";
+	        for (int i = 1; i <= namesCols.size(); i++) {	
+	           columns[i] = namesCols.get(i-1);
+	        }	        
+	        
+	        DRDataSource dataSource = new DRDataSource(columns);
+    		
+	        for(PadCronicosMontos pad:padecimientos) {       		
+	        		for(PadecimientoCronicoValues padv: pad.getPadecimientos()) {	        			
+	        			labels.add(padv.getPadecimiento());
+	        		}
+	        }
+	        
+	        HashSet<String> h = new HashSet<String>(labels);
+	        labels.clear();
+	        labels.addAll(h);
+	        	        
+	        		Object[] values = new Object[noCols];
+	        		Object[] valuesInts = new Object[noCols];
+	        		Object[] totales = new Object[noCols];
+	        		totales[0]="TOTAL";
+	        		
+	        		for(int i=1;i<values.length;i++) {	        				
+        				totales[i]= (Integer)0;
+        			}
+	        		
+	        		for(String l:labels) {	        			
+	        			values = getPadecimientosPeriodoStrings(noCols,l,padecimientos);
+	        			valuesInts = getPadecimientosPeriodoInts(noCols,l,padecimientos);
+	        			dataSource.add(values);
+	        			for(int i=1;i<valuesInts.length;i++) {
+	        				totales[i] = (Integer)valuesInts[i] + (Integer)totales[i];
+	        			}
+	        		}
+	        		
+	        		dataSource.add(getTotalesPadecimientos(noCols,totales));
+
+		return dataSource;
+	}
+	
+	
+	/**
+	 * Genera datos para llenar tabla Distribucion de Gastos 
+	 * No Cubiertos
+	 * @param gastos Lista de objetos tipo DistribucionGastoValues
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearGastosNoCubiertosTablaDS(ArrayList<DistribucionGastosValues> gastos) {
+		
+		int masterRowNumber = gastos.size();
+		int noCols = masterRowNumber+1;
+        String[] columns = new String[noCols];                
+        
+        columns[0] = "vigencia";
+        for (int i = 1; i <= masterRowNumber; i++) {	
+           columns[i] = gastos.get(i-1).getPeriodo();
+        }        
+        
+        DRDataSource dataSource = new DRDataSource(columns);
+		
+        ArrayList<String> labels = new ArrayList<String>();
+        for(DistribucionGastosValues periodo:gastos) {       		
+    			for(ConceptoMonto concepto: periodo.getMontos()) {	        			
+    				labels.add(concepto.getPadecimiento());
+    			}
+        }
+    
+        HashSet<String> h = new HashSet<String>(labels);
+        labels.clear();
+        labels.addAll(h);
+    
+        Object[] values = new Object[noCols];
+        Object[] totales = new Object[noCols];
+        
+        totales[0]="No Cubierto";
+        for(int i=1;i<values.length;i++) {	        				
+			totales[i]= (Integer)0;
+		}
+        
+        for(String l:labels) {	        			
+    			values = getMontoPeriodoGastosNoCubiertos(noCols,l,gastos);
+    			dataSource.add(values);
+    			for(int i=1;i<values.length;i++) {
+    				totales[i] = (Integer)values[i] + (Integer)totales[i];
+    			}
+    		}        
+            
+        dataSource.add(totales);
+		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar tabla Distribucion de Gastos 
+	 * No Cubiertos
+	 * @param gastos Lista de objetos tipo ConceptoMonto
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearGastosNoCubiertosGraficaDS(ArrayList<ConceptoMonto> gastos) {
+		
+		DRDataSource dataSource = new DRDataSource("concepto","monto");
+		for(ConceptoMonto pad: gastos){
+			dataSource.add(pad.getPadecimiento(),pad.getMontoTotalPadecimiento());
+		}
+		return dataSource;		
+	}
+	
+	
+	
+	
+	
+	/**
+	 * Función para obtener monto y numero de siniestros de un padecimiento
+	 * @param columnas Integer con el numero de columnas que se van a crear
+	 * @param padecimiento String con el padecimiento a buscar
+	 * @param padecimientos lista de padecimientos tipo PadCronicosMontos
+	 * @return
+	 */
+	private Object[] getPadecimientosPeriodoStrings(Integer columnas, String padecimiento, ArrayList<PadCronicosMontos> padecimientos) {
+		      					
+			Object[] temp = new Object[3];
+			Object[] result = new Object[columnas];
+			int i = 1;
+			result[0] = padecimiento;
+ 			for(PadCronicosMontos padv: padecimientos) { 					
+ 					for(PadecimientoCronicoValues pcv: padv.getPadecimientos()) {
+ 						if(pcv.getPadecimiento().equals(padecimiento)) { 							
+ 							temp[0]="$"+pcv.getMontoPagado();
+ 							Integer noSins = pcv.getNoSiniestros();
+ 							temp[1]=noSins.toString(); 							
+ 							if(noSins!=0) {
+ 								Integer promedio = pcv.getMontoPagado()/noSins; 
+ 								temp[2]="$"+promedio;
+ 							}
+ 							else
+ 								temp[2]="$"+0;
+ 							System.arraycopy(temp, 0, result, i, temp.length);
+ 							i = i + 3;
+ 						}
+ 					} 				
+ 			}
+     return result;
+		
+	}
+	
+	private Object[] getMontoPeriodoGastosNoCubiertos(Integer columnas, String concepto, ArrayList<DistribucionGastosValues> gastos) {
+			
+		Object[] temp = new Object[1];
+		Object[] result = new Object[columnas];
+		int i = 1;
+		result[0] = concepto;
+			for(DistribucionGastosValues padv: gastos) { 					
+					for(ConceptoMonto pcv: padv.getMontos()) {
+						if(pcv.getPadecimiento().equals(concepto)) { 							
+							temp[0] = pcv.getMontoTotalPadecimiento();	
+							System.arraycopy(temp, 0, result, i, temp.length);
+							i++;
+						}
+					} 				
+			}
+			return result;
+	
+	}
+	
+	
+	private Object[] getPadecimientosPeriodoInts(Integer columnas, String padecimiento, ArrayList<PadCronicosMontos> padecimientos) {
+			
+		Object[] temp = new Object[3];
+		Object[] result = new Object[columnas];
+		int i = 1;
+		result[0] = padecimiento;
+			for(PadCronicosMontos padv: padecimientos) { 					
+					for(PadecimientoCronicoValues pcv: padv.getPadecimientos()) {
+						if(pcv.getPadecimiento().equals(padecimiento)) { 							
+							temp[0]=pcv.getMontoPagado();
+							int noSins = pcv.getNoSiniestros();
+							temp[1]=noSins; 							
+							if(noSins!=0) {
+								Integer promedio = pcv.getMontoPagado()/noSins; 
+								temp[2]=promedio;
+							}
+							else
+								temp[2]=0;
+							System.arraycopy(temp, 0, result, i, temp.length);
+							i = i + 3;
+						}
+					} 				
+			}
+ return result;
+	
+}
+	
+	
+	private Object[] getTotalesPadecimientos(Integer columnas,Object[] values) {		
+		Object[] result = new Object[columnas];
+		result[0]="TOTAL";		
+		
+		for(int i=1;i<values.length;i++) {
+			if(i % 3 == 0) {
+				Integer res = (Integer)values[i-2] / (Integer)values[i-1];
+				result[i] = "$ "+res.toString();
+			} else if(i % 2 == 0){
+				result[i] = values[i].toString();
+			} else {
+				result[i] = "$ "+values[i];
+			}
+		}		
+		
+		return result;
 	}
 	
 }
