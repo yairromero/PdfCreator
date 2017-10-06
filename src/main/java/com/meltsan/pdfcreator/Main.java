@@ -1,14 +1,14 @@
 package com.meltsan.pdfcreator;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
+import com.meltsan.pdfcreator.beans.ComparativoHospital;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
 import com.meltsan.pdfcreator.beans.DistribucionGastos;
+import com.meltsan.pdfcreator.beans.HospitalPorcentaje;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.MisionObjetivo;
 import com.meltsan.pdfcreator.beans.MontosPagados;
@@ -17,16 +17,19 @@ import com.meltsan.pdfcreator.beans.PadCronicosMontos;
 import com.meltsan.pdfcreator.beans.ConceptoMonto;
 import com.meltsan.pdfcreator.beans.PadecimientoCronicos;
 import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
+import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
-import com.meltsan.pdfcreator.beans.SiniestroMonto;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.TopHospitales;
+import com.meltsan.pdfcreator.beans.TopHospitalesGrafica;
 import com.meltsan.pdfcreator.beans.TopPadecimientosCronicos;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
+import com.meltsan.pdfcreator.beans.values.ComparativoHospitalValues;
 import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.DistribucionGastosValues;
 import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
@@ -39,6 +42,7 @@ import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
+import com.meltsan.pdfcreator.beans.values.TopHospitalesValues;
 
 public class Main {
 	
@@ -56,10 +60,10 @@ public class Main {
 		Antecedentes ant = new Antecedentes(l1,l2,t1);
 		
 	
-		IndicadoresSiniestroValues pcv1 = new IndicadoresSiniestroValues("2013-2014",12183742L,436,11147,14106,79f,51f);
-		IndicadoresSiniestroValues pcv2 = new IndicadoresSiniestroValues("2014-2015",10825495L,396,9455,14256,66f,57f);
-		IndicadoresSiniestroValues pcv3 = new IndicadoresSiniestroValues("2015-2016",16058004L,379,11976,15203,92f,50f);
-		IndicadoresSiniestroValues pcv4 = new IndicadoresSiniestroValues("2016-2017",18400650L,404,18028,15154,99f);
+		IndicadoresSiniestroValues pcv1 = new IndicadoresSiniestroValues("2013-2014",12183742,436,11147,14106,79f,51f);
+		IndicadoresSiniestroValues pcv2 = new IndicadoresSiniestroValues("2014-2015",10825495,396,9455,14256,66f,57f);
+		IndicadoresSiniestroValues pcv3 = new IndicadoresSiniestroValues("2015-2016",16058004,379,11976,15203,92f,50f);
+		IndicadoresSiniestroValues pcv4 = new IndicadoresSiniestroValues("2016-2017",18400650,404,18028,15154,99f);
 		
 		ArrayList<IndicadoresSiniestroValues> pcv = new ArrayList<IndicadoresSiniestroValues>();
 		pcv.add(pcv1);
@@ -164,39 +168,18 @@ public class Main {
 		SiniestroPadecimientoValues p5 = new SiniestroPadecimientoValues(1140242996L,"Hidronefrosis con obstrucción por cálculos del riñón y del uréter");
 		SiniestroPadecimientoValues p6 = new SiniestroPadecimientoValues(1100244731L,"Gastroduodentis, no especificada");
 		
-		SiniestroMonto s1 = new SiniestroMonto(p1,1997835L);
-		SiniestroMonto s2 = new SiniestroMonto(p2,1895998L);
-		SiniestroMonto s4 = new SiniestroMonto(p3,1894832L);
-		SiniestroMonto s5 = new SiniestroMonto(p4,132869L);
-		SiniestroMonto s6 = new SiniestroMonto(p4,339741L);
-		SiniestroMonto s7 = new SiniestroMonto(p5,78218L);
-		SiniestroMonto s8 = new SiniestroMonto(p5,1216460L);
-		SiniestroMonto s9 = new SiniestroMonto(p6,51293L);
-		SiniestroMonto s10 = new SiniestroMonto(p6,38210L);
-		SiniestroMonto s11 = new SiniestroMonto(p6,424248L);	
 		
-		ArrayList<SiniestroMonto> p2014 = new ArrayList<SiniestroMonto>();
-		p2014.add(s2);
-		p2014.add(s9);
-		
-		
-		ArrayList<SiniestroMonto> p2015 = new ArrayList<SiniestroMonto>();		
-		p2015.add(s5);
-		p2015.add(s7);
-		p2015.add(s10);
-		
-		ArrayList<SiniestroMonto> p2016 = new ArrayList<SiniestroMonto>();
-		p2016.add(s1);
-		p2016.add(s4);
-		p2016.add(s6);
-		p2016.add(s8);
-		p2016.add(s11);
 				
 		ArrayList<SiniestrosMayores> siniestrosMayores = new ArrayList<SiniestrosMayores>();
-		siniestrosMayores.add(new SiniestrosMayores("2013-2014",p2014));
-		siniestrosMayores.add(new SiniestrosMayores("2014-2015",p2015));
-		siniestrosMayores.add(new SiniestrosMayores("2015-2016",p2016));
-		
+		siniestrosMayores.add(new SiniestrosMayores("1150250772","Otros recién nacidos pre término","2015-2016",1997835));		
+		siniestrosMayores.add(new SiniestrosMayores("1140209240","Otros recién nacidos pre término","2013-2014",1895998));
+		siniestrosMayores.add(new SiniestrosMayores("1150251720","Esclerosis múltiple SAI","2015-2016",1894832));
+		siniestrosMayores.add(new SiniestrosMayores("1140257979","Linfangitis","2014-2015",165684));
+		siniestrosMayores.add(new SiniestrosMayores("1140257979","Linfangitis","2015-2016",1612961));
+		siniestrosMayores.add(new SiniestrosMayores("1100244731","Gastroduodentis, no especificada","2013-2014",51293));
+		siniestrosMayores.add(new SiniestrosMayores("1100244731","Gastroduodentis, no especificada","2014-2015",38210));
+		siniestrosMayores.add(new SiniestrosMayores("1100244731","Gastroduodentis, no especificada","2015-2016",424248));
+		siniestrosMayores.add(new SiniestrosMayores("3140202258","Lumbago no especificado","2014-2015",474453));				
 		
 		
 		ArrayList<PadecimientosFrecuenciaValues> padecimientosFrecuencia = new ArrayList<PadecimientosFrecuenciaValues>();
@@ -362,6 +345,71 @@ public class Main {
 		
 		DistribucionGastos dg = new DistribucionGastos(dgt,dgv,dgv1);
 				
+		
+		String tht = "Es importante destacar que para un 69.90% de los siniestros, no contamos con la información referente al hospital que atendió "
+				+ "a los siniestros, estamos negociando con las aseguradoras el envío con los datos completos para el análisis.";
+		
+		
+		ArrayList<HospitalPorcentaje> thcm = new ArrayList<HospitalPorcentaje>();
+		thcm.add(new HospitalPorcentaje("Hospital Angeles Del Pedregal",2.62f));
+		thcm.add(new HospitalPorcentaje("Hospital A.B.C",2.62f));
+		thcm.add(new HospitalPorcentaje("Hospital San Javier",1.83f));
+		thcm.add(new HospitalPorcentaje("Hospital Español",1.83f));
+		thcm.add(new HospitalPorcentaje("Hospital Angeles De Cd Juarez",1.83f));
+		TopHospitalesGrafica thg = new TopHospitalesGrafica(tht,69.90f,19.37f,thcm);
+		
+		ArrayList<TopHospitalesValues> thv = new ArrayList<TopHospitalesValues>(); 
+		thv.add(new TopHospitalesValues("Hospital Ángeles Del Pedregal","Monto Pagado",675449.51f));
+		thv.add(new TopHospitalesValues("Hospital Ángeles Del Pedregal","Número de Siniestros",10f));
+		thv.add(new TopHospitalesValues("Hospital Ángeles Del Pedregal","Costo Promedio",67545f));
+		thv.add(new TopHospitalesValues("Hospital Ángeles Del Pedregal","Morbilidad",0.87f));
+		thv.add(new TopHospitalesValues("Hospital A.B.C","Monto Pagado",498027.01f));
+		thv.add(new TopHospitalesValues("Hospital A.B.C","Número de Siniestros",10f));
+		thv.add(new TopHospitalesValues("Hospital A.B.C","Costo Promedio",49803f));
+		thv.add(new TopHospitalesValues("Hospital A.B.C","Morbilidad",0.87f));
+		thv.add(new TopHospitalesValues("Hospital San Javier","Monto Pagado",214458.06f));
+		thv.add(new TopHospitalesValues("Hospital San Javier","Número de Siniestros",7f));
+		thv.add(new TopHospitalesValues("Hospital San Javier","Costo Promedio",30637f));
+		thv.add(new TopHospitalesValues("Hospital San Javier","Morbilidad",0.61f));
+		thv.add(new TopHospitalesValues("Hospital Español","Monto Pagado",300968.17f));
+		thv.add(new TopHospitalesValues("Hospital Español","Número de Siniestros",7f));
+		thv.add(new TopHospitalesValues("Hospital Español","Costo Promedio",41995f));
+		thv.add(new TopHospitalesValues("Hospital Español","Morbilidad",0.61f));
+		thv.add(new TopHospitalesValues("Hospital Á́ngeles De Cd Juárez","Monto Pagado",785601.64f));
+		thv.add(new TopHospitalesValues("Hospital Á́ngeles De Cd Juárez","Número de Siniestros",7f));
+		thv.add(new TopHospitalesValues("Hospital Á́ngeles De Cd Juárez","Costo Promedio",112229f));
+		thv.add(new TopHospitalesValues("Hospital Á́ngeles De Cd Juárez","Morbilidad",0.61f));
+		
+		
+		TopHospitales th = new TopHospitales(thv,thg);
+		
+		ArrayList<ParticipacionAsegurado> pa = new ArrayList<ParticipacionAsegurado>();
+		pa.add(new ParticipacionAsegurado("2013-2014",12183742,203563,266076,568346,733331,13955058,87f,1f,2f,4f,5f));
+		pa.add(new ParticipacionAsegurado("2014-2015",10825494,235152,260618,759024,862397,12942685,84f,2f,2f,6f,7f));
+		pa.add(new ParticipacionAsegurado("2015-2016",16058004,268655,270204,802736,729464,18129063,89f,1f,1f,4f,4f));
+			
+		ArrayList<ComparativoHospitalValues> chv = new ArrayList<ComparativoHospitalValues>();
+		chv.add(new ComparativoHospitalValues("Cesárea","Centro Medico Dalinde",1,36051,36051));
+		chv.add(new ComparativoHospitalValues("Cesárea","Hospital De La Mujer",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Cesárea","Hospital San Javier",1,36051,36051));
+		chv.add(new ComparativoHospitalValues("Cesárea","Star Medica Cd. Juárez",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Embarazo Abdominal","Hospital A.B.C",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Embarazo Abdominal","Hospital San Javier",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Miopia y Astigmatismo","Hospital San Javier",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Miopia y Astigmatismo","Active Visión Center",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Miopia y Astigmatismo","Klarhet Laser",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Recien Nacido Sano","Hospital A.B.C",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Recien Nacido Sano","Hospital San Javier",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Recien Nacido Sano","Hospital Sur Lomas",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Recien Nacido Sano","Hospital Ángeles del Pedregal",2,88647,44323));
+		chv.add(new ComparativoHospitalValues("Recien Nacido Sano","Hospital Country 2000",2,88647,44323));
+		
+		String cht = "Para el padecimiento “Presencia de anteojos y lentes de contacto” no "
+				+ "contamos con información del hospital en que se atendieron los siniestros, "
+				+ "motivo por el cual, dicho padecimiento no aparece en esta lámina";	
+		
+		ComparativoHospital ch = new ComparativoHospital(cht,chv);
+		
 		generador.setReporteAntecedentes(ant);
 		generador.setReporteSiniestralidadEsperada(se);
 		generador.setReportePoblacionHistorica(ph);
@@ -374,8 +422,11 @@ public class Main {
 		generador.setReportePadecimientosCronicos(pcd);
 		generador.setReporteSiniestrosPadecimientos(sp);
 		generador.setReportePadecimientosFrecuentes(pf);
+		generador.setReporteParticipacionAsegurado(pa);
 		generador.setReporteGastosNoCubiertos(dg);
+		generador.setResporteTopHospitales(th);
 		generador.setReporteMontosPagados(mp);
+		generador.setReporteComparativoHospitales(ch);
 		generador.setReporteCostoVsTarifasFemenino(cvt);		
 		generador.setReporteCostoVsTarifasMasculino(cvt);
 		generador.setReporteMisionVision(mv);

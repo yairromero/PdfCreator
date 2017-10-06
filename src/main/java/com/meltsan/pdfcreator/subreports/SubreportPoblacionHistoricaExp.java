@@ -23,7 +23,7 @@ public class SubreportPoblacionHistoricaExp extends AbstractSimpleExpression<Jas
 		   ArrayList<PobHistoricaValues> srt = reportParameters.getValue("columns");		   
 		   
 		         JasperReportBuilder report = report();		         
-		         report.setTemplate(Estilos.reportSmallTemplate)	
+		         report.setTemplate(Estilos.reportConditionalPorcentajeTemplate)	
 		         		.title(cmp.text(Constantes.POBLACION_HIST_TABLA_TITULO).setStyle(Estilos.chartTitleStyle)
 		         																.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER))
 		         		.addColumn(col.column("Vigencia", "vigencia", type.stringType()).setWidth(150));

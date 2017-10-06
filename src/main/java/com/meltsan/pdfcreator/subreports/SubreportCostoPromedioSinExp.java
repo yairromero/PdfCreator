@@ -23,7 +23,7 @@ public class SubreportCostoPromedioSinExp extends AbstractSimpleExpression<Jaspe
 		   ArrayList<CostoPromedioSiniestroValues> srt = reportParameters.getValue("columns");		   
 		   
 		         JasperReportBuilder report = report();		         
-		         report.setTemplate(Estilos.reportSmallTemplate)		         		
+		         report.setTemplate(Estilos.reportConditionalPorcentajeTemplate)		         		
 		         		.addColumn(col.column("Vigencia", "vigencia", type.stringType()).setWidth(120));
 		         for (CostoPromedioSiniestroValues srp : srt) {		
 		           report.addColumn(col.column(srp.getPeriodo(), srp.getPeriodo(), type.stringType()));	

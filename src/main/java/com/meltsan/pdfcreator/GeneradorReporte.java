@@ -3,7 +3,10 @@ package com.meltsan.pdfcreator;
 import static net.sf.dynamicreports.report.builder.DynamicReports.cht;
 import static net.sf.dynamicreports.report.builder.DynamicReports.cmp;
 import static net.sf.dynamicreports.report.builder.DynamicReports.col;
+import static net.sf.dynamicreports.report.builder.DynamicReports.exp;
+import static net.sf.dynamicreports.report.builder.DynamicReports.field;
 import static net.sf.dynamicreports.report.builder.DynamicReports.report;
+import static net.sf.dynamicreports.report.builder.DynamicReports.stl;
 import static net.sf.dynamicreports.report.builder.DynamicReports.type;
 
 import java.awt.Color;
@@ -20,6 +23,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import com.meltsan.pdfcreator.beans.Antecedentes;
+import com.meltsan.pdfcreator.beans.ComparativoHospital;
 import com.meltsan.pdfcreator.beans.Constantes;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
@@ -32,12 +36,15 @@ import com.meltsan.pdfcreator.beans.PadCronicoClienteMercado;
 import com.meltsan.pdfcreator.beans.PadCronicosMontos;
 import com.meltsan.pdfcreator.beans.PadecimientoCronicos;
 import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
+import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.TopHospitales;
+import com.meltsan.pdfcreator.beans.TopHospitalesGrafica;
 import com.meltsan.pdfcreator.beans.TopPadecimientosCronicos;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
 import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
@@ -47,12 +54,14 @@ import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
+import com.meltsan.pdfcreator.beans.values.TopHospitalesValues;
 import com.meltsan.pdfcreator.customizers.CustomizedBarChart;
 import com.meltsan.pdfcreator.customizers.CustomizedCurrencyLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedLabelVertBarChart;
 import com.meltsan.pdfcreator.customizers.CustomizedLabelVertLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedNoBorderLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
+import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarIntervalChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentagePieChart;
 import com.meltsan.pdfcreator.customizers.CustomizedSmallPercentageBarChart;
@@ -60,6 +69,7 @@ import com.meltsan.pdfcreator.subreports.SubreportCostoPromedioSinExp;
 import com.meltsan.pdfcreator.subreports.SubreportDistribucionGastosExp;
 import com.meltsan.pdfcreator.subreports.SubreportIndicadoresSinExp;
 import com.meltsan.pdfcreator.subreports.SubreportPadecimientosCronicosExp;
+import com.meltsan.pdfcreator.subreports.SubreportParticipacionAseguradoExp;
 import com.meltsan.pdfcreator.subreports.SubreportPoblacionHistoricaExp;
 import com.meltsan.pdfcreator.subreports.SubreportSiniestroRangoExp;
 import com.meltsan.pdfcreator.subreports.SubreportSiniestrosMayoresExp;
@@ -77,6 +87,7 @@ import net.sf.dynamicreports.report.builder.component.TextFieldBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalImageAlignment;
 import net.sf.dynamicreports.report.constant.HorizontalTextAlignment;
 import net.sf.dynamicreports.report.constant.ImageScale;
+import net.sf.dynamicreports.report.constant.LineStyle;
 import net.sf.dynamicreports.report.constant.PageOrientation;
 import net.sf.dynamicreports.report.constant.PageType;
 import net.sf.dynamicreports.report.constant.Position;
@@ -101,11 +112,14 @@ public class GeneradorReporte {
 	private CostoPromedioSiniestro reporteCostoPromedio;
 	private PadecimientoCronicos reportePadecimientosCronicos;
 	private DistribucionGastos reporteGastosNoCubiertos;
+	private TopHospitales resporteTopHospitales;
+	private ComparativoHospital reporteComparativoHospitales;
 	private ArrayList<SiniestrosMayores> reporteSiniestrosMayores;
 	private ArrayList<SiniestroRangoGrafica> reporteSiniestroRangoGrafica;
 	private ArrayList<SiniestroRangoPeriodo> reporteSiniestroRangoTabla;	
 	private ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasFemenino;
 	private ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasMasculino;
+	private ArrayList<ParticipacionAsegurado> reporteParticipacionAsegurado;	
 	
 	private ArrayList<JasperReportBuilder> listaReportes;
 	private BufferedImage img = null;
@@ -188,6 +202,7 @@ public class GeneradorReporte {
  			 listaReportes.add(reportePadecimientosCronicosBarras(this.getReportePadecimientosCronicos().getPadecimientos(),
  					 													this.getReportePadecimientosCronicos().getClienteMercado()));
  		  }
+ 		  
  		 listaReportes.add(reportePadecimientosCronicosPie(this.getReportePadecimientosCronicos().getTopCronicos()));
  	  }
  	  
@@ -198,6 +213,11 @@ public class GeneradorReporte {
  	   if(this.getReportePadecimientosFrecuentes() != null) {
 		   listaReportes.add(reportePadecimientosFrecuentes(this.getReportePadecimientosFrecuentes()));
 	   }
+ 	   
+ 	   if(this.getReporteParticipacionAsegurado() != null && !this.getReporteParticipacionAsegurado().isEmpty()) {
+ 		   listaReportes.add(reporteParticipacionAseguradoTabla(this.getReporteParticipacionAsegurado()));
+ 		  //listaReportes.add(reporteParticipacionAseguradoGrafica(this.getReporteParticipacionAsegurado()));
+ 	   }
  	  	    	   	    	   	   	   
  	   if(this.getReporteGastosNoCubiertos() != null) {
  		   listaReportes.add(reporteGastosNoCubiertos(this.getReporteGastosNoCubiertos()));
@@ -205,6 +225,21 @@ public class GeneradorReporte {
  	   
  	   if(this.getReporteMontosPagados() != null){
  		   listaReportes.add(reporteMontosPagados(this.getReporteMontosPagados()));
+ 	   }
+ 	   
+ 	   if(this.getResporteTopHospitales() != null) {
+ 		   
+ 		  if(!this.getResporteTopHospitales().getTopHospitales().isEmpty()) {
+ 			  listaReportes.add(reporteTopHospitalesTabla(this.getResporteTopHospitales().getTopHospitales()));
+ 		   }
+ 		   
+ 		   if(this.getResporteTopHospitales().getTopHospitalesGrafica() != null) {
+ 			   listaReportes.add(reporteTopHospitalesGrafica(this.getResporteTopHospitales().getTopHospitalesGrafica()));
+ 		   } 		    		   
+ 	   }
+ 	   
+ 	   if(this.getReporteComparativoHospitales() != null) {
+ 		   listaReportes.add(reporteComparativoHospital(this.getReporteComparativoHospitales()));
  	   }
  	   
  	   if(this.getReporteCostoVsTarifasFemenino() != null && !this.getReporteCostoVsTarifasFemenino().isEmpty()) {
@@ -694,7 +729,7 @@ public class GeneradorReporte {
 		JasperReportBuilder reporteSinMayores = new JasperReportBuilder();
 		
 		SubreportBuilder subreport = cmp.subreport(new SubreportSiniestrosMayoresExp())
-				.setDataSource(ds.crearSiniestrosMayoresDS(siniestros));
+				.setDataSource(ds.crearSiniestrosMayoresDS(siniestros));				
 		
 		reporteSinMayores
 		.addParameter("columns",siniestros)
@@ -925,6 +960,120 @@ public class GeneradorReporte {
 	}
 
 	/**
+	 * Genera el reporte de Tabla de participacion asegurado
+	 * @param montos Lista de objetos ParticipacionAsegurado
+	 * @return JasperReportBuilder con la hoja de reporte
+	 */
+	private JasperReportBuilder reporteParticipacionAseguradoTabla(ArrayList<ParticipacionAsegurado> montos) {
+	
+		JasperReportBuilder reporteParticipacionAsegurado = new JasperReportBuilder();
+		
+		SubreportBuilder subreport = cmp.subreport(new SubreportParticipacionAseguradoExp())
+				.setDataSource(ds.crearParticipacionAseguradoTablaDS(montos));
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Float> pagadoColumn = col.column("PAGADO", "pagado", type.floatType());
+		TextColumnBuilder<Float> deducibleColumn = col.column("DEDUCIBLE", "deducible", type.floatType());
+		TextColumnBuilder<Float> coaseguroColumn = col.column("COASEGURO", "coaseguro", type.floatType());
+		TextColumnBuilder<Float> ivaColumn = col.column("IVA", "iva", type.floatType());
+		TextColumnBuilder<Float> noCubiertoColumn = col.column("NO CUBIERTO", "nocubierto", type.floatType());
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("PAGADO", Estilos.colorYellow);
+		seriesColors.put("DEDUCIBLE", Color.LIGHT_GRAY);
+		seriesColors.put("COASEGURO", Estilos.colorNavy);
+		seriesColors.put("IVA",Color.GRAY);
+		seriesColors.put("NO CUBIERTO", Estilos.colorWine);
+		
+		ArrayList<Float> rangos = new ArrayList<Float>();
+		for(ParticipacionAsegurado monto:montos) {
+			rangos.add(monto.getPorcentajePagado());
+			rangos.add(monto.getPorcentajeDeducible());
+			rangos.add(monto.getPorcentajeCoaseguro());
+			rangos.add(monto.getPorcentajeIVA());
+			rangos.add(monto.getPorcentajeNoCubierto());
+		}
+		
+		Float max = this.getMaxFloat(rangos);
+		max = max - 10;
+		int maxRange = Math.round(max);
+		
+		reporteParticipacionAsegurado
+		.addParameter("columns",montos)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.title(cmp.text(Constantes.PARTICIPACION_ASEGURADO_TITULO).setStyle(Estilos.reportTitleStyle))
+   		.setTitleBackgroundComponent(imgHeader)
+   		.summary(cmp.verticalList(subreport,   				
+   			 cht.stackedBarChart()	
+				.setHeight(260)
+				.seriesColorsByName(seriesColors)   					 				
+				.addCustomizer(new CustomizedPercentageBarIntervalChart())					
+				.setLegendPosition(Position.RIGHT)	
+				.setTitle(Constantes.PARTICIPACION_ASEGURADO_GRAFICA_TITULO)
+				.setTitleFont(Estilos.chartFontStyle)
+				.setTitleColor(Estilos.colorNavy)
+				.seriesColorsByName(seriesColors)					
+				.setDataSource(ds.crearParticipacionAseguradoGraficaDS(montos))
+				.setCategory(periodoColumn)
+				.series(
+						cht.serie(pagadoColumn), cht.serie(deducibleColumn), cht.serie(coaseguroColumn), cht.serie(ivaColumn), cht.serie(noCubiertoColumn))  
+				.setValueAxisFormat(cht.axisFormat()
+											.setRangeMinValueExpression(maxRange))				
+				))	
+   		.build();		
+		return reporteParticipacionAsegurado;
+	}
+	
+	/**
+	 * Genera el reporte de Grafica de participacion asegurado
+	 * @param montos Lista de objetos ParticipacionAsegurado
+	 * @return JasperReportBuilder con la hoja de reporte
+	 */
+	private JasperReportBuilder reporteParticipacionAseguradoGrafica(ArrayList<ParticipacionAsegurado> montos) {
+	
+		JasperReportBuilder reporteParticipacionAsegurado = new JasperReportBuilder();
+		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Float> pagadoColumn = col.column("PAGADO", "pagado", type.floatType());
+		TextColumnBuilder<Float> deducibleColumn = col.column("DEDUCIBLE", "deducible", type.floatType());
+		TextColumnBuilder<Float> coaseguroColumn = col.column("COASEGURO", "coaseguro", type.floatType());
+		TextColumnBuilder<Float> ivaColumn = col.column("IVA", "iva", type.floatType());
+		TextColumnBuilder<Float> noCubiertoColumn = col.column("NO CUBIERTO", "nocubierto", type.floatType());
+		
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("PAGADO", Estilos.colorYellow);
+		seriesColors.put("DEDUCIBLE", Color.LIGHT_GRAY);
+		seriesColors.put("COASEGURO", Estilos.colorNavy);
+		seriesColors.put("IVA",Color.GRAY);
+		seriesColors.put("NO CUBIERTO", Estilos.colorWine);
+				
+		reporteParticipacionAsegurado
+		.addParameter("columns",montos)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.title(cmp.text(Constantes.PARTICIPACION_ASEGURADO_TITULO).setStyle(Estilos.reportTitleStyle))
+   		.setTitleBackgroundComponent(imgHeader)
+   		.summary(  cht.stackedBarChart()	
+   					.setHeight(220)
+   					.seriesColorsByName(seriesColors)   					 				
+					.addCustomizer(new CustomizedPercentageBarIntervalChart())					
+					.setLegendPosition(Position.RIGHT)	
+					.setTitle(Constantes.PARTICIPACION_ASEGURADO_GRAFICA_TITULO)
+					.setTitleFont(Estilos.chartFontStyle)
+					.setTitleColor(Estilos.colorNavy)
+					.seriesColorsByName(seriesColors)					
+					.setDataSource(ds.crearParticipacionAseguradoGraficaDS(montos))
+					.setCategory(periodoColumn)
+					.series(
+							cht.serie(pagadoColumn), cht.serie(deducibleColumn), cht.serie(coaseguroColumn), cht.serie(ivaColumn), cht.serie(noCubiertoColumn))  
+					.setValueAxisFormat(cht.axisFormat()
+												.setRangeMinValueExpression(80))					
+   					)   				   	
+   		.build();		
+		return reporteParticipacionAsegurado;
+	}
+	
+	
+	/**
 	 * Genera el reporte de Distribucion de Gastos
 	 * No Cubiertos
 	 * @param  gastos Objeto tipo Distribucion Gastos
@@ -1129,6 +1278,156 @@ public class GeneradorReporte {
    				)
    		.build();		
 		return reportePadecimientos;
+	}
+	
+	/**
+	 * Genera el reporte de Tabla Top 5 Hospitales 
+	 * @param info Objeto tipo MisionVision
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteTopHospitalesTabla(ArrayList<TopHospitalesValues> topHospitales){
+		JasperReportBuilder reporteTopHospitales = new JasperReportBuilder();
+		
+		TextColumnBuilder<String> hospitalGColumn = col.column("Hospital", exp.text("")).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));
+		TextColumnBuilder<String> hospitalColumn = col.column("Hospital", "hospital", type.stringType());
+		TextColumnBuilder<String> conceptoColumn = col.column("Concepto", "concepto", type.stringType());
+		TextColumnBuilder<String> indicadoresColumn = col.column("Indicadores", "indicadores", type.stringType());		
+
+		reporteTopHospitales	
+		.setTemplate(Estilos.reportSmallTemplate)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.TOP_HOSPITALES_TITULO).setStyle(Estilos.reportTitleStyle))
+   		.fields(
+   				field("hospital", type.stringType()))
+   		.columns(hospitalGColumn,hospitalColumn,conceptoColumn,indicadoresColumn)
+   		.groupBy(hospitalColumn)   	
+   		.setGroupStyle(Estilos.groupStyle)
+   		.setDataSource(ds.crearTopHospitalesTablaDS(topHospitales));
+		return reporteTopHospitales;
+	}
+		
+	/**
+	 * Genera el reporte de Grafica Top 5 Hospitales 
+	 * @param info Objeto tipo MisionVision
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteTopHospitalesGrafica(TopHospitalesGrafica info){
+		JasperReportBuilder reporteTopHospitales = new JasperReportBuilder();
+		
+		TextColumnBuilder<String> hospitalColumn = col.column("Hospital", "hospital", type.stringType());
+		TextColumnBuilder<Integer> siniestroColumn = col.column("Siniestros", "siniestros", type.integerType());
+		
+		String texto = info.getTexto();
+		TextFieldBuilder<String> textField = cmp.text("");
+		
+		if(texto.length() <= 300) {
+			textField = cmp.text(texto)													
+					.setStyle(Estilos.reportBigTextAreaStyle);
+		}
+		
+		if(texto.length() >= 301 && texto.length() <= 500) {
+			textField = cmp.text(texto)													
+					.setStyle(Estilos.reportMediumTextAreaStyle);
+		}
+		
+		if(texto.length() > 501) {
+			textField = cmp.text(texto)													
+					.setStyle(Estilos.reportSmallTextAreaStyle);
+		}
+		
+		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
+
+		HorizontalListBuilder textoInferior = cmp.horizontalList()
+														.add(textField)
+														.setBackgroundComponent(rectangulo);	
+		
+		reporteTopHospitales		
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.TOP_HOSPITALES_TITULO).setStyle(Estilos.reportTitleStyle))
+   		.summary(cmp.verticalList(
+   					cmp.horizontalList(
+   						cht.pieChart()
+   							.setDataSource(ds.crearTopHospitalesGraficaDS(info,1))
+   							.customizers(new CustomizedPercentagePieChart())   							
+   							.setLabelFormat("{1} %")   							
+   							.setTitle(Constantes.TOP_HOSPITALES_TOTAL_PIE_TITULO)   	
+   							.setTitleColor(Estilos.colorBlueLight)
+   							.setTitleFont(Estilos.chartFontStyle) 
+   							.setKey(hospitalColumn)
+   							.series(   				
+   									cht.serie(siniestroColumn)),  
+   							cmp.horizontalGap(5),
+   							cht.pieChart()
+   							.setDataSource(ds.crearTopHospitalesGraficaDS(info,2))
+   							.customizers(new CustomizedPercentagePieChart())   							
+   							.setLabelFormat("{1} %")   							
+   							.setTitle(Constantes.TOP_HOSPITALES_DETALLE_PIE_TITULO)   	
+   							.setTitleColor(Estilos.colorBlueLight)
+   							.setTitleFont(Estilos.chartFontStyle) 
+   							.setKey(hospitalColumn)
+   							.series(   				
+   									cht.serie(siniestroColumn))
+   						),
+   						cmp.verticalGap(20),
+   						textoInferior
+   					)
+   				);
+		return reporteTopHospitales;
+	}
+	
+	/**
+	 * Genera el reporte de Tabla Comparativo Hospitales 
+	 * @param hospitales Objetos tipo ComparativoHospital
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteComparativoHospital(ComparativoHospital hospitales){
+		JasperReportBuilder reporteHospitales = new JasperReportBuilder();
+		
+		TextColumnBuilder<String> padecimientoGColumn = col.column("Padecimiento", exp.text("")).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));
+		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "padecimiento", type.stringType());
+		TextColumnBuilder<String> hospitalColumn = col.column("Hospital", "hospital", type.stringType());		
+		TextColumnBuilder<Integer> siniestrosColumn = col.column("No. De Siniestros", "siniestro", type.integerType());
+		TextColumnBuilder<String> montoColumn = col.column("Monto Pagado", "monto", type.stringType());
+		TextColumnBuilder<String> costoColumn = col.column("Costo Promedio", "costo", type.stringType());
+
+		TextFieldBuilder<String> textField = cmp.text("");
+		String texto = hospitales.getTexto();
+		
+		if(texto.length() <= 300) {
+			textField = cmp.text(texto)													
+					.setStyle(Estilos.reportBigTextAreaStyle);
+		}
+		
+		if(texto.length() >= 301 && texto.length() <= 500) {
+			textField = cmp.text(texto)													
+					.setStyle(Estilos.reportMediumTextAreaStyle);
+		}
+		
+		if(texto.length() > 501) {
+			textField = cmp.text(texto)													
+					.setStyle(Estilos.reportSmallTextAreaStyle);
+		}
+		
+		reporteHospitales	
+		.setTemplate(Estilos.reportSmallTemplate)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.COMPARATIVO_HOSPITAL_TITULO).setStyle(Estilos.reportTitleStyle))
+   		.fields(
+   				field("padecimiento", type.stringType()))
+   		.columns(padecimientoGColumn,padecimientoColumn,hospitalColumn,siniestrosColumn,
+   				montoColumn,costoColumn)
+   		.groupBy(padecimientoColumn)   	
+   		.setGroupStyle(Estilos.groupStyle)
+   		.setDataSource(ds.crearComparativoHospitalDS(hospitales.getHospitales()))
+   		.summary(cmp.verticalList(cmp.verticalGap(30),textField));
+
+		return reporteHospitales;
 	}
 	
 	/**
@@ -1458,6 +1757,7 @@ public class GeneradorReporte {
 	public void setReporteCostoVsTarifasMasculino(ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasMasculino) {
 		this.reporteCostoVsTarifasMasculino = reporteCostoVsTarifasMasculino;
 	}
+	
 	private CostoPromedioSiniestro getReporteCostoPromedio() {
 		return reporteCostoPromedio;
 	}
@@ -1482,6 +1782,35 @@ public class GeneradorReporte {
 		this.reporteGastosNoCubiertos = reporteGastosNoCubiertos;
 	}
 
+	private TopHospitales getResporteTopHospitales() {
+		return resporteTopHospitales;
+	}
+
+	public void setResporteTopHospitales(TopHospitales resporteTopHospitales) {
+		this.resporteTopHospitales = resporteTopHospitales;
+	}
+
+	private ArrayList<ParticipacionAsegurado> getReporteParticipacionAsegurado() {
+		return reporteParticipacionAsegurado;
+	}
+
+	public void setReporteParticipacionAsegurado(ArrayList<ParticipacionAsegurado> reporteParticipacionAsegurado) {
+		this.reporteParticipacionAsegurado = reporteParticipacionAsegurado;
+	}
+
+	private ComparativoHospital getReporteComparativoHospitales() {
+		return reporteComparativoHospitales;
+	}
+
+	public void setReporteComparativoHospitales(ComparativoHospital reporteComparativoHospitales) {
+		this.reporteComparativoHospitales = reporteComparativoHospitales;
+	}
+
+	
+	
+	
+	
+	
 	private Float getMaxFloat(ArrayList<Float> data) {
 		Float min = data.get(0);
         for (Float i : data){

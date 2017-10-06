@@ -28,12 +28,16 @@ public class Estilos {
 	public static final StyleBuilder reportHeadStyle;
 	public static final StyleBuilder columnStyle;
 	public static final StyleBuilder columnSmallStyle;
+	public static final StyleBuilder columnConditionalPorcentajeStyle;
 	public static final StyleBuilder columnConditionSmallStyle;
 	public static final StyleBuilder columnTitleStyle;
 	public static final StyleBuilder groupStyle;
 	public static final StyleBuilder groupSmallStyle;
 	public static final StyleBuilder subtotalStyle;
 	public static final StyleBuilder textAreaStyle;
+	public static final StyleBuilder reportBigTextAreaStyle;
+	public static final StyleBuilder reportMediumTextAreaStyle;	
+	public static final StyleBuilder reportSmallTextAreaStyle;
 	public static final StyleBuilder reportTextAreaStyle;	
 	public static final StyleBuilder misionTitleStyle;	
 	public static final StyleBuilder misionStyle;
@@ -41,6 +45,7 @@ public class Estilos {
 	public static final StyleBuilder chartTitleStyle;
 	public static final ReportTemplateBuilder reportTemplate;
 	public static final ReportTemplateBuilder reportSmallTemplate;
+	public static final ReportTemplateBuilder reportConditionalPorcentajeTemplate;
 	public static final ReportTemplateBuilder reportConditionalGroupTemplate;
 	public static final CurrencyType currencyType;
 	public static final FontBuilder chartFontStyle;
@@ -57,6 +62,8 @@ public class Estilos {
 	public static final Color colorCatastrofe;
 	public static final Color colorSevero;
 	public static final Color colorFrecuencias;
+	public static final Color colorYellow;
+	public static final Color colorWine;
 	
 	
 	static {
@@ -68,6 +75,8 @@ public class Estilos {
 			  colorOrange = Color.getHSBColor(0.11713836f, 0.848f, 0.98039216f);
 			  colorRed = Color.getHSBColor(0.0f, 1.0f, 0.7490196f);
 			  colorRedDark = Color.getHSBColor(0.95555556f, 0.8f, 0.5882353f);
+			  colorYellow = Color.getHSBColor(0.23431373f, 0.79812205f, 0.8352941f);
+			  colorWine = Color.getHSBColor(0.95555556f, 0.8f, 0.5882353f);
 			  
 			  colorCatastrofe = Color.getHSBColor(0.0f, 0.09411765f, 1.0f);
 			  colorSevero = Color.getHSBColor(0.12916666f, 0.15748031f, 0.99607843f);
@@ -112,6 +121,21 @@ public class Estilos {
 		    		  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
       								.setFontSize(13)
       								.setForegroundColor(colorBlueLight);
+		      
+		      reportBigTextAreaStyle = stl.style(boldStyle)
+	  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
+					.setFontSize(15)
+					.setForegroundColor(colorBlueLight);
+		      
+		      reportMediumTextAreaStyle = stl.style(boldStyle)
+	  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
+					.setFontSize(11)
+					.setForegroundColor(colorBlueLight);
+		      
+		      reportSmallTextAreaStyle = stl.style(boldStyle)
+	  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
+					.setFontSize(7)
+					.setForegroundColor(colorBlueLight);
 		                  
 		      
 		      reportSubTitleCenteredStyle = stl.style(boldCenteredStyle)		
@@ -150,17 +174,22 @@ public class Estilos {
 		                               .setForegroundColor(Color.WHITE);		                             		
 		      
 		      groupStyle          = stl.style(boldStyle)		    		  						
-                      .setHorizontalTextAlignment(HorizontalTextAlignment.CENTER);                      
+		    		  					.setFontSize(12);
 		      		      
 		      
 		      groupSmallStyle          = stl.style(boldStyle)		    		  						
 		                               .setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
 		                               .conditionalStyles(bajaTitle,altaTitle,severaTitle,catasTitle);	
 		      
-		      columnSmallStyle         = stl.style().setFontSize(10)
+		      columnConditionalPorcentajeStyle         = stl.style().setFontSize(10)
 										.setVerticalTextAlignment(VerticalTextAlignment.MIDDLE)
 										.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
 										.conditionalStyles(porcentajeHL)
+										.setBottomBorder(stl.penThin());
+		      
+		      columnSmallStyle         = stl.style().setFontSize(10)
+										.setVerticalTextAlignment(VerticalTextAlignment.MIDDLE)
+										.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)										
 										.setBottomBorder(stl.penThin());
 		      
 		      columnConditionSmallStyle         = stl.style().setFontSize(10)
@@ -191,6 +220,10 @@ public class Estilos {
 		      reportSmallTemplate = template()		    		  				
                       				.setColumnStyle(columnSmallStyle)		
                       				.setColumnTitleStyle(columnTitleStyle);
+		      
+		      reportConditionalPorcentajeTemplate = template()		    		  				
+        								.setColumnStyle(columnConditionalPorcentajeStyle)		
+        								.setColumnTitleStyle(columnTitleStyle);
 		      
 		      
 		      reportConditionalGroupTemplate = template()

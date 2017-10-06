@@ -2,28 +2,28 @@ package com.meltsan.pdfcreator.beans;
 
 public class ConceptoMonto {
 	
-	private String padecimiento;
-	private Integer montoTotalPadecimiento;
+	private String concepto;
+	private Integer monto;
 
-	public ConceptoMonto(String padecimiento, Integer montoTotalPadecimiento) {
-		this.padecimiento = padecimiento;
-		this.montoTotalPadecimiento = montoTotalPadecimiento;
+	public ConceptoMonto(String concepto, Integer monto) {
+		this.concepto = concepto;
+		this.monto = monto;
 	}
 
-	public String getPadecimiento() {
-		return padecimiento;
+	public String getConcepto() {
+		return concepto;
 	}
 
-	public void setPadecimiento(String padecimiento) {
-		this.padecimiento = padecimiento;
+	public void setConcepto(String concepto) {
+		this.concepto = concepto;
 	}
 
-	public Integer getMontoTotalPadecimiento() {
-		return montoTotalPadecimiento;
+	public Integer getMonto() {
+		return monto;
 	}
 
-	public void setMontoTotalPadecimiento(Integer montoTotalPadecimiento) {
-		this.montoTotalPadecimiento = montoTotalPadecimiento;
+	public void setMonto(Integer monto) {
+		this.monto = monto;
 	}
 
 }

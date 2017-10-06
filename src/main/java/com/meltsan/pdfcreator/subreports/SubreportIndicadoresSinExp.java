@@ -23,7 +23,7 @@ public class SubreportIndicadoresSinExp extends AbstractSimpleExpression<JasperR
 		   ArrayList<IndicadoresSiniestroValues> srt = reportParameters.getValue("columns");		   
 		   
 		         JasperReportBuilder report = report();		         
-		         report.setTemplate(Estilos.reportSmallTemplate)		         		
+		         report.setTemplate(Estilos.reportConditionalPorcentajeTemplate)		         		
 		         		.addColumn(col.column("Vigencia", "vigencia", type.stringType()).setWidth(150));
 		         for (IndicadoresSiniestroValues srp : srt) {		
 		           report.addColumn(col.column(srp.getPeriodo(), srp.getPeriodo(), type.stringType()));	

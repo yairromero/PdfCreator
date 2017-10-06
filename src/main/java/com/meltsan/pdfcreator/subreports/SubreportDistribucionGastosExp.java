@@ -24,7 +24,7 @@ public class SubreportDistribucionGastosExp extends AbstractSimpleExpression<Jas
 			   ArrayList<DistribucionGastosValues> srt = reportParameters.getValue("columns");			   
 			         JasperReportBuilder report = report();		
 			         report.setLocale(Locale.US);
-			         report.setTemplate(Estilos.reportSmallTemplate)		         		
+			         report.setTemplate(Estilos.reportConditionalPorcentajeTemplate)		         		
 			         		.addColumn(col.column("", "vigencia", type.stringType()).setWidth(120));
 			         for (DistribucionGastosValues srp : srt) {			        	 
 			           report.addColumn(col.column(srp.getPeriodo(), srp.getPeriodo(), type.integerType()).setPattern("$ ###,###,###"));			           

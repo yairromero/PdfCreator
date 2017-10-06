@@ -50,7 +50,7 @@ public class SubreportPadecimientosCronicosExp extends AbstractSimpleExpression<
 		   		
 		         JasperReportBuilder report = report();		
 		         report.setLocale(Locale.US);
-		         report.setTemplate(Estilos.reportSmallTemplate);
+		         report.setTemplate(Estilos.reportConditionalPorcentajeTemplate);
 		         report.columnGrid(gridList);
 		         report.addColumn(vigenciaColumn);
 		         for(Columns col: columns){

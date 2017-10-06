@@ -10,14 +10,20 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
+import com.meltsan.pdfcreator.beans.HospitalPorcentaje;
 import com.meltsan.pdfcreator.beans.PadCronicoClienteMercado;
 import com.meltsan.pdfcreator.beans.PadCronicosMontos;
+import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
+import com.meltsan.pdfcreator.beans.ComparativoHospital;
 import com.meltsan.pdfcreator.beans.ConceptoMonto;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
+import com.meltsan.pdfcreator.beans.TopHospitales;
+import com.meltsan.pdfcreator.beans.TopHospitalesGrafica;
 import com.meltsan.pdfcreator.beans.TopPadecimientosCronicos;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
+import com.meltsan.pdfcreator.beans.values.ComparativoHospitalValues;
 import com.meltsan.pdfcreator.beans.values.CostoPromedioSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.DistribucionGastosValues;
 import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
@@ -29,6 +35,8 @@ import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
+import com.meltsan.pdfcreator.beans.values.TopHospitalesValues;
+import com.meltsan.pdfcreator.util.Utilidades;
 
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.jasperreports.engine.JRDataSource;
@@ -789,19 +797,73 @@ public class DataSources {
 	 */
 	public JRDataSource crearSiniestrosMayoresDS(ArrayList<SiniestrosMayores> siniestros) {
 		
-		int masterRowNumber = siniestros.size();	         
-        String[] columns = new String[masterRowNumber + 2];                
+		ArrayList<String> periodos = Utilidades.getPeriodosSinMayores(siniestros);
+		ArrayList<String> labels = Utilidades.getEtiquetasSinMayores(siniestros);
+		ArrayList<Object[]> temp = new ArrayList<Object[]>();
+		
+		int noCols = periodos.size()+3;	         
+        String[] columns = new String[noCols];                
         
         columns[0] = "siniestro";
         columns[1] = "padecimiento";
-        for (int i = 2; i <= masterRowNumber; i++) {	
-           columns[i] = siniestros.get(i-2).getPeriodo();
-        }        
+        
+        for (int i = 0; i < periodos.size(); i++) {	
+           columns[i+2] = periodos.get(i);
+        }
+        
+        columns[noCols-1]="acumulado";
         
         DRDataSource dataSource = new DRDataSource(columns);
+        columns = null;
 
+        for(String label:labels) {        		
+        		for(SiniestrosMayores siniestro: siniestros) {        			
+        			Object[] data = new Object[noCols];
+        			data[0] = label;
+        			data[1] = siniestro.getPadecimiento();
+        			
+        			if(siniestro.getNoSiniestro().equals(label)) {        				
+        				Object[] values = new Object[periodos.size()];
+        				int i = 0;
+        				
+        				for(String periodo:periodos) {        					
+        					if(periodo.equals(siniestro.getPeriodo())) {
+        						values[i] = siniestro.getMonto();
+        					}
+        					i++;
+        				}
+        				        				
+        				System.arraycopy(values, 0, data, 2, values.length);
+        				temp.add(data);
+        			}
+        		}        	
+        }
         
-		
+        int acumulado = 0;
+        Object[] result = new Object[noCols];
+        for(String label:labels) {
+        		Object[] data = new Object[noCols];
+        		Object[] tmp = new Object[noCols];
+        		for(Object[] objeto:temp) {        		
+        			if(objeto[0].equals(label)) {
+        				for(int i=2;i<noCols;i++) {
+        					if(objeto[i] != null) {
+        						tmp[i] = "$"+formatoEntero.format(objeto[i]);
+        						acumulado = acumulado +(Integer)objeto[i];
+        						result[0] = objeto[0];
+        						result[1] = objeto[1];
+        					}
+        				}        				
+        			}
+        			data = tmp;	
+        		}  
+        		System.arraycopy(data, 2, result, 2, data.length-2);
+        		result[noCols-1] = "$"+formatoEntero.format(acumulado);        		
+        		dataSource.add(result);
+        		acumulado = 0;
+		}
+        
+        
 		return dataSource;
 	}	
 	
@@ -963,7 +1025,7 @@ public class DataSources {
 			
 			Double porcentajePadecimientos = 0.0;
 			for(ConceptoMonto pad: padecimientos.getPadecimientosCronicos()){
-				porcentajePadecimientos += pad.getMontoTotalPadecimiento();
+				porcentajePadecimientos += pad.getMonto();
 			}
 			
 			dataSource.add("No crónicos",padecimientos.getMontoNoCronicos());
@@ -974,7 +1036,7 @@ public class DataSources {
 		case 2:
 			
 			for(ConceptoMonto pad: padecimientos.getPadecimientosCronicos()){
-				dataSource.add(pad.getPadecimiento(),pad.getMontoTotalPadecimiento());
+				dataSource.add(pad.getConcepto(),pad.getMonto());
 			}
 			
 			break;
@@ -1065,7 +1127,6 @@ public class DataSources {
 		return dataSource;
 	}
 	
-	
 	/**
 	 * Genera datos para llenar tabla Distribucion de Gastos 
 	 * No Cubiertos
@@ -1088,7 +1149,7 @@ public class DataSources {
         ArrayList<String> labels = new ArrayList<String>();
         for(DistribucionGastosValues periodo:gastos) {       		
     			for(ConceptoMonto concepto: periodo.getMontos()) {	        			
-    				labels.add(concepto.getPadecimiento());
+    				labels.add(concepto.getConcepto());
     			}
         }
     
@@ -1127,13 +1188,279 @@ public class DataSources {
 		
 		DRDataSource dataSource = new DRDataSource("concepto","monto");
 		for(ConceptoMonto pad: gastos){
-			dataSource.add(pad.getPadecimiento(),pad.getMontoTotalPadecimiento());
+			dataSource.add(pad.getConcepto(),pad.getMonto());
 		}
 		return dataSource;		
 	}
 	
+	/**
+	 * Genera datos para llenar graficas reporte
+	 * Top 5 Hospitales
+	 * 	
+	 * @param hospitales Objeto tipo TopHospitalesGrafica
+	 * @param tipoGrafica Entero donde 1 es la grafica de hospitales totales
+	 * y 2 es la tabla de hospitales especifica
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearTopHospitalesGraficaDS(TopHospitalesGrafica hospitales, int tipoGrafica) {
+		
+		DRDataSource dataSource = new DRDataSource("hospital","siniestros");
+		
+		switch(tipoGrafica){
+		case 1:
+					
+			float totalTop = 0;
+			for(HospitalPorcentaje pad: hospitales.getTopHospitales()){
+				totalTop += pad.getPorcentaje();
+			}
+			
+			dataSource.add("Sin Especificar",hospitales.getHospitalesSinEspecificar());
+			dataSource.add("Otros Hospitales",hospitales.getOtrosHospitales());
+			dataSource.add("Top "+hospitales.getTopHospitales().size() +" Hospitales",totalTop);
+			
+			break;
+			
+		case 2:
+			
+			for(HospitalPorcentaje pad: hospitales.getTopHospitales()){
+				dataSource.add(pad.getHospital(),pad.getPorcentaje());
+			}
+			
+			break;
+		default:
+			dataSource.add("Grafica no valida",100);
+			break;
+		}
+		
+		return dataSource;
+	}
 	
 	
+	/**
+	 * Genera datos para llenar tabla reporte
+	 * Top 5 Hospitales
+	 * 	
+	 * @param hospitales Lista de objetos tipo TopHospitalValues
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearTopHospitalesTablaDS(ArrayList<TopHospitalesValues> hospitales) {
+		
+		DRDataSource dataSource = new DRDataSource("hospital","concepto","indicadores");
+		
+		for(TopHospitalesValues thv: hospitales) {
+			if(thv.getConcepto().equals("Monto Pagado") || thv.getConcepto().equals("Costo Promedio"))
+				dataSource.add(thv.getHopital(),thv.getConcepto(),"$"+formatoEntero.format(thv.getIndicadores()));
+			
+			if(thv.getConcepto().equals("Número de Siniestros"))
+				dataSource.add(thv.getHopital(),thv.getConcepto(),formatoEntero.format(thv.getIndicadores()));
+			
+			if(thv.getConcepto().equals("Morbilidad"))
+				dataSource.add(thv.getHopital(),thv.getConcepto(),formatoEntero.format(thv.getIndicadores())+"%");
+		}
+		
+		return dataSource;
+	}
+	
+	
+	/**
+	 * Genera datos para crear tabla de Participacion
+	 * Asegurado
+	 * @param indicadores lista con objetos ParticipacionAsegurado 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearParticipacionAseguradoTablaDS(ArrayList<ParticipacionAsegurado> montos) {		
+		
+		int masterRowNumber = montos.size();	  
+		int noCols = masterRowNumber * 2;
+		noCols = noCols + 3;
+        String[] columns = new String[noCols];                
+        ArrayList<String> namesCols = new ArrayList<String>();        
+        
+        for (int i = 0; i < masterRowNumber; i++) {
+        		namesCols.add("monto"+i);
+        		namesCols.add("porcien"+i);        		
+        }
+        
+        columns[0] = "vigencia";
+        for (int i = 1; i <= namesCols.size(); i++) {	
+	           columns[i] = namesCols.get(i-1);
+	        }      
+        
+        columns[noCols-2]="montototal";
+        columns[noCols-1]="porcientotal";
+        
+        DRDataSource dataSource = new DRDataSource(columns);
+		
+        ArrayList<String>labels = new ArrayList<String>();
+        labels.add("Reclamado");
+        labels.add("Pagado");                
+        labels.add("Deducible");                
+        labels.add("Coaseguro");        
+        labels.add("IVA");        
+        labels.add("No Cubierto");        
+                              
+        float acumuladoTotal = 0;        
+        Object[] temp = new Object[noCols];
+        
+        //Se llena datasource
+        for (int i = 0; i < labels.size(); i++) {
+
+           Object[] values = new Object[noCols];                      
+           
+           String label = labels.get(i);
+           values[0] = label;
+            
+           if(label.equals("Reclamado")){        	   
+   	   			int j = 1;   	   		
+   	   			for(ParticipacionAsegurado monto:montos) {
+   	   				values[j] = "$"+formatoEntero.format(monto.getMontoReclamado()).toString();
+   	   				acumuladoTotal = acumuladoTotal + monto.getMontoReclamado();
+   	   				j++;
+   	   				values[j] = "100%";
+   	   				j++;
+   	   			}
+   	   			values[noCols-2] = "$"+formatoEntero.format(acumuladoTotal).toString();
+   	   			values[noCols-1] = "100%";
+   	   			System.arraycopy(values,0, temp, 0, values.length);   	   			
+           }
+           
+           if(label.equals("Pagado")){        	   
+        	   		int j = 1;
+        	   		float acumulado = 0;
+        	   		for(ParticipacionAsegurado monto:montos) {
+        	   			values[j] = "$"+formatoEntero.format(monto.getMontoPagado()).toString();
+        	   			acumulado = acumulado + monto.getMontoPagado();
+        	   			j++;
+        	   			values[j] = formatoEntero.format(monto.getPorcentajePagado()).toString()+"%";
+        	   			j++;
+        	   		}
+        	   		values[noCols-2] = "$"+formatoEntero.format(acumulado).toString();
+        	   		float x = acumulado/acumuladoTotal;
+        	   		x = Math.round(x * 100.0f) / 100.0f;
+        	   		int res = (int) (x * 100);
+        	   		values[noCols-1] = formatoEntero.format(res).toString()+"%";
+        	   		dataSource.add(values);        	   		
+           }
+           
+           if(label.equals("Deducible")){
+        	   
+        	   int j = 1;
+   	   		float acumulado = 0;
+   	   		for(ParticipacionAsegurado monto:montos) {
+   	   			values[j] = "$"+formatoEntero.format(monto.getMontoDeducible()).toString();
+   	   			acumulado = acumulado + monto.getMontoDeducible();
+   	   			j++;
+   	   			values[j] = formatoEntero.format(monto.getPorcentajeDeducible()).toString()+"%";
+   	   			j++;
+   	   		}
+   	   		values[noCols-2] = "$"+formatoEntero.format(acumulado).toString();
+   	   		float x = acumulado/acumuladoTotal;
+   	   		x = Math.round(x * 100.0f) / 100.0f;
+   	   		int res = (int) (x * 100);
+   	   		values[noCols-1] = formatoEntero.format(res).toString()+"%";
+   	   		dataSource.add(values); 
+   	   		
+           }
+           
+           if(label.equals("Coaseguro")){
+        	   int j = 1;
+      	   		float acumulado = 0;
+      	   		for(ParticipacionAsegurado monto:montos) {
+      	   			values[j] = "$"+formatoEntero.format(monto.getMontoCoaseguro()).toString();
+      	   			acumulado = acumulado + monto.getMontoDeducible();
+      	   			j++;
+      	   			values[j] = formatoEntero.format(monto.getPorcentajeCoaseguro()).toString()+"%";
+      	   			j++;
+      	   		}
+      	   		values[noCols-2] = "$"+formatoEntero.format(acumulado).toString();
+      	   		float x = acumulado/acumuladoTotal;
+      	   		x = Math.round(x * 100.0f) / 100.0f;
+      	   		int res = (int) (x * 100);
+      	   		values[noCols-1] = formatoEntero.format(res).toString()+"%";
+      	   		dataSource.add(values); 
+	   			 	 
+           }
+           
+           if(label.equals("IVA")){
+        	   int j = 1;
+      	   		float acumulado = 0;
+      	   		for(ParticipacionAsegurado monto:montos) {
+      	   			values[j] = "$"+formatoEntero.format(monto.getMontoIVA()).toString();
+      	   			acumulado = acumulado + monto.getMontoIVA();
+      	   			j++;
+      	   			values[j] = formatoEntero.format(monto.getPorcentajeIVA()).toString()+"%";
+      	   			j++;
+      	   		}
+      	   		values[noCols-2] = "$"+formatoEntero.format(acumulado).toString();
+      	   		float x = acumulado/acumuladoTotal;
+      	   		x = Math.round(x * 100.0f) / 100.0f;
+      	   		int res = (int) (x * 100);
+      	   		values[noCols-1] = formatoEntero.format(res).toString()+"%";
+      	   		dataSource.add(values); 
+	   			 	 
+          }
+           
+           if(label.equals("No Cubierto")){
+ 	   			 	   				
+        	   int j = 1;
+      	   		float acumulado = 0;
+      	   		for(ParticipacionAsegurado monto:montos) {
+      	   			values[j] = "$"+formatoEntero.format(monto.getMontoNoCubierto()).toString();
+      	   			acumulado = acumulado + monto.getMontoNoCubierto();
+      	   			j++;
+      	   			values[j] = formatoEntero.format(monto.getPorcentajeNoCubierto()).toString()+"%";
+      	   			j++;
+      	   		}
+      	   		values[noCols-2] = "$"+formatoEntero.format(acumulado).toString();
+      	   		float x = acumulado/acumuladoTotal;
+      	   		x = Math.round(x * 100.0f) / 100.0f;
+      	   		int res = (int) (x * 100);
+      	   		values[noCols-1] = formatoEntero.format(res).toString()+"%";
+      	   		dataSource.add(values); 
+	 
+          }
+                               
+        }
+		dataSource.add(temp);
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para crear grafica de Participacion
+	 * Asegurado
+	 * @param indicadores lista con objetos ParticipacionAsegurado 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearParticipacionAseguradoGraficaDS(ArrayList<ParticipacionAsegurado> montos) {	
+		
+		DRDataSource dataSource = new DRDataSource("periodo", "pagado","deducible","coaseguro","iva","nocubierto");
+		
+		for(ParticipacionAsegurado pc : montos) {
+			dataSource.add(pc.getPeriodo(),pc.getPorcentajePagado(),pc.getPorcentajeDeducible(),
+							pc.getPorcentajeCoaseguro(),pc.getPorcentajeIVA(),pc.getPorcentajeNoCubierto());
+		}
+		
+		return dataSource;
+	}
+	
+	/**
+	 * Genera datos para llenar tabla reporte
+	 * Comparativo Hospitales
+	 * 	
+	 * @param hospitales Lista de objetos tipo ComparativoHospital
+	 * @return JRDataSource para alimentar graficas
+	 */
+	public JRDataSource crearComparativoHospitalDS(ArrayList<ComparativoHospitalValues> hospitales) {
+		
+		DRDataSource dataSource = new DRDataSource("padecimiento","hospital","siniestro","monto","costo");
+		
+		for(ComparativoHospitalValues ch: hospitales) {
+			dataSource.add(ch.getPadecimiento(),ch.getHospital(),ch.getNoSiniestros(),"$"+formatoEntero.format(ch.getMontoPagdo()),
+					"$"+formatoEntero.format(ch.getCostoPromedio()));
+		}
+		
+		return dataSource;
+	}
 	
 	
 	/**
@@ -1178,8 +1505,8 @@ public class DataSources {
 		result[0] = concepto;
 			for(DistribucionGastosValues padv: gastos) { 					
 					for(ConceptoMonto pcv: padv.getMontos()) {
-						if(pcv.getPadecimiento().equals(concepto)) { 							
-							temp[0] = pcv.getMontoTotalPadecimiento();	
+						if(pcv.getConcepto().equals(concepto)) { 							
+							temp[0] = pcv.getMonto();	
 							System.arraycopy(temp, 0, result, i, temp.length);
 							i++;
 						}

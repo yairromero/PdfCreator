@@ -100,6 +100,24 @@ public class Constantes {
 	public static String PAD_CRONICO_DETALLE_PIE_TITULO =
 			"Padecimientos Crónico-Degenerativos";
 	
+	public static String TOP_HOSPITALES_TOTAL_PIE_TITULO =
+			"Hospitales";
+	
+	public static String TOP_HOSPITALES_DETALLE_PIE_TITULO =
+			"Top 5 Hospitales";
+	
+	public static String TOP_HOSPITALES_TITULO =
+			"Top 5 Hospitales Última Vigencia";
+	
+	public static String PARTICIPACION_ASEGURADO_TITULO =
+			"Participación del Asegurado en la Siniestralidad";
+	
+	public static String PARTICIPACION_ASEGURADO_GRAFICA_TITULO =
+				"Participación del Asegurado";
+	
+	public static String COMPARATIVO_HOSPITAL_TITULO =
+			"Comparativo de Hospitales para los padecimientos más frecuentes";
+	
 	public static String WWW_LOCKTON_LINK =
 			"www.lockton.com.mx";
 	

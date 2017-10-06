@@ -2,7 +2,7 @@ package com.meltsan.pdfcreator.beans.values;
 
 public class IndicadoresSiniestroValues {
 	
-	private Long montoPagado;
+	private Integer montoPagado;
 	private Integer noSiniestros;
 	private Integer costoPerCapita;
 	private Integer primaPerCapita;
@@ -10,7 +10,7 @@ public class IndicadoresSiniestroValues {
 	private Float porcienSiniestroSinCatastrofe;
 	private String periodo;	
 	
-	public IndicadoresSiniestroValues(String periodo, Long montoPagado, Integer noSiniestro, Integer costo, Integer prima,
+	public IndicadoresSiniestroValues(String periodo, Integer montoPagado, Integer noSiniestro, Integer costo, Integer prima,
 							Float porcentajeSiniestralidad, Float porcentajeSiniestroSinCatastrofe) {
 		this.periodo = periodo;
 		this.montoPagado = montoPagado;
@@ -21,7 +21,7 @@ public class IndicadoresSiniestroValues {
 		this.porcienSiniestroSinCatastrofe = porcentajeSiniestroSinCatastrofe;
 	}
 	
-	public IndicadoresSiniestroValues(String periodo, Long montoPagado, Integer noSiniestro, Integer costo, Integer prima,
+	public IndicadoresSiniestroValues(String periodo, Integer montoPagado, Integer noSiniestro, Integer costo, Integer prima,
 			Float porcentajeSiniestralidad) {
 			
 		this.periodo = periodo;
@@ -41,11 +41,11 @@ public class IndicadoresSiniestroValues {
 		this.periodo = periodo;
 	}
 
-	public Long getMontoPagado() {
+	public Integer getMontoPagado() {
 		return montoPagado;
 	}
 
-	public void setMontoPagado(Long montoPagado) {
+	public void setMontoPagado(Integer montoPagado) {
 		this.montoPagado = montoPagado;
 	}
 

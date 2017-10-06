@@ -1,15 +1,33 @@
 package com.meltsan.pdfcreator.beans;
 
-import java.util.ArrayList;
-
 public class SiniestrosMayores {
 	
+	private String noSiniestro;
+	private String padecimiento;
 	private String periodo;
-	private ArrayList<SiniestroMonto> siniestros;
+	private Integer monto;
 	
-	public SiniestrosMayores(String periodo, ArrayList<SiniestroMonto> siniestros) {
+	public SiniestrosMayores(String noSiniestro, String padecimiento, String periodo, Integer monto) {		
+		this.noSiniestro = noSiniestro;
+		this.padecimiento = padecimiento;
 		this.periodo = periodo;
-		this.siniestros = siniestros;		
+		this.monto = monto;
+	}
+
+	public String getNoSiniestro() {
+		return noSiniestro;
+	}
+
+	public void setNoSiniestro(String noSiniestro) {
+		this.noSiniestro = noSiniestro;
+	}
+
+	public String getPadecimiento() {
+		return padecimiento;
+	}
+
+	public void setPadecimiento(String padecimiento) {
+		this.padecimiento = padecimiento;
 	}
 
 	public String getPeriodo() {
@@ -20,12 +38,12 @@ public class SiniestrosMayores {
 		this.periodo = periodo;
 	}
 
-	public ArrayList<SiniestroMonto> getSiniestros() {
-		return siniestros;
+	public Integer getMonto() {
+		return monto;
 	}
 
-	public void setSiniestros(ArrayList<SiniestroMonto> siniestros) {
-		this.siniestros = siniestros;
+	public void setMonto(Integer monto) {
+		this.monto = monto;
 	}
 
 }

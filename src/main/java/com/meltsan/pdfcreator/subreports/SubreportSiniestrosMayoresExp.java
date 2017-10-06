@@ -5,9 +5,11 @@ import static net.sf.dynamicreports.report.builder.DynamicReports.report;
 import static net.sf.dynamicreports.report.builder.DynamicReports.type;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
 import com.meltsan.pdfcreator.util.Estilos;
+import com.meltsan.pdfcreator.util.Utilidades;
 
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
@@ -20,34 +22,23 @@ public class SubreportSiniestrosMayoresExp extends AbstractSimpleExpression<Jasp
 	@Override
 	public JasperReportBuilder evaluate(ReportParameters reportParameters) {
 	
-		 ArrayList<SiniestrosMayores> sm = reportParameters.getValue("columns");							
-		 int noPeridos = sm.size();
+		 		ArrayList<SiniestrosMayores> sm = reportParameters.getValue("columns");							
+		 		ArrayList<String> periodos = Utilidades.getPeriodosSinMayores(sm);
+		 		
 		         JasperReportBuilder report = report();		         
-		         report.setTemplate(Estilos.reportTemplate);			         
-		         report.addColumn(col.reportRowNumberColumn("No."));
+		         report.setTemplate(Estilos.reportSmallTemplate);
+		         report.setLocale(Locale.US);
+		         report.addColumn(col.reportRowNumberColumn("No.").setFixedWidth(30));
 		         report.addColumn(col.column("Siniestro","siniestro",type.stringType()));
-		         report.addColumn(col.column("Padecimiento","padecimiento",type.stringType()));
-		         for (SiniestrosMayores entity : sm) {		
-		           report.addColumn(col.column(entity.getPeriodo(), entity.getPeriodo(), type.stringType()));	
+		         report.addColumn(col.column("Padecimiento","padecimiento",type.stringType()).setFixedWidth(175));
+		         		         		         
+		         for (String entity : periodos) {
+		        	 
+		           report.addColumn(col.column(entity, entity, type.stringType()));	
 		         }				                 
-		         report.addColumn(col.column("Acumulado "+noPeridos+" años", new ExpressionColumn()));
+		         report.addColumn(col.column("Acumulado "+periodos.size()+" años","acumulado",type.stringType()));
 
 		         return report;
 		      }
 	
-	private class ExpressionColumn extends AbstractSimpleExpression<String> {
-		
-		      private static final long serialVersionUID = 1L;
-
-		      @Override		
-		      public String evaluate(ReportParameters reportParameters) {		
-		         return		
-		            "Item = ";		            		
-		      }
-		   }
-	
 	}
-
-
-
-
