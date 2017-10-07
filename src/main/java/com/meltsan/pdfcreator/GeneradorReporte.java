@@ -5,6 +5,7 @@ import static net.sf.dynamicreports.report.builder.DynamicReports.cmp;
 import static net.sf.dynamicreports.report.builder.DynamicReports.col;
 import static net.sf.dynamicreports.report.builder.DynamicReports.exp;
 import static net.sf.dynamicreports.report.builder.DynamicReports.field;
+import static net.sf.dynamicreports.report.builder.DynamicReports.grid;
 import static net.sf.dynamicreports.report.builder.DynamicReports.report;
 import static net.sf.dynamicreports.report.builder.DynamicReports.stl;
 import static net.sf.dynamicreports.report.builder.DynamicReports.type;
@@ -28,6 +29,7 @@ import com.meltsan.pdfcreator.beans.Constantes;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
 import com.meltsan.pdfcreator.beans.DistribucionGastos;
+import com.meltsan.pdfcreator.beans.IndicadoresOficina;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.MisionObjetivo;
@@ -39,6 +41,7 @@ import com.meltsan.pdfcreator.beans.PadecimientosFrecuencia;
 import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
+import com.meltsan.pdfcreator.beans.SiniestralidadOficina;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
@@ -67,6 +70,7 @@ import com.meltsan.pdfcreator.customizers.CustomizedPercentagePieChart;
 import com.meltsan.pdfcreator.customizers.CustomizedSmallPercentageBarChart;
 import com.meltsan.pdfcreator.subreports.SubreportCostoPromedioSinExp;
 import com.meltsan.pdfcreator.subreports.SubreportDistribucionGastosExp;
+import com.meltsan.pdfcreator.subreports.SubreportIndicadoresOficinaExp;
 import com.meltsan.pdfcreator.subreports.SubreportIndicadoresSinExp;
 import com.meltsan.pdfcreator.subreports.SubreportPadecimientosCronicosExp;
 import com.meltsan.pdfcreator.subreports.SubreportParticipacionAseguradoExp;
@@ -74,10 +78,12 @@ import com.meltsan.pdfcreator.subreports.SubreportPoblacionHistoricaExp;
 import com.meltsan.pdfcreator.subreports.SubreportSiniestroRangoExp;
 import com.meltsan.pdfcreator.subreports.SubreportSiniestrosMayoresExp;
 import com.meltsan.pdfcreator.util.Estilos;
+import com.meltsan.pdfcreator.util.Utilidades;
 
 import net.sf.dynamicreports.jasper.builder.JasperConcatenatedReportBuilder;
 import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.jasper.builder.export.Exporters;
+import net.sf.dynamicreports.report.builder.chart.LineChartBuilder;
 import net.sf.dynamicreports.report.builder.column.TextColumnBuilder;
 import net.sf.dynamicreports.report.builder.component.HorizontalListBuilder;
 import net.sf.dynamicreports.report.builder.component.ImageBuilder;
@@ -120,6 +126,8 @@ public class GeneradorReporte {
 	private ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasFemenino;
 	private ArrayList<CostoPerCapitaTarifas> reporteCostoVsTarifasMasculino;
 	private ArrayList<ParticipacionAsegurado> reporteParticipacionAsegurado;	
+	private ArrayList<IndicadoresOficina> reporteIndicadoresOficina;
+	private ArrayList<SiniestralidadOficina> reporteSiniestralidadOficina; 
 	
 	private ArrayList<JasperReportBuilder> listaReportes;
 	private BufferedImage img = null;
@@ -213,6 +221,14 @@ public class GeneradorReporte {
  	   if(this.getReportePadecimientosFrecuentes() != null) {
 		   listaReportes.add(reportePadecimientosFrecuentes(this.getReportePadecimientosFrecuentes()));
 	   }
+ 	   
+ 	   if(this.getReporteSiniestralidadOficina() != null && !this.getReporteSiniestralidadOficina().isEmpty()) {
+ 		  listaReportes.add(reporteSiniestralidadOficina(this.getReporteSiniestralidadOficina())); 
+ 	   }
+ 	   
+ 	   if(this.getReporteIndicadoresOficina() != null) {
+ 		   listaReportes.add(reporteIndicadoresOficina(this.getReporteIndicadoresOficina()));
+ 	   }
  	   
  	   if(this.getReporteParticipacionAsegurado() != null && !this.getReporteParticipacionAsegurado().isEmpty()) {
  		   listaReportes.add(reporteParticipacionAseguradoTabla(this.getReporteParticipacionAsegurado()));
@@ -960,6 +976,88 @@ public class GeneradorReporte {
 	}
 
 	/**
+	 * Genera el reporte de Tabla Siniestralidad
+	 * por oficina y estado 
+	 * @param oficinas Lista de Objetos tipo SiniestralidadOficina
+	 * @return JasperReportBuilder con la hoja de 
+	 * la tabla de padecimientos cronicos 
+	 */
+	private JasperReportBuilder reporteSiniestralidadOficina(ArrayList<SiniestralidadOficina> oficinas){
+		JasperReportBuilder reporteTopHospitales = new JasperReportBuilder();
+		
+		TextColumnBuilder<String> oficinaGColumn = col.column("Oficina/Población", exp.text("")).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));
+		TextColumnBuilder<String> oficinaColumn = col.column("Oficina/Población", "oficina", type.stringType());
+		TextColumnBuilder<String> estadoColumn = col.column("Estado Atención", "estado", type.stringType());
+		TextColumnBuilder<String> siniestroColumn = col.column("No. Siniestro", "siniestros", type.stringType());
+		TextColumnBuilder<String> montoColumn = col.column("Monto Pagado", "monto", type.stringType());
+		TextColumnBuilder<String> morbilidadColumn = col.column("Morbilidad", "morbo", type.stringType()).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));;
+		TextColumnBuilder<String> costoPromedioColumn = col.column("Costo Promedio", "costo", type.stringType()).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));;
+		TextColumnBuilder<String> costoPerCapitaColumn = col.column("Costo Per Cápita", "percapita", type.stringType()).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));;
+
+		reporteTopHospitales	
+		.setTemplate(Estilos.reportSmallTemplate)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.TOP_HOSPITALES_TITULO).setStyle(Estilos.reportTitleStyle))
+   		.columnGrid(oficinaGColumn,estadoColumn,grid.titleGroup("Acumulado",siniestroColumn,montoColumn,morbilidadColumn,costoPromedioColumn,costoPerCapitaColumn))
+   		.fields(
+   				field("oficina", type.stringType()))
+   		.columns(oficinaGColumn,oficinaColumn,estadoColumn,siniestroColumn,montoColumn,morbilidadColumn,costoPromedioColumn,costoPerCapitaColumn)
+   		.groupBy(oficinaColumn)   	
+   		.setGroupStyle(Estilos.groupStyle)
+   		.setDataSource(new JREmptyDataSource(1));
+		return reporteTopHospitales;
+	}
+	
+	/**
+	 * Genera el reporte de Tabla de indicadores oficina
+	 * @param montos Lista de objetos IndicadoresOficina
+	 * @return JasperReportBuilder con la hoja de reporte
+	 */
+	private JasperReportBuilder reporteIndicadoresOficina(ArrayList<IndicadoresOficina> montos) {
+	
+		JasperReportBuilder reporteIndicadoresOficina = new JasperReportBuilder();
+		
+		SubreportBuilder subreportTabla = cmp.subreport(new SubreportIndicadoresOficinaExp())
+				.setDataSource(ds.crearIndicadoresOficinaTablaDS(montos));
+						 
+		 ArrayList<String> labels = Utilidades.getEtiquetasIndicadoresOficina(montos);
+		   		   
+		 labels.remove("General");
+		 TextColumnBuilder<String> periodoColumn = col.column("Periodo","periodo", type.stringType());
+		  	   	 
+	   	 LineChartBuilder chart = cht.lineChart();                 
+        
+        chart			
+			.customizers(new CustomizedNoBorderLineChart())
+			.setTitle(Constantes.COSTO_PROMEDIO_GRAFICA_TITULO)
+			.setTitleColor(Estilos.colorBlueLight)
+			.setTitleFont(Estilos.chartFontStyle)   				
+			.setCategory(periodoColumn)
+			//.seriesColorsByName(seriesColors)
+			.setLegendPosition(Position.RIGHT)
+			.setLegendFont(Estilos.chartFontBoldMediumStyle);			
+        
+        for(String label: labels) {
+       	 	chart.addSerie(cht.serie(col.column(label,label,type.integerType())));
+        }
+        
+        chart.setDataSource(ds.crearIndicadoresOficinaGraficaDS(montos));
+		
+		reporteIndicadoresOficina
+		.addParameter("columns",montos)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.title(cmp.text(Constantes.PARTICIPACION_ASEGURADO_TITULO).setStyle(Estilos.reportTitleStyle))
+   		.setTitleBackgroundComponent(imgHeader)
+   		.summary(cmp.verticalList(
+   									subreportTabla,cmp.verticalGap(20),chart
+   								)
+   				)
+   		.build();		
+		return reporteIndicadoresOficina;
+	}
+	
+	/**
 	 * Genera el reporte de Tabla de participacion asegurado
 	 * @param montos Lista de objetos ParticipacionAsegurado
 	 * @return JasperReportBuilder con la hoja de reporte
@@ -1003,9 +1101,10 @@ public class GeneradorReporte {
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
    		.title(cmp.text(Constantes.PARTICIPACION_ASEGURADO_TITULO).setStyle(Estilos.reportTitleStyle))
    		.setTitleBackgroundComponent(imgHeader)
-   		.summary(cmp.verticalList(subreport,   				
+   		.summary(cmp.verticalList(subreport, 
+   				cmp.verticalGap(10),
    			 cht.stackedBarChart()	
-				.setHeight(260)
+				.setHeight(250)
 				.seriesColorsByName(seriesColors)   					 				
 				.addCustomizer(new CustomizedPercentageBarIntervalChart())					
 				.setLegendPosition(Position.RIGHT)	
@@ -1071,7 +1170,6 @@ public class GeneradorReporte {
    		.build();		
 		return reporteParticipacionAsegurado;
 	}
-	
 	
 	/**
 	 * Genera el reporte de Distribucion de Gastos
@@ -1425,7 +1523,7 @@ public class GeneradorReporte {
    		.groupBy(padecimientoColumn)   	
    		.setGroupStyle(Estilos.groupStyle)
    		.setDataSource(ds.crearComparativoHospitalDS(hospitales.getHospitales()))
-   		.summary(cmp.verticalList(cmp.verticalGap(30),textField));
+   		.summary(cmp.verticalList(cmp.verticalGap(15),textField));
 
 		return reporteHospitales;
 	}
@@ -1806,11 +1904,22 @@ public class GeneradorReporte {
 		this.reporteComparativoHospitales = reporteComparativoHospitales;
 	}
 
-	
-	
-	
-	
-	
+	private ArrayList<IndicadoresOficina> getReporteIndicadoresOficina() {
+		return reporteIndicadoresOficina;
+	}
+
+	public void setReporteIndicadoresOficina(ArrayList<IndicadoresOficina> reporteIndicadoresOficina) {
+		this.reporteIndicadoresOficina = reporteIndicadoresOficina;
+	}
+
+	private ArrayList<SiniestralidadOficina> getReporteSiniestralidadOficina() {
+		return reporteSiniestralidadOficina;
+	}
+
+	public void setReporteSiniestralidadOficina(ArrayList<SiniestralidadOficina> reporteSiniestralidadOficina) {
+		this.reporteSiniestralidadOficina = reporteSiniestralidadOficina;
+	}
+
 	private Float getMaxFloat(ArrayList<Float> data) {
 		Float min = data.get(0);
         for (Float i : data){

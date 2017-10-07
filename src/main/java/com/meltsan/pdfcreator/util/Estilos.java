@@ -124,12 +124,12 @@ public class Estilos {
 		      
 		      reportBigTextAreaStyle = stl.style(boldStyle)
 	  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
-					.setFontSize(15)
+					.setFontSize(13)
 					.setForegroundColor(colorBlueLight);
 		      
 		      reportMediumTextAreaStyle = stl.style(boldStyle)
 	  					.setTextAlignment(HorizontalTextAlignment.CENTER, VerticalTextAlignment.MIDDLE)
-					.setFontSize(11)
+					.setFontSize(10)
 					.setForegroundColor(colorBlueLight);
 		      
 		      reportSmallTextAreaStyle = stl.style(boldStyle)

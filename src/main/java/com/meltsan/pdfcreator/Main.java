@@ -9,6 +9,7 @@ import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.CostoPromedioSiniestro;
 import com.meltsan.pdfcreator.beans.DistribucionGastos;
 import com.meltsan.pdfcreator.beans.HospitalPorcentaje;
+import com.meltsan.pdfcreator.beans.IndicadoresOficina;
 import com.meltsan.pdfcreator.beans.InflacionSectorSalud;
 import com.meltsan.pdfcreator.beans.MisionObjetivo;
 import com.meltsan.pdfcreator.beans.MontosPagados;
@@ -21,6 +22,7 @@ import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
 import com.meltsan.pdfcreator.beans.IndicadoresSiniestros;
 import com.meltsan.pdfcreator.beans.PoblacionHistorica;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
+import com.meltsan.pdfcreator.beans.SiniestralidadOficina;
 import com.meltsan.pdfcreator.beans.SiniestroPadecimiento;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
@@ -39,6 +41,7 @@ import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
+import com.meltsan.pdfcreator.beans.values.SiniestralidadOficinaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
@@ -410,7 +413,36 @@ public class Main {
 		
 		ComparativoHospital ch = new ComparativoHospital(cht,chv);
 		
-		generador.setReporteAntecedentes(ant);
+		ArrayList<IndicadoresOficina> io = new ArrayList<IndicadoresOficina>();
+		io.add(new IndicadoresOficina("2013-2014","Guadalajara",36,19113,6910));
+		io.add(new IndicadoresOficina("2014-2015","Guadalajara",33,20512,6837));
+		io.add(new IndicadoresOficina("2015-2016","Guadalajara",22,15370,2416));
+		io.add(new IndicadoresOficina("2013-2014","Juarez",49,27515,13475));
+		io.add(new IndicadoresOficina("2014-2015","Juarez",25,12143,3071));
+		io.add(new IndicadoresOficina("2015-2016","Juarez",31,30387,9459));
+		io.add(new IndicadoresOficina("2013-2014","México",46,22628,10453));
+		io.add(new IndicadoresOficina("2014-2015","México",40,25526,10167));
+		io.add(new IndicadoresOficina("2015-2016","México",38,33135,12493));
+		io.add(new IndicadoresOficina("2013-2014","Monterrey",36,24068,8685));
+		io.add(new IndicadoresOficina("2014-2015","Monterrey",53,35792,18918));
+		io.add(new IndicadoresOficina("2015-2016","Monterrey",39,38385,14917));
+		io.add(new IndicadoresOficina("2013-2014","Tijuana",24,82396,19741));
+		io.add(new IndicadoresOficina("2014-2015","Tijuana",27,18294,4915));
+		io.add(new IndicadoresOficina("2015-2016","Tijuana",43,133915,57111));
+		
+		io.add(new IndicadoresOficina("2013-2014","General",40,27944,11147));
+		io.add(new IndicadoresOficina("2014-2015","General",35,27337,9455));
+		io.add(new IndicadoresOficina("2015-2016","General",33,42369,13976));
+		
+		ArrayList<SiniestralidadOficinaValues> sov1 = new ArrayList<SiniestralidadOficinaValues>();	
+		sov1.add(new SiniestralidadOficinaValues("Distrito Federal",28,208760));
+		sov1.add(new SiniestralidadOficinaValues("Extranjero",2,9279));
+		sov1.add(new SiniestralidadOficinaValues("Jalisco",88,2002941));
+		
+		ArrayList<SiniestralidadOficina> so = new ArrayList<SiniestralidadOficina>(); 
+		so.add(new SiniestralidadOficina("Guadalajara",382,30.89f,18822,5814,sov1));
+		
+		/*generador.setReporteAntecedentes(ant);
 		generador.setReporteSiniestralidadEsperada(se);
 		generador.setReportePoblacionHistorica(ph);
 		generador.setReporteIndicadoresSiniestralidad(pc);
@@ -421,7 +453,9 @@ public class Main {
 		generador.setReporteSiniestrosMayores(siniestrosMayores);
 		generador.setReportePadecimientosCronicos(pcd);
 		generador.setReporteSiniestrosPadecimientos(sp);
-		generador.setReportePadecimientosFrecuentes(pf);
+		generador.setReportePadecimientosFrecuentes(pf);*/
+		generador.setReporteSiniestralidadOficina(so);
+		/*generador.setReporteIndicadoresOficina(io);
 		generador.setReporteParticipacionAsegurado(pa);
 		generador.setReporteGastosNoCubiertos(dg);
 		generador.setResporteTopHospitales(th);
@@ -429,7 +463,7 @@ public class Main {
 		generador.setReporteComparativoHospitales(ch);
 		generador.setReporteCostoVsTarifasFemenino(cvt);		
 		generador.setReporteCostoVsTarifasMasculino(cvt);
-		generador.setReporteMisionVision(mv);
+		generador.setReporteMisionVision(mv);*/
 		
 		
 		generador.generaReporte();

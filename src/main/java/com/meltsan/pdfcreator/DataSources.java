@@ -11,6 +11,7 @@ import java.util.Map.Entry;
 
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.HospitalPorcentaje;
+import com.meltsan.pdfcreator.beans.IndicadoresOficina;
 import com.meltsan.pdfcreator.beans.PadCronicoClienteMercado;
 import com.meltsan.pdfcreator.beans.PadCronicosMontos;
 import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
@@ -1235,7 +1236,6 @@ public class DataSources {
 		return dataSource;
 	}
 	
-	
 	/**
 	 * Genera datos para llenar tabla reporte
 	 * Top 5 Hospitales
@@ -1260,7 +1260,6 @@ public class DataSources {
 		
 		return dataSource;
 	}
-	
 	
 	/**
 	 * Genera datos para crear tabla de Participacion
@@ -1462,6 +1461,120 @@ public class DataSources {
 		return dataSource;
 	}
 	
+	/**
+	 * Genera datos para crear tabla de Indicadores
+	 * Oficina
+	 * @param indicadores lista con objetos IndicadoresOficina 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearIndicadoresOficinaTablaDS(ArrayList<IndicadoresOficina> montos) {		
+		
+		ArrayList<String>labels = Utilidades.getEtiquetasIndicadoresOficina(montos);
+        ArrayList<String>periodos = Utilidades.getPeriodosIndicadoresOficina(montos);
+        
+		int masterRowNumber = periodos.size();	  
+		int noCols = masterRowNumber * 3;
+		noCols = noCols + 1;
+        String[] columns = new String[noCols];                
+        ArrayList<String> namesCols = new ArrayList<String>();        
+        
+        for (int i = 0; i < masterRowNumber; i++) {
+        		namesCols.add("morbo"+i);
+        		namesCols.add("costo"+i);
+        		namesCols.add("percapita"+i);
+        }
+        
+        columns[0] = "oficina";
+        for (int i = 1; i <= namesCols.size(); i++) {	
+	           columns[i] = namesCols.get(i-1);
+	        }      
+        
+        DRDataSource dataSource = new DRDataSource(columns);                        
+        Object[] valuesGeneral = new Object[noCols];
+        
+        for(String label :labels) {        		
+        			Object[] values = new Object[noCols];
+        			values[0]=label;
+        			int i = 1;
+        			for(IndicadoresOficina io: montos) {
+        				Object[] tmp = new Object[3];        			
+        				if(io.getOficina().equals(label)) {        				
+        					for(String periodo:periodos) {        					
+        						if(io.getPeriodo().equals(periodo)) {
+        							tmp[0] = formatoEntero.format(io.getMorbilidad())+"%";        						
+        							tmp[1] = "$"+formatoEntero.format(io.getCostoPromedio());        						
+        							tmp[2] = "$"+formatoEntero.format(io.getCostoPerCapita());        						
+        						}        					
+        					}
+        					if(label.equals("General")) {
+        						valuesGeneral[0] = "General";
+        						System.arraycopy(tmp, 0, valuesGeneral, i, tmp.length);
+        					}else {
+        						System.arraycopy(tmp, 0, values, i, tmp.length);
+        					}
+        					
+        					i = i+3;    					
+        				}
+        			}
+        			if(!label.equals("General"))
+        				dataSource.add(values);        		
+        }
+        
+        if(valuesGeneral[1] != null) {
+        		dataSource.add(valuesGeneral);  
+        }
+        
+        
+        return dataSource;
+	}
+	
+	/**
+	 * Genera datos para crear Grafica de Indicadores
+	 * Oficina
+	 * @param indicadores lista con objetos IndicadoresOficina 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearIndicadoresOficinaGraficaDS(ArrayList<IndicadoresOficina> montos) {
+		
+		ArrayList<String>labels = Utilidades.getEtiquetasIndicadoresOficina(montos);
+		ArrayList<String>periodos = Utilidades.getPeriodosIndicadoresOficina(montos);
+		
+		int noCols = 0;
+		
+		labels.remove("General");
+		 
+		noCols = labels.size()+1;
+		
+		String[] columns = new String[noCols];
+		columns[0] = "periodo";
+		
+		for (int i = 1; i < noCols; i++) {	
+	           columns[i] = labels.get(i-1);
+	        }  
+		
+		DRDataSource dataSource = new DRDataSource(columns);
+		
+		 for(String periodo :periodos) {        		
+ 			Object[] values = new Object[noCols];
+ 			values[0]=periodo;
+ 			int i = 1;
+ 			for(IndicadoresOficina io: montos) {
+ 				//Object[] tmp = new Object[3];        			
+ 				if(io.getPeriodo().equals(periodo)) {        				
+ 					for(String label:labels) {        					
+ 						if(io.getOficina().equals(label)) {
+ 							values[i] = io.getMorbilidad(); 
+ 							i++;
+ 						} 						
+ 					}   				 					
+ 				} 				
+ 			}
+ 			dataSource.add(values);
+ 		}
+		
+		
+		return dataSource;
+	}
 	
 	/**
 	 * Función para obtener monto y numero de siniestros de un padecimiento
