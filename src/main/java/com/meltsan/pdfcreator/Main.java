@@ -161,8 +161,7 @@ public class Main {
 		ArrayList<SiniestroRangoGrafica> srv = new ArrayList<SiniestroRangoGrafica>();		
 		srv.add(new SiniestroRangoGrafica("2013-2014",26.90,25.72,12.17,35.21));
 		srv.add(new SiniestroRangoGrafica("2014-2015",31.66,30.34,23.52,14.48));
-		srv.add(new SiniestroRangoGrafica("2015-2016",17.29,22.79,14.16,45.75));		
-		
+		srv.add(new SiniestroRangoGrafica("2015-2016",17.29,22.79,14.16,45.75));				
 		
 		
 		ArrayList<SiniestroPadecimientoValues> spv = new ArrayList<SiniestroPadecimientoValues>();
@@ -510,9 +509,9 @@ public class Main {
 		generador.setReporteCostoPromedio(cps);
 		generador.setReporteSiniestroRangoGrafica(srv);
 		generador.setReporteSiniestroRangoTabla(srp);
-		generador.setReporteSiniestrosMayores(siniestrosMayores);
+		generador.setReporteSiniestrosMayores(siniestrosMayores);*/
 		generador.setReportePadecimientosCronicos(pcd);
-		generador.setReporteSiniestrosPadecimientos(sp);
+		/*generador.setReporteSiniestrosPadecimientos(sp);
 		generador.setReportePadecimientosFrecuentes(pf);
 		generador.setReporteSiniestralidadOficina(so);
 		generador.setReporteIndicadoresOficina(io);
@@ -522,9 +521,9 @@ public class Main {
 		generador.setReporteMontosPagados(mp);
 		generador.setReporteComparativoHospitales(ch);
 		generador.setReporteCostoVsTarifasFemenino(cvt);		
-		generador.setReporteCostoVsTarifasMasculino(cvt);*/
+		generador.setReporteCostoVsTarifasMasculino(cvt);
 		generador.setReporteTiemposRespuesta(tr);
-		//generador.setReporteMisionVision(mv);
+		generador.setReporteMisionVision(mv);*/
 		
 		
 		generador.generaReporte();

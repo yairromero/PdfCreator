@@ -1782,7 +1782,7 @@ public class GeneradorReporte {
 		JasperReportBuilder report = new JasperReportBuilder();
 		
 		SubreportBuilder subreport = cmp.subreport(new SubreportTiempoRespuesta())
-				.setDataSource(new JREmptyDataSource(1));
+				.setDataSource(ds.crearTiempoRespuestaDS(info));				
 				
 		report
 		.addParameter("columns", info)

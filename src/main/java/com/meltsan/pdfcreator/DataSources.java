@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.meltsan.pdfcreator.beans.ConceptoMonto;
 import com.meltsan.pdfcreator.beans.CostoPerCapitaTarifas;
 import com.meltsan.pdfcreator.beans.HospitalPorcentaje;
 import com.meltsan.pdfcreator.beans.IndicadoresOficina;
@@ -17,12 +18,9 @@ import com.meltsan.pdfcreator.beans.PadCronicosMontos;
 import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
 import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
 import com.meltsan.pdfcreator.beans.SiniestralidadOficina;
-import com.meltsan.pdfcreator.beans.ComparativoHospital;
-import com.meltsan.pdfcreator.beans.ConceptoMonto;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
 import com.meltsan.pdfcreator.beans.SiniestroRangoPeriodo;
 import com.meltsan.pdfcreator.beans.SiniestrosMayores;
-import com.meltsan.pdfcreator.beans.TopHospitales;
 import com.meltsan.pdfcreator.beans.TopHospitalesGrafica;
 import com.meltsan.pdfcreator.beans.TopPadecimientosCronicos;
 import com.meltsan.pdfcreator.beans.values.CausaValues;
@@ -39,6 +37,7 @@ import com.meltsan.pdfcreator.beans.values.SexoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestralidadEsperadaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestralidadOficinaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
+import com.meltsan.pdfcreator.beans.values.TiempoRespuesta;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
 import com.meltsan.pdfcreator.beans.values.TopHospitalesValues;
 import com.meltsan.pdfcreator.util.Utilidades;
@@ -1646,6 +1645,64 @@ public class DataSources {
 		
 		return dataSource;
 	}
+	
+	/**
+	 * Genera datos para llenar tabla de Tiempos de Respuesta
+	 * 	
+	 * @param info Lista de objetos tipo TiempoRespuesta
+	 * @return JRDataSource para alimentar tabla
+	 */
+	public JRDataSource crearTiempoRespuestaDS(ArrayList<TiempoRespuesta> info) {		
+		
+		ArrayList<String>labels = Utilidades.getEtiquetasTiempoRespuesta(info);
+		ArrayList<String>periodos = Utilidades.getPeriodoTiempoRespuesta(info);
+		
+		int noCols = 0;
+						 
+		noCols = periodos.size()+1;
+		
+		String[] columns = new String[noCols];
+		Object[] totales = new Object[noCols];
+		columns[0] = "periodo";
+		totales[0]="Total";
+		
+		for (int i = 1; i < noCols; i++) {	
+	           columns[i] = periodos.get(i-1);
+	           totales[i] = 0;
+	        }  
+		
+		DRDataSource dataSource = new DRDataSource(columns);
+
+		 for(String label :labels) {        		
+ 			Object[] values = new Object[noCols];
+ 			Object[] porcientos = new Object[noCols];
+ 			
+ 			values[0]=label;
+ 			porcientos[0]="% Acumulado";
+ 			int i = 1;
+ 			for(TiempoRespuesta io: info) { 				   		
+ 				if(io.getMes().equals(label)) {        				
+ 					for(String periodo:periodos) {        					
+ 						if(io.getTiempoRespuesta().toString().equals(periodo)) {
+ 							values[i] = io.getSiniestros().toString();
+ 							totales[i] = (Integer)totales[i] + io.getSiniestros();
+ 							porcientos[i] = io.getPorcentajeAcumulado()+"%";
+ 							i++;
+ 						} 						
+ 					}   				 					
+ 				} 				
+ 			}
+ 			dataSource.add(values);
+ 			dataSource.add(porcientos);
+ 		}
+		 
+		 for(int i = 1;i<totales.length;i++) {
+			 totales[i] = totales[i].toString();
+		 }
+		 
+		  dataSource.add(totales);
+	       return dataSource;
+	    }
 	
 	
 	public class So{

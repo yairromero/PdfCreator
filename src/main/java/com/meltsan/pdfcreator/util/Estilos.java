@@ -34,7 +34,6 @@ public class Estilos {
 	public static final StyleBuilder columnTitleStyle;
 	public static final StyleBuilder groupStyle;
 	public static final StyleBuilder groupSmallStyle;
-	public static final StyleBuilder subtotalStyle;
 	public static final StyleBuilder textAreaStyle;
 	public static final StyleBuilder reportBigTextAreaStyle;
 	public static final StyleBuilder reportMediumTextAreaStyle;	
@@ -94,6 +93,8 @@ public class Estilos {
 		      ConditionalStyleBuilder catasCol = stl.conditionalStyle(new CatastroficaExp()).setBackgroundColor(colorCatastrofe);
 		      
 		      ConditionalStyleBuilder porcentajeHL = stl.conditionalStyle(new PorcentajeHighLightExp()).setBackgroundColor(Color.lightGray);
+		      
+		      ConditionalStyleBuilder boldMonth = stl.conditionalStyle(new TiemposRespuestaExp()).setBold(true);
 		      		      
 			  
 			  chartFontStyle		= stl.fontArialBold().setFontSize(12);
@@ -164,8 +165,10 @@ public class Estilos {
 		    		  					.setForegroundColor(Color.GRAY)
 		    		  					.setFontSize(15);		     
 		      
-		      columnStyle         = stl.style(rootStyle).setVerticalTextAlignment(VerticalTextAlignment.MIDDLE)
+		      columnStyle         = stl.style().setFontSize(12)
+		    		  					.setVerticalTextAlignment(VerticalTextAlignment.MIDDLE)
 		    		  					.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER) 
+		    		  					.conditionalStyles(boldMonth)
 		    		  					.setBorder(stl.pen1Point());		      
 	  									
 		      columnTitleStyle    = stl.style(columnStyle)		
@@ -198,21 +201,7 @@ public class Estilos {
 	  										.setVerticalTextAlignment(VerticalTextAlignment.MIDDLE)
 	  										.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)
 	  										.conditionalStyles(bajaCol,altaCol,severaCol,catasCol)
-	  										.setBorder(stl.pen1Point());
-		      
-		      subtotalStyle       = stl.style(boldStyle)		
-		                               .setTopBorder(stl.pen1Point());
-		      		   
-		      
-		      
-		      StyleBuilder crosstabGroupStyle      = stl.style(columnTitleStyle);
-		      StyleBuilder crosstabGroupTotalStyle = stl.style(columnTitleStyle)		
-		                                                .setBackgroundColor(new Color(170, 170, 170));
-		      StyleBuilder crosstabGrandTotalStyle = stl.style(columnTitleStyle)
-		                                                .setBackgroundColor(new Color(140, 140, 140));
-		      StyleBuilder crosstabCellStyle       = stl.style(columnStyle)
-		                                                .setBorder(stl.pen1Point());
-						      		      
+	  										.setBorder(stl.pen1Point());	      		   						      		      
 		      
 		      reportTemplate = template()		    		  				
 		                         .setColumnStyle(columnStyle)		
@@ -231,8 +220,7 @@ public class Estilos {
 		      reportConditionalGroupTemplate = template()
 		    		  				.setColumnStyle(columnConditionSmallStyle)		
 		    		  				.setColumnTitleStyle(columnTitleStyle)
-		    		  				.setGroupStyle(groupSmallStyle)				    		  				
-		    		  				.setSubtotalStyle(subtotalStyle);	
+		    		  				.setGroupStyle(groupSmallStyle);		    		  				
 		                         
 		
 		      currencyType = new CurrencyType();
@@ -311,6 +299,19 @@ public class Estilos {
 		    String celda = reportParameters.getFieldValue("vigencia");
 		    
 		    if( celda.contains("Variaci"))		    	
+		    		return true;
+		    else 
+		    		return false;
+		  }
+		}
+	
+	private static class TiemposRespuestaExp extends AbstractSimpleExpression<Boolean> {
+		  
+		private static final long serialVersionUID = 1L;
+
+		public Boolean evaluate(ReportParameters reportParameters) {
+		    String cat = reportParameters.getFieldValue("periodo");		   
+		    if(!cat.startsWith("%"))
 		    		return true;
 		    else 
 		    		return false;
