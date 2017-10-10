@@ -17,7 +17,7 @@ import net.sf.dynamicreports.report.builder.grid.ColumnTitleGroupBuilder;
 import net.sf.dynamicreports.report.builder.grid.HorizontalColumnGridListBuilder;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 
-public class SubreportPadecimientosCronicosExp extends AbstractSimpleExpression<JasperReportBuilder>{
+public class SubreportPadecimientosCronicos extends AbstractSimpleExpression<JasperReportBuilder>{
 
 	private static final long serialVersionUID = 1L;
 	

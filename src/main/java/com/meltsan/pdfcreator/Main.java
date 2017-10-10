@@ -41,9 +41,11 @@ import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.IndicadoresSiniestroValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
+import com.meltsan.pdfcreator.beans.values.SiniestralidadEsperadaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestralidadOficinaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroRangoTablaValues;
+import com.meltsan.pdfcreator.beans.values.TiempoRespuesta;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
 import com.meltsan.pdfcreator.beans.values.TopHospitalesValues;
 
@@ -103,14 +105,45 @@ public class Main {
 		
 		
 		
-		String setxt = "En base a la siniestralidad histórica mensual de las vigencias "
+		String seHead = "En base a la siniestralidad histórica mensual de las vigencias "
 				+ "anteriores y considerando la siniestralidad que se lleva hasta el momento se "
 				+ "espera el siguiente comportamiento (mostrado gráficamente), con un monto al "
-				+ "final de la vigencia de $18,400,650.";	
+				+ "final de la vigencia de $18,400,650.";
 		
-		SiniestralidadEsperada se = new SiniestralidadEsperada(setxt);
+		String seNota = "Los saltos presentes en la gráfica son debido a los siniestros catastróficos, "
+				+ "mismos que si son tomados en cuenta para realizar la estimiación";
 		
+		ArrayList<SiniestralidadEsperadaValues> sev1 = new ArrayList<SiniestralidadEsperadaValues>();
+		sev1.add(new SiniestralidadEsperadaValues("jul-13",427303.97f,433390.12f));
+		sev1.add(new SiniestralidadEsperadaValues("sep-13",237262.82f,472882.62f));
+		sev1.add(new SiniestralidadEsperadaValues("nov-13",367196.03f,512375.12f));
+		sev1.add(new SiniestralidadEsperadaValues("ene-14",458551.91f,551867.63f));
+		sev1.add(new SiniestralidadEsperadaValues("mar-14",351722.71f,591360.13f));
+		sev1.add(new SiniestralidadEsperadaValues("may-14",288183.19f,630852.63f));
+		sev1.add(new SiniestralidadEsperadaValues("jul-14",821961.17f,670345.13f));
+		sev1.add(new SiniestralidadEsperadaValues("sep-14",588444.99f,709837.63f));
+		sev1.add(new SiniestralidadEsperadaValues("nov-14",494446.59f,749330.13f));
+		sev1.add(new SiniestralidadEsperadaValues("ene-15",347702.5f,788822.63f));
+		sev1.add(new SiniestralidadEsperadaValues("mar-15",273396.07f,828315.14f));
+		sev1.add(new SiniestralidadEsperadaValues("may-15",632143.8f,867807.64f));
+		sev1.add(new SiniestralidadEsperadaValues("jul-15",1468510.7f,907300.14f));
+		sev1.add(new SiniestralidadEsperadaValues("sep-15",675168.2f,946792.64f));
+		sev1.add(new SiniestralidadEsperadaValues("nov-15",1169418.37f,986285.14f));
+		sev1.add(new SiniestralidadEsperadaValues("ene-16",870927.52f,1025777.64f));
+		sev1.add(new SiniestralidadEsperadaValues("mar-16",570314.87f,1065270.14f));
+		sev1.add(new SiniestralidadEsperadaValues("may-16",261599.64f,1104762.65f));
+		sev1.add(new SiniestralidadEsperadaValues("jul-16",1463225.25f,1144255.15f));
 		
+		ArrayList<SiniestralidadEsperadaValues> sev2 = new ArrayList<SiniestralidadEsperadaValues>();
+		sev2.add(new SiniestralidadEsperadaValues("jul-16",1463225.25f,1144255.15f));
+		sev2.add(new SiniestralidadEsperadaValues("sep-16",1414574.43f,1183747.65f));
+		sev2.add(new SiniestralidadEsperadaValues("nov-16",1150930.35f,1223240.15f));
+		sev2.add(new SiniestralidadEsperadaValues("ene-17",1032970.66f,1262732.65f));
+		sev2.add(new SiniestralidadEsperadaValues("mar-17",872387.90f,1302225.15f));
+		sev2.add(new SiniestralidadEsperadaValues("may-17",867885.56f,1341717.65f));
+		
+				
+		SiniestralidadEsperada se = new SiniestralidadEsperada(seHead,seNota,656053,sev1,sev2);
 		
 		String pht = "Durante las vigencias en consideración, la población incrementó un 5.03%, por su parte la prima per cápita ha "
 				+ "incrementado un  ́14.5%";
@@ -441,6 +474,33 @@ public class Main {
 		
 		ArrayList<SiniestralidadOficina> so = new ArrayList<SiniestralidadOficina>(); 
 		so.add(new SiniestralidadOficina("Guadalajara",382,30.89f,18822,5814,sov1));
+		so.add(new SiniestralidadOficina("Juárez",761,34.82f,24554,8550,sov1));
+		
+		
+		ArrayList<TiempoRespuesta> tr = new ArrayList<TiempoRespuesta>();
+		tr.add(new TiempoRespuesta(3,"Enero",1,3));
+		tr.add(new TiempoRespuesta(3,"Febrero",13,28));
+		tr.add(new TiempoRespuesta(3,"Marzo",15,48));
+		tr.add(new TiempoRespuesta(3,"Abril",9,50));
+		tr.add(new TiempoRespuesta(3,"Mayo",27,63));
+		
+		tr.add(new TiempoRespuesta(4,"Enero",24,80));
+		tr.add(new TiempoRespuesta(4,"Febrero",28,89));
+		tr.add(new TiempoRespuesta(4,"Marzo",8,74));
+		tr.add(new TiempoRespuesta(4,"Abril",9,100));
+		tr.add(new TiempoRespuesta(4,"Mayo",11,88));
+		
+		tr.add(new TiempoRespuesta(5,"Enero",1,83));
+		tr.add(new TiempoRespuesta(5,"Febrero",1,91));
+		tr.add(new TiempoRespuesta(5,"Marzo",3,84));
+		tr.add(new TiempoRespuesta(5,"Abril",0,100));
+		tr.add(new TiempoRespuesta(5,"Mayo",1,90));
+		
+		tr.add(new TiempoRespuesta(6,"Enero",1,86));
+		tr.add(new TiempoRespuesta(6,"Febrero",0,0));
+		tr.add(new TiempoRespuesta(6,"Marzo",0,84));
+		tr.add(new TiempoRespuesta(6,"Abril",0,100));
+		tr.add(new TiempoRespuesta(6,"Mayo",1,92));
 		
 		/*generador.setReporteAntecedentes(ant);
 		generador.setReporteSiniestralidadEsperada(se);
@@ -453,17 +513,18 @@ public class Main {
 		generador.setReporteSiniestrosMayores(siniestrosMayores);
 		generador.setReportePadecimientosCronicos(pcd);
 		generador.setReporteSiniestrosPadecimientos(sp);
-		generador.setReportePadecimientosFrecuentes(pf);*/
+		generador.setReportePadecimientosFrecuentes(pf);
 		generador.setReporteSiniestralidadOficina(so);
-		/*generador.setReporteIndicadoresOficina(io);
+		generador.setReporteIndicadoresOficina(io);
 		generador.setReporteParticipacionAsegurado(pa);
 		generador.setReporteGastosNoCubiertos(dg);
 		generador.setResporteTopHospitales(th);
 		generador.setReporteMontosPagados(mp);
 		generador.setReporteComparativoHospitales(ch);
 		generador.setReporteCostoVsTarifasFemenino(cvt);		
-		generador.setReporteCostoVsTarifasMasculino(cvt);
-		generador.setReporteMisionVision(mv);*/
+		generador.setReporteCostoVsTarifasMasculino(cvt);*/
+		generador.setReporteTiemposRespuesta(tr);
+		//generador.setReporteMisionVision(mv);
 		
 		
 		generador.generaReporte();

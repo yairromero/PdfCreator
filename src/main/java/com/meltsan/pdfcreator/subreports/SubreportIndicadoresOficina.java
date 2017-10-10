@@ -19,7 +19,7 @@ import net.sf.dynamicreports.report.builder.grid.ColumnTitleGroupBuilder;
 import net.sf.dynamicreports.report.builder.grid.HorizontalColumnGridListBuilder;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 
-public class SubreportIndicadoresOficinaExp extends AbstractSimpleExpression<JasperReportBuilder> {
+public class SubreportIndicadoresOficina extends AbstractSimpleExpression<JasperReportBuilder> {
  
 	private static final long serialVersionUID = 1L;
 	

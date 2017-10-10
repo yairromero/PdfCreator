@@ -118,6 +118,9 @@ public class Constantes {
 	public static String COMPARATIVO_HOSPITAL_TITULO =
 			"Comparativo de Hospitales para los padecimientos más frecuentes";
 	
+	public static String TIEMPO_RESPUESTA_TITULO =
+			"Tiempo de Respuesta Siniestros";
+	
 	public static String WWW_LOCKTON_LINK =
 			"www.lockton.com.mx";
 	

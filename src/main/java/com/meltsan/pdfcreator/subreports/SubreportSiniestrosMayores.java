@@ -15,7 +15,7 @@ import net.sf.dynamicreports.jasper.builder.JasperReportBuilder;
 import net.sf.dynamicreports.report.base.expression.AbstractSimpleExpression;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 
-public class SubreportSiniestrosMayoresExp extends AbstractSimpleExpression<JasperReportBuilder> {
+public class SubreportSiniestrosMayores extends AbstractSimpleExpression<JasperReportBuilder> {
  
 	private static final long serialVersionUID = 1L;
 	

@@ -11,6 +11,7 @@ import net.sf.dynamicreports.report.builder.style.ConditionalStyleBuilder;
 import net.sf.dynamicreports.report.builder.style.FontBuilder;
 import net.sf.dynamicreports.report.builder.style.StyleBuilder;
 import net.sf.dynamicreports.report.constant.HorizontalTextAlignment;
+import net.sf.dynamicreports.report.constant.LineStyle;
 import net.sf.dynamicreports.report.constant.VerticalTextAlignment;
 import net.sf.dynamicreports.report.definition.ReportParameters;
 
@@ -189,7 +190,8 @@ public class Estilos {
 		      
 		      columnSmallStyle         = stl.style().setFontSize(10)
 										.setVerticalTextAlignment(VerticalTextAlignment.MIDDLE)
-										.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)										
+										.setHorizontalTextAlignment(HorizontalTextAlignment.CENTER)	
+										.setBorder(stl.pen(0f, LineStyle.SOLID))
 										.setBottomBorder(stl.penThin());
 		      
 		      columnConditionSmallStyle         = stl.style().setFontSize(10)

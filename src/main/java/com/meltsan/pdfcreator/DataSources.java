@@ -15,6 +15,8 @@ import com.meltsan.pdfcreator.beans.IndicadoresOficina;
 import com.meltsan.pdfcreator.beans.PadCronicoClienteMercado;
 import com.meltsan.pdfcreator.beans.PadCronicosMontos;
 import com.meltsan.pdfcreator.beans.ParticipacionAsegurado;
+import com.meltsan.pdfcreator.beans.SiniestralidadEsperada;
+import com.meltsan.pdfcreator.beans.SiniestralidadOficina;
 import com.meltsan.pdfcreator.beans.ComparativoHospital;
 import com.meltsan.pdfcreator.beans.ConceptoMonto;
 import com.meltsan.pdfcreator.beans.SiniestroRangoGrafica;
@@ -34,6 +36,8 @@ import com.meltsan.pdfcreator.beans.values.PadecimientosFrecuenciaValues;
 import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
+import com.meltsan.pdfcreator.beans.values.SiniestralidadEsperadaValues;
+import com.meltsan.pdfcreator.beans.values.SiniestralidadOficinaValues;
 import com.meltsan.pdfcreator.beans.values.SiniestroPadecimientoValues;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
 import com.meltsan.pdfcreator.beans.values.TopHospitalesValues;
@@ -41,6 +45,7 @@ import com.meltsan.pdfcreator.util.Utilidades;
 
 import net.sf.dynamicreports.report.datasource.DRDataSource;
 import net.sf.jasperreports.engine.JRDataSource;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 public class DataSources {
 	
@@ -1576,6 +1581,128 @@ public class DataSources {
 		return dataSource;
 	}
 	
+
+	/**
+	 * Genera datos para crear tabla de Siniestralidad
+	 * por Oficina y Estado
+	 * @param oficinas lista con objetos SiniestralidadOficina 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearSiniestralidadOficinaDS(ArrayList<SiniestralidadOficina> oficinas) {
+		
+		ArrayList<So> dataSource = new ArrayList<So>();
+	
+
+		for (SiniestralidadOficina oficina:oficinas) {
+			
+			So data = new So();
+			ArrayList<String> estados = new ArrayList<String>();
+			ArrayList<String> siniestros = new ArrayList<String>();
+			ArrayList<String> monto = new ArrayList<String>();
+			
+			for(SiniestralidadOficinaValues estado: oficina.getEstados()) {
+				estados.add(estado.getEstado());
+				siniestros.add(estado.getNoSiniestros().toString());
+				monto.add("$"+formatoEntero.format(estado.getMontoPagado()));				
+			}
+			
+			data.setOfi(oficina.getOficina()+" "+oficina.getNoAsegurados()+" Asegurados");
+			data.setEstado(estados);
+			data.setSiniestros(siniestros);
+			data.setMonto(monto);
+			data.setMorbo(formatoEntero.format((oficina.getMorbilidad()))+"%");
+			data.setCosto("$"+formatoEntero.format(oficina.getCostoPromedio()));
+			data.setPercapita("$"+formatoEntero.format(oficina.getCostoPerCapita()));
+			dataSource.add(data);
+		}
+				
+		
+		return new JRBeanCollectionDataSource(dataSource);
+	}
+	
+	/**
+	 * Genera datos para crear grafica de Siniestralidad
+	 * esperada
+	 * @param indicadores Objetos tipo SiniestralidadEsperada 
+	 * @return JRDataSource para alimentar grafica 
+	 */
+	public JRDataSource crearIndicadoresSiniestroGraficaDS(SiniestralidadEsperada indicadores) {
+		DRDataSource dataSource = new DRDataSource("periodo", "siniestralidad","pronostico","tendencia");
+		
+		for(SiniestralidadEsperadaValues pc : indicadores.getSiniestralidadHistorica()) {
+			dataSource.add(pc.getPeriodo(),(pc.getSiniestralidad()/1000000),null,(pc.getTendencia()/1000000));
+		}
+		
+		dataSource.add(indicadores.getSiniestralidadPronostico().get(0).getPeriodo(),null,
+				(indicadores.getSiniestralidadPronostico().get(0).getSiniestralidad()/1000000),
+				null);
+		
+		for(int i = 1;i< indicadores.getSiniestralidadPronostico().size();i++) {
+			
+			dataSource.add(indicadores.getSiniestralidadPronostico().get(i).getPeriodo(),null,
+					(indicadores.getSiniestralidadPronostico().get(i).getSiniestralidad()/1000000),
+					(indicadores.getSiniestralidadPronostico().get(i).getTendencia()/1000000));
+		}
+		
+		return dataSource;
+	}
+	
+	
+	public class So{
+		
+		private String ofi;
+		private ArrayList<String> estado;
+		private ArrayList<String> siniestros;
+		private ArrayList<String> monto;
+		private String morbo;
+		private String costo;
+		private String percapita;
+		
+		public String getOfi() {
+			return ofi;
+		}
+		public void setOfi(String ofi) {
+			this.ofi = ofi;
+		}
+		public ArrayList<String> getEstado() {
+			return estado;
+		}
+		public void setEstado(ArrayList<String> estado) {
+			this.estado = estado;
+		}
+		public ArrayList<String> getSiniestros() {
+			return siniestros;
+		}
+		public void setSiniestros(ArrayList<String> siniestros) {
+			this.siniestros = siniestros;
+		}
+		public ArrayList<String> getMonto() {
+			return monto;
+		}
+		public void setMonto(ArrayList<String> monto) {
+			this.monto = monto;
+		}
+		public String getMorbo() {
+			return morbo;
+		}
+		public void setMorbo(String morbo) {
+			this.morbo = morbo;
+		}
+		public String getCosto() {
+			return costo;
+		}
+		public void setCosto(String costo) {
+			this.costo = costo;
+		}
+		public String getPercapita() {
+			return percapita;
+		}
+		public void setPercapita(String percapita) {
+			this.percapita = percapita;
+		}
+		
+	}
+		
 	/**
 	 * Función para obtener monto y numero de siniestros de un padecimiento
 	 * @param columnas Integer con el numero de columnas que se van a crear

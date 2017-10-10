@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -56,11 +57,13 @@ import com.meltsan.pdfcreator.beans.values.InflacionSSValues;
 import com.meltsan.pdfcreator.beans.values.ParentescoValues;
 import com.meltsan.pdfcreator.beans.values.PobHistoricaValues;
 import com.meltsan.pdfcreator.beans.values.SexoValues;
+import com.meltsan.pdfcreator.beans.values.TiempoRespuesta;
 import com.meltsan.pdfcreator.beans.values.TipoPagoValues;
 import com.meltsan.pdfcreator.beans.values.TopHospitalesValues;
 import com.meltsan.pdfcreator.customizers.CustomizedBarChart;
 import com.meltsan.pdfcreator.customizers.CustomizedCurrencyLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedLabelVertBarChart;
+import com.meltsan.pdfcreator.customizers.CustomizedLabelVertIntervalLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedLabelVertLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedNoBorderLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarChart;
@@ -68,15 +71,16 @@ import com.meltsan.pdfcreator.customizers.CustomizedPercentageBarIntervalChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentageLineChart;
 import com.meltsan.pdfcreator.customizers.CustomizedPercentagePieChart;
 import com.meltsan.pdfcreator.customizers.CustomizedSmallPercentageBarChart;
-import com.meltsan.pdfcreator.subreports.SubreportCostoPromedioSinExp;
-import com.meltsan.pdfcreator.subreports.SubreportDistribucionGastosExp;
-import com.meltsan.pdfcreator.subreports.SubreportIndicadoresOficinaExp;
-import com.meltsan.pdfcreator.subreports.SubreportIndicadoresSinExp;
-import com.meltsan.pdfcreator.subreports.SubreportPadecimientosCronicosExp;
-import com.meltsan.pdfcreator.subreports.SubreportParticipacionAseguradoExp;
-import com.meltsan.pdfcreator.subreports.SubreportPoblacionHistoricaExp;
-import com.meltsan.pdfcreator.subreports.SubreportSiniestroRangoExp;
-import com.meltsan.pdfcreator.subreports.SubreportSiniestrosMayoresExp;
+import com.meltsan.pdfcreator.subreports.SubreportCostoPromedioSin;
+import com.meltsan.pdfcreator.subreports.SubreportDistribucionGastos;
+import com.meltsan.pdfcreator.subreports.SubreportIndicadoresOficina;
+import com.meltsan.pdfcreator.subreports.SubreportIndicadoresSin;
+import com.meltsan.pdfcreator.subreports.SubreportPadecimientosCronicos;
+import com.meltsan.pdfcreator.subreports.SubreportParticipacionAsegurado;
+import com.meltsan.pdfcreator.subreports.SubreportPoblacionHistorica;
+import com.meltsan.pdfcreator.subreports.SubreportSiniestroRango;
+import com.meltsan.pdfcreator.subreports.SubreportSiniestrosMayores;
+import com.meltsan.pdfcreator.subreports.SubreportTiempoRespuesta;
 import com.meltsan.pdfcreator.util.Estilos;
 import com.meltsan.pdfcreator.util.Utilidades;
 
@@ -128,6 +132,7 @@ public class GeneradorReporte {
 	private ArrayList<ParticipacionAsegurado> reporteParticipacionAsegurado;	
 	private ArrayList<IndicadoresOficina> reporteIndicadoresOficina;
 	private ArrayList<SiniestralidadOficina> reporteSiniestralidadOficina; 
+	private ArrayList<TiempoRespuesta> reporteTiemposRespuesta;
 	
 	private ArrayList<JasperReportBuilder> listaReportes;
 	private BufferedImage img = null;
@@ -162,7 +167,6 @@ public class GeneradorReporte {
 	public void generaReporte() {
 		
 		ds = new DataSources();	
-			
  	   	
  	   listaReportes = new ArrayList<JasperReportBuilder>();
  	   
@@ -266,6 +270,10 @@ public class GeneradorReporte {
 		   listaReportes.add(reporteCostoVsTarifasMasc(this.getReporteCostoVsTarifasMasculino()));
 	   }
  	  
+ 	  if(this.getReporteTiemposRespuesta() != null && !this.getReporteTiemposRespuesta().isEmpty()) {
+ 		  listaReportes.add(reporteTiemposRespuesta(this.getReporteTiemposRespuesta()));
+ 	  }
+ 	  
  	  if(this.getReporteMisionVision() != null) {
  		  listaReportes.add(reporteMisionVision(this.getReporteMisionVision()));
  	  }
@@ -324,15 +332,93 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reporteSinEsperada = new JasperReportBuilder();
 		
+		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
+		TextColumnBuilder<Float> sinestrialidadColumn = col.column("Siniestralidad\nHistórica", "siniestralidad", type.floatType());
+		TextColumnBuilder<Float> tendenciaColumn = col.column("Pronostico", "pronostico", type.floatType());
+		TextColumnBuilder<Float> pronosticoColumn = col.column("Tendencia", "tendencia", type.floatType());
+
+		Map<String, Color> seriesColors = new HashMap<String, Color>();
+		seriesColors.put("Siniestralidad\nHistórica", Estilos.colorBlueLight);
+		seriesColors.put("Tendencia", Estilos.colorRedDark);
+		seriesColors.put("Pronostico", Estilos.colorGreenLight);
+		
+					
+		String textoHead = sinEsperada.getTextoHeader();
+		String textoNote = sinEsperada.getTextoNota();
+		
+		TextFieldBuilder<String> textFieldDesviacion = cmp.text("Desviación\nEstándar:\n$"+sinEsperada.getDesviacionEstandar())
+				.setStyle(Estilos.reportTextAreaStyle);
+		
+		TextFieldBuilder<String> textFieldHead = null;
+		TextFieldBuilder<String> textFieldNote = null;
+		
+		if(textoHead.length() <= 300) {
+			textFieldHead = cmp.text(textoHead)													
+					.setStyle(Estilos.reportBigTextAreaStyle);
+		}
+		
+		if(textoHead.length() >= 301 && textoHead.length() <= 500) {
+			textFieldHead = cmp.text(textoHead)													
+					.setStyle(Estilos.reportMediumTextAreaStyle);
+		}
+		
+		if(textoHead.length() > 501) {
+			textFieldHead = cmp.text(textoHead)													
+					.setStyle(Estilos.reportSmallTextAreaStyle);
+		}
+		
+		if(textoNote.length() <= 300) {
+			textFieldNote = cmp.text(textoNote)													
+					.setStyle(Estilos.reportMediumTextAreaStyle);
+		}
+		
+		if(textoHead.length() >= 301) {
+			textFieldNote = cmp.text(textoNote)													
+					.setStyle(Estilos.reportSmallTextAreaStyle);
+		}
+		
+		
+		RectangleBuilder rectangulo = cmp.rectangle().setStyle(Estilos.textAreaStyle);
+
+		HorizontalListBuilder textoDesviacion = cmp.horizontalList()
+		.add(textFieldDesviacion)
+		.setBackgroundComponent(rectangulo);	
+		
+		
 		reporteSinEsperada
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+		.setLocale(Locale.US)
    		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.SIN_ESPERADA_TITULO).setStyle(Estilos.reportTitleStyle))   		
    		.summary(cmp.verticalList(
-   					cmp.text(sinEsperada.getTexto())
-   							.setStyle(Estilos.reportSubTitleStyle)
+   						textFieldHead
    							.setHorizontalTextAlignment(HorizontalTextAlignment.JUSTIFIED)
-   					)
+   					),cmp.horizontalList(
+   							cht.lineChart()   	
+   								.customizers(new CustomizedLabelVertIntervalLineChart())
+   								.seriesColorsByName(seriesColors)
+   								.setTitle(Constantes.PERCAPITA_GRAFICA_TITULO)
+   								.setTitleColor(Estilos.colorBlueLight)
+   								.setTitleFont(Estilos.chartFontStyle)
+   								.setCategory(periodoColumn)   				
+   								.series(
+   										cht.serie(sinestrialidadColumn), cht.serie(tendenciaColumn), 
+   										cht.serie(pronosticoColumn))
+   											.setCategoryAxisFormat(
+   													cht.axisFormat().setLabel("Periodo"))
+   											.setCategoryAxisFormat(cht.axisFormat()
+   													.setVerticalTickLabels(true))
+   											.setValueAxisFormat(   							
+   													cht.axisFormat().setLabel("Millones")
+   														.setTickLabelMask("$ #0.0")
+   													)	  
+   											.setDataSource(ds.crearIndicadoresSiniestroGraficaDS(sinEsperada)),   											
+   							cmp.verticalList(
+   						   		textoDesviacion,
+   						   		cmp.verticalGap(5),
+   						   		textFieldNote   							
+   							)
+   					 )   					
    				)
    		.build();		
 		return reporteSinEsperada;
@@ -348,7 +434,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reportePobHistorica = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportPoblacionHistoricaExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportPoblacionHistorica())
 				.setDataSource(ds.crearPobHistoricoTablaDS(pob.getValores()));
 		
 		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
@@ -415,7 +501,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reporteIndicadoresSin = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportIndicadoresSinExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportIndicadoresSin())
 				.setDataSource(ds.crearIndicadoresSiniestroDS(siniestros.getValores()));
 		
 		reporteIndicadoresSin
@@ -557,7 +643,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reporteCostoPromedioSin = new JasperReportBuilder();
 				
-		SubreportBuilder subreport = cmp.subreport(new SubreportCostoPromedioSinExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportCostoPromedioSin())
 				.setDataSource(ds.crearCostoPromedioTablaDS(siniestros.getValores()));
 		
 		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
@@ -717,7 +803,7 @@ public class GeneradorReporte {
 			
 		JasperReportBuilder reporteRangosSin = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportSiniestroRangoExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportSiniestroRango())
 									.setDataSource(ds.crearSiniestroRangoDSTabla(sinRangoTabla));
 	      
 		reporteRangosSin
@@ -744,7 +830,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reporteSinMayores = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportSiniestrosMayoresExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportSiniestrosMayores())
 				.setDataSource(ds.crearSiniestrosMayoresDS(siniestros));				
 		
 		reporteSinMayores
@@ -771,7 +857,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reportePadecimientos = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportPadecimientosCronicosExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportPadecimientosCronicos())
 				.setDataSource(ds.crearPadecimientoCronicoTablaDS(padecimientos));
 		
 		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "padecimiento", type.stringType());
@@ -985,27 +1071,23 @@ public class GeneradorReporte {
 	private JasperReportBuilder reporteSiniestralidadOficina(ArrayList<SiniestralidadOficina> oficinas){
 		JasperReportBuilder reporteTopHospitales = new JasperReportBuilder();
 		
-		TextColumnBuilder<String> oficinaGColumn = col.column("Oficina/Población", exp.text("")).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));
-		TextColumnBuilder<String> oficinaColumn = col.column("Oficina/Población", "oficina", type.stringType());
-		TextColumnBuilder<String> estadoColumn = col.column("Estado Atención", "estado", type.stringType());
-		TextColumnBuilder<String> siniestroColumn = col.column("No. Siniestro", "siniestros", type.stringType());
-		TextColumnBuilder<String> montoColumn = col.column("Monto Pagado", "monto", type.stringType());
-		TextColumnBuilder<String> morbilidadColumn = col.column("Morbilidad", "morbo", type.stringType()).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));;
-		TextColumnBuilder<String> costoPromedioColumn = col.column("Costo Promedio", "costo", type.stringType()).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));;
-		TextColumnBuilder<String> costoPerCapitaColumn = col.column("Costo Per Cápita", "percapita", type.stringType()).setStyle(stl.style().setBorder(stl.pen(0f, LineStyle.SOLID)));;
+		TextColumnBuilder<String> oficinaColumn = col.column("Oficina/Población", "ofi", type.stringType());
+		TextColumnBuilder<List> estadoColumn = col.column("Estado Atención", "estado", type.listType());
+		TextColumnBuilder<List> siniestroColumn = col.column("No. Siniestro", "siniestros", type.listType());
+		TextColumnBuilder<List> montoColumn = col.column("Monto Pagado", "monto", type.listType());
+		TextColumnBuilder<String> morbilidadColumn = col.column("Morbilidad", "morbo", type.stringType());
+		TextColumnBuilder<String> costoPromedioColumn = col.column("Costo Promedio", "costo", type.stringType());
+		TextColumnBuilder<String> costoPerCapitaColumn = col.column("Costo Per Cápita", "percapita", type.stringType());
 
 		reporteTopHospitales	
 		.setTemplate(Estilos.reportSmallTemplate)
 		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
 		.setTitleBackgroundComponent(imgHeader)    	   		
    		.title(cmp.text(Constantes.TOP_HOSPITALES_TITULO).setStyle(Estilos.reportTitleStyle))
-   		.columnGrid(oficinaGColumn,estadoColumn,grid.titleGroup("Acumulado",siniestroColumn,montoColumn,morbilidadColumn,costoPromedioColumn,costoPerCapitaColumn))
-   		.fields(
-   				field("oficina", type.stringType()))
-   		.columns(oficinaGColumn,oficinaColumn,estadoColumn,siniestroColumn,montoColumn,morbilidadColumn,costoPromedioColumn,costoPerCapitaColumn)
-   		.groupBy(oficinaColumn)   	
+   		.columnGrid(oficinaColumn,estadoColumn,grid.titleGroup("Acumulado",siniestroColumn,montoColumn,morbilidadColumn,costoPromedioColumn,costoPerCapitaColumn))
+   		.columns(oficinaColumn,estadoColumn,siniestroColumn,montoColumn,morbilidadColumn,costoPromedioColumn,costoPerCapitaColumn)
    		.setGroupStyle(Estilos.groupStyle)
-   		.setDataSource(new JREmptyDataSource(1));
+   		.setDataSource(ds.crearSiniestralidadOficinaDS(oficinas));
 		return reporteTopHospitales;
 	}
 	
@@ -1018,7 +1100,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reporteIndicadoresOficina = new JasperReportBuilder();
 		
-		SubreportBuilder subreportTabla = cmp.subreport(new SubreportIndicadoresOficinaExp())
+		SubreportBuilder subreportTabla = cmp.subreport(new SubreportIndicadoresOficina())
 				.setDataSource(ds.crearIndicadoresOficinaTablaDS(montos));
 						 
 		 ArrayList<String> labels = Utilidades.getEtiquetasIndicadoresOficina(montos);
@@ -1066,7 +1148,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reporteParticipacionAsegurado = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportParticipacionAseguradoExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportParticipacionAsegurado())
 				.setDataSource(ds.crearParticipacionAseguradoTablaDS(montos));
 		
 		TextColumnBuilder<String> periodoColumn = col.column("Periodo", "periodo", type.stringType());
@@ -1182,7 +1264,7 @@ public class GeneradorReporte {
 	
 		JasperReportBuilder reportePadecimientos = new JasperReportBuilder();
 		
-		SubreportBuilder subreport = cmp.subreport(new SubreportDistribucionGastosExp())
+		SubreportBuilder subreport = cmp.subreport(new SubreportDistribucionGastos())
 				.setDataSource(ds.crearGastosNoCubiertosTablaDS(periodos.getGastos()));
 		
 		TextColumnBuilder<String> padecimientoColumn = col.column("Padecimiento", "concepto", type.stringType());
@@ -1691,6 +1773,28 @@ public class GeneradorReporte {
 	}
 	
 	/**
+	 * Genera el reporte de Tiempos de respuesta
+	 * @param  info Lista de Objetos tipo TiempoRespuesta
+	 * @return JasperReportBuilder hoja del reporte 
+	 */
+	private JasperReportBuilder reporteTiemposRespuesta(ArrayList<TiempoRespuesta> info) {
+	
+		JasperReportBuilder report = new JasperReportBuilder();
+		
+		SubreportBuilder subreport = cmp.subreport(new SubreportTiempoRespuesta())
+				.setDataSource(new JREmptyDataSource(1));
+				
+		report
+		.addParameter("columns", info)
+		.setPageFormat(PageType.A5, PageOrientation.LANDSCAPE)
+   		.setTitleBackgroundComponent(imgHeader)    	   		
+   		.title(cmp.text(Constantes.TIEMPO_RESPUESTA_TITULO).setStyle(Estilos.reportTitleStyle))   		
+   		.summary(subreport)
+   		.build();		
+		return report;
+	}
+	
+	/**
 	 * Genera el reporte de Mision y Vision 
 	 * @param info Objeto tipo MisionVision
 	 * @return JasperReportBuilder con la hoja de 
@@ -1741,7 +1845,6 @@ public class GeneradorReporte {
 			 }
 
 	}	
-	
 	
 	//Getters y Setters de reportes
 	private ArrayList<SiniestrosMayores> getReporteSiniestrosMayores() {
@@ -1918,6 +2021,15 @@ public class GeneradorReporte {
 
 	public void setReporteSiniestralidadOficina(ArrayList<SiniestralidadOficina> reporteSiniestralidadOficina) {
 		this.reporteSiniestralidadOficina = reporteSiniestralidadOficina;
+	}
+	
+
+	public ArrayList<TiempoRespuesta> getReporteTiemposRespuesta() {
+		return reporteTiemposRespuesta;
+	}
+
+	public void setReporteTiemposRespuesta(ArrayList<TiempoRespuesta> reporteTiemposRespuesta) {
+		this.reporteTiemposRespuesta = reporteTiemposRespuesta;
 	}
 
 	private Float getMaxFloat(ArrayList<Float> data) {
